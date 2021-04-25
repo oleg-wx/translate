@@ -1,6 +1,6 @@
 {
   "name": "@oleg.wx/translate",
-  "version": "0.0.1",
+  "version": "0.0.1a",
   "description": "Simplest translation functionality ever",
   "main": "index.js",
   "scripts": {
@@ -23,7 +23,7 @@
     "localize",
     "localization"
   ],
-  "author": "Oleg A.V.",
+  "author": "Oleg V.",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/hwx/translate/issues"

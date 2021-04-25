@@ -1,4 +1,8 @@
-export type SimpleCompare = "_" | `${">" | "<" | "="}${" " | ""}${number | ""}`;
+import { compileFunction } from "./compileFunction";
+
+export type SimpleCompare =
+  | "_"
+  | `${">" | "<=" | "<" | ">=" | "="}${" " | ""}${number | ""}`;
 export type numberOrEmpty = `${`,${number}` | ""}`;
 export type numberOrEmptyX5 = `${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
 export type Contains = `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
@@ -6,7 +10,7 @@ export type Contains = `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
 export type PluralOptions = [
   SimpleCompare | Contains,
   string,
-  (() => boolean)?
+  ((val: string | number) => boolean)?
 ];
 
 export interface Dictionary {
@@ -17,7 +21,6 @@ export interface DictionaryEntry {
   plural?: { [key: string]: PluralOptions[] };
   description?: string;
 }
-export interface PluralEntry {}
 
 export class Translations {
   static regexProps = /(\$T)?{([\w|\d]+)\}/g;
@@ -63,11 +66,14 @@ export class Translations {
 
   appendDictionary(lang: string, dictionary: Dictionary) {
     this.dictionaries = this.dictionaries || {};
-    let existingDictionary = (this.dictionaries[lang] =
-      this.dictionaries[lang] || {});
-
-    for (let n in dictionary) {
-      existingDictionary[n] = dictionary[n];
+    let existingDictionary = this.dictionaries[lang];
+    
+    if (existingDictionary) {
+      for (let n in dictionary) {
+        existingDictionary[n] = dictionary[n];
+      }
+    } else {
+      this.dictionaries[lang] = dictionary;
     }
   }
 
@@ -144,7 +150,7 @@ export class Translations {
                   fn = compileFunction(key);
                   tr_value[2] = fn;
                 }
-                if (fn.call(res)) {
+                if (fn(res)) {
                   ret = tr_value[1];
                   break;
                 }
@@ -193,17 +199,4 @@ export class Translations {
   private _storeAbsent(key: string, fallback?: string) {
     this.absent[key] = fallback || "";
   }
-}
-
-function compileFunction(operator: SimpleCompare | Contains): () => boolean {
-  let _operator = operator.replace(/\{\$\}/g, "this").replace(/=/g, "==");
-  if (/[>=<]/.exec(_operator)?.index === 0) {
-    _operator = `this ${_operator}`;
-  } else if (operator.indexOf("in [") == 0) {
-    _operator = operator.replace(
-      /in (\[[\d\s,]+\])/g,
-      (all: string, arr: string) => `${arr} + ".includes(this)`
-    );
-  }
-  return Function(`"use strict"; return ${_operator}`) as any;
 }
