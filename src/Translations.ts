@@ -1,4 +1,4 @@
-import { compileFunction } from "./compileFunction";
+import { translate } from "./translate";
 
 export type SimpleCompare =
   | "_"
@@ -28,11 +28,15 @@ export class Translations {
   readonly dynamicCache: { [key: string]: string } = {};
   readonly absent: { [key: string]: string } = {};
 
+  storeAbsent: boolean;
+  cacheDynamic: boolean;
+
   constructor(
     private dictionaries?: { [lang: string]: Dictionary },
-    private storeAbsent: boolean = false,
-    private cacheDynamic: boolean = false
+    options?: { cacheDynamic?: boolean; storeAbsent?: boolean }
   ) {
+    this.cacheDynamic = !!options?.cacheDynamic;
+    this.storeAbsent = !!options?.storeAbsent;
     // var a: DictionaryEntry = {
     //   value: "",
     //   plural: [">2", "string"],
@@ -52,13 +56,13 @@ export class Translations {
       throw new Error('"key" parameter is required');
     }
 
-    let result = this._translate(
+    let result = translate(
       this.dictionaries ? this.dictionaries[lang] : undefined,
       key,
       stringParams,
       fallback,
-      this.storeAbsent ? this._storeAbsent : undefined,
-      this.cacheDynamic ? this.dynamicCache : undefined
+      this.cacheDynamic ? this.dynamicCache : undefined,
+      this.storeAbsent ? this._storeAbsent : undefined
     );
 
     return result;
@@ -67,7 +71,7 @@ export class Translations {
   appendDictionary(lang: string, dictionary: Dictionary) {
     this.dictionaries = this.dictionaries || {};
     let existingDictionary = this.dictionaries[lang];
-    
+
     if (existingDictionary) {
       for (let n in dictionary) {
         existingDictionary[n] = dictionary[n];
@@ -77,126 +81,17 @@ export class Translations {
     }
   }
 
-  use(dictionary: Dictionary) {
+  use(dictionary: Dictionary, dynamicCache?: { [key: string]: string }) {
     return (
       key: string,
-      stringParams?: { [key: string]: string },
+      stringParams?: { [key: string]: string | number },
       fallback?: string
-    ) => this._translate(dictionary, key, stringParams, fallback);
-  }
-
-  private _translate(
-    dictionary: Dictionary | undefined,
-    key: string,
-    stringParams?: { [key: string]: string | number },
-    fallback?: string,
-    storeAbsent?: (key: string, fallback?: string) => void,
-    dynamicCache?: { [key: string]: string }
-  ): string {
-    if (key == null || key == "") {
-      return "";
-    }
-    if (typeof key !== "string") {
-      throw new Error('"key" parameter is required');
-    }
-
-    var result = dictionary ? this._getTerm(dictionary, key) : key;
-
-    if (!result) {
-      if (storeAbsent) {
-        storeAbsent(key, fallback);
-      }
-      result = key;
-    }
-
-    if (!stringParams) {
-      if (typeof result === "string") return result;
-      return result?.value || "";
-    } else {
-      const val = typeof result === "string" ? result : result?.value;
-      let dynamicKey: string = "";
-      if (dynamicCache) {
-        dynamicKey = `${key}::${JSON.stringify(stringParams)}`;
-        if (Object.prototype.hasOwnProperty.call(dynamicCache, dynamicKey)) {
-          return dynamicCache[dynamicKey];
-        }
-      }
-      var res = val.replace(
-        Translations.regexProps,
-        (
-          all: string,
-          leadingT: string | undefined,
-          prop: string,
-          ind: number
-        ): string => {
-          var res;
-          if (Object.prototype.hasOwnProperty.call(stringParams, prop)) {
-            res = stringParams[prop];
-          } else {
-            res = prop;
-          }
-
-          if (typeof result !== "string" && result?.plural) {
-            var tr_values = result.plural[prop];
-            var ret = "{$}";
-            for (let i = 0; i < tr_values.length; i++) {
-              let tr_value = tr_values[i];
-              let key = tr_value[0];
-              if (key === "_") {
-                ret = tr_value[1];
-              } else {
-                let fn = tr_value[2];
-                if (!fn) {
-                  fn = compileFunction(key);
-                  tr_value[2] = fn;
-                }
-                if (fn(res)) {
-                  ret = tr_value[1];
-                  break;
-                }
-              }
-            }
-            res = ret.replace(/\{\$\}/g, res as string);
-            return res;
-          }
-
-          if (!leadingT) {
-            return res as string;
-          } else {
-            return this._translate(
-              dictionary,
-              res as string,
-              undefined,
-              fallback
-            );
-          }
-        }
-      );
-      if (dynamicCache) {
-        dynamicCache[`${dynamicKey}`] = res;
-      }
-      return res;
-    }
-  }
-
-  private _getTerm(
-    dictionary: Dictionary | undefined,
-    key: string
-  ): string | DictionaryEntry | undefined {
-    if (!key) {
-      return undefined!;
-    }
-    if (!dictionary) {
-      return undefined!;
-    }
-    var term = dictionary[key];
-    if (typeof term === "string") {
-      return term;
-    }
-    return term;
+    ) => translate(dictionary, key, stringParams, fallback, dynamicCache);
   }
 
   private _storeAbsent(key: string, fallback?: string) {
     this.absent[key] = fallback || "";
   }
 }
+
+

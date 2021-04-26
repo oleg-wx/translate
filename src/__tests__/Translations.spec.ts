@@ -25,8 +25,7 @@ let translations = new Translations(
       },
     },
   },
-  false,
-  true
+  {cacheDynamic: true}
 );
 
 let values = [
@@ -74,6 +73,5 @@ values.forEach((v, i) => {
 });
 
 test("cached", () => {
-  console.log(translations.dynamicCache);
   expect(Object.keys(translations.dynamicCache).length).toBe(5);
 });
