@@ -118,7 +118,7 @@ translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 11, 
 translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 6, eggs: 1 });
 // I ate many bananas and one egg for dinner
 ```
-Pluralizations are added to `plural` property of translation value as an array to keep executio order.
+Pluralizations are added to `plural` property of disxtionary entry as an array (to keep execution order).
 The structure of pluralization entry is a tupple: `[operation, value]`.
 Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, and `_` for *default*. Operations can only be done with static numbers provided in `operation`;
 Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
