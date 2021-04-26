@@ -120,7 +120,7 @@ translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 6, e
 ```
 Pluralizations are added to `plural` property of translation value as an array to keep executio order.
 The structure of pluralization entry is a tupple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=` and `in []`.
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, and `_` for *default*. Operations can only be done with static numbers provided in `operation`;
 Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
 
 ### Cache
