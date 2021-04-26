@@ -1,11 +1,11 @@
 import { translate } from "./translate";
 
-export type SimpleCompare =
-  | "_"
-  | `${">" | "<=" | "<" | ">=" | "="}${" " | ""}${number | ""}`;
-export type numberOrEmpty = `${`,${number}` | ""}`;
-export type numberOrEmptyX5 = `${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
-export type Contains = `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
+export type SimpleCompare = string;
+// | "_"
+// | `${">" | "<=" | "<" | ">=" | "="}${" " | ""}${number | ""}`;
+export type numberOrEmpty = string; //`${`,${number}` | ""}`;
+export type numberOrEmptyX5 = string; //`${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
+export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
 //export type Between = `between ${number},${number}`;
 export type PluralOptions = [
   SimpleCompare | Contains,
@@ -25,7 +25,7 @@ export interface DictionaryEntry {
 export class Translations {
   static regexProps = /(\$T)?{([\w|\d]+)\}/g;
 
-  readonly dynamicCache: { [key: string]: string } = {};
+  readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
   readonly absent: { [key: string]: string } = {};
 
   storeAbsent: boolean;
@@ -61,7 +61,7 @@ export class Translations {
       key,
       stringParams,
       fallback,
-      this.cacheDynamic ? this.dynamicCache : undefined,
+      this.cacheDynamic ? (this.dynamicCache[lang] = (this.dynamicCache[lang] || {})) : undefined,
       this.storeAbsent ? this._storeAbsent : undefined
     );
 
@@ -93,5 +93,3 @@ export class Translations {
     this.absent[key] = fallback || "";
   }
 }
-
-

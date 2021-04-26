@@ -18,13 +18,15 @@ export function translate(
     throw new Error('"key" parameter is required');
   }
 
-  var result = dictionary ? getTranslationValue(dictionary, key) : key;
+  let result = dictionary ? getTranslationValue(dictionary, key) : key;
 
+  let fallingBack = false;
   if (!result) {
     if (storeAbsent) {
-      storeAbsent(key, fallback);
+      storeAbsent(key, fallback || '');
     }
-    result = key;
+    fallingBack = true;
+    result = fallback || key;
   }
 
   if (!stringParams) {
@@ -34,7 +36,7 @@ export function translate(
   } else {
     const val = typeof result === "string" ? result : result?.value;
     let dynamicKey: string = "";
-    if (dynamicCache) {
+    if (dynamicCache && !fallingBack) {
       dynamicKey = `${key}::${JSON.stringify(stringParams)}`;
       if (Object.prototype.hasOwnProperty.call(dynamicCache, dynamicKey)) {
         return dynamicCache[dynamicKey];
@@ -88,12 +90,12 @@ export function translate(
             dictionary,
             res as string,
             undefined,
-            fallback
+            undefined
           );
         }
       }
     );
-    if (dynamicCache) {
+    if (dynamicCache && !fallingBack) {
       dynamicCache[`${dynamicKey}`] = res;
     }
     return res;

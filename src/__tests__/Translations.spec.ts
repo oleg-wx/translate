@@ -1,27 +1,51 @@
 import { Translations } from "..";
 
-let lang = "en";
-let key = "clean-{numberOfRooms}-rooms-at-{numberOfFloors}";
+let key = "i-ate-{eggs}-{bananas}-dinner";
 let translations = new Translations(
   {
-    [lang]: {
+    'en': {
       [key]: {
-        value: "clean {numberOfRooms} at {numberOfFloors}",
+        value: "I ate {bananas} and {eggs} for dinner",
         plural: {
-          numberOfRooms: [
-            ["= 0", "no rooms"],
-            ["= 1", "1 room"],
-            ["> 100", "many rooms"],
-            ["> 1", "{$} rooms"],
-            ["_", "{$} rooms"],
+          bananas: [
+            ["= 0", "no bananas"],
+            ["= 1", "one banana"],
+            ["in [3,4]", "{$} bananas"],
+            ["> 10", "too many bananas"],
+            ["> 5", "many bananas"],
+            ["_", "{$} bananas"],
           ],
-          numberOfFloors: [
-            ["= 0", "zero floors"],
-            ["= 1", "one floor"],
-            ["_", "{$} floors"],
+          eggs: [
+            ["= 0", "zero eggs"],
+            ["= 1", "one egg"],
+            ["_", "{$} eggs"],
           ],
         },
-        description: "blah",
+        description: "translations",
+      },
+    },
+    'ru': {
+      [key]: {
+        value: "Я съел {bananas} и {eggs} на обед",
+        plural: {
+          bananas: [
+            ["= 0", "нуль бананов"],
+            ["= 1", "один банан"],
+            ["= 2", "два банана"],
+            ["in [3,4]", "{$} банана"],
+            ["> 10", "слишком много бананов"],
+            ["> 5", "много бананов"],
+            ["_", "{$} бананов"],
+          ],
+          eggs: [
+            ["= 0", "нуль яиц"],
+            ["= 1", "одно яйцо"],
+            ["= 2", "два яйца"],
+            ["in [3,4]", "{$} яйца"],
+            ["_", "{$} яйц"],
+          ],
+        },
+        description: "translations",
       },
     },
   },
@@ -30,48 +54,57 @@ let translations = new Translations(
 
 let values = [
   {
-    numberOfRooms: 0,
-    numberOfFloors: 3,
+    bananas: 0,
+    eggs: 3,
   },
   {
-    numberOfRooms: 1,
-    numberOfFloors: 2,
+    bananas: 3,
+    eggs: 4,
   },
   {
-    numberOfRooms: 115,
-    numberOfFloors: 20,
+    bananas: 1,
+    eggs: 2,
   },
   {
-    numberOfRooms: 12,
-    numberOfFloors: 1,
+    bananas: 11,
+    eggs: 0,
   },
   {
-    numberOfRooms: 0,
-    numberOfFloors: 0,
+    bananas: 6,
+    eggs: 1,
   },
-  {
-    numberOfRooms: 0,
-    numberOfFloors: 3,
-  },
-];
-
-let expected = [
-  "clean no rooms at 3 floors",
-  "clean 1 room at 2 floors",
-  "clean many rooms at 20 floors",
-  "clean 12 rooms at one floor",
-  "clean no rooms at zero floors",
-  "clean no rooms at 3 floors",
 ];
 
 beforeEach(() => {});
 
+let expectedEn = [
+  "I ate no bananas and 3 eggs for dinner",
+  "I ate 3 bananas and 4 eggs for dinner",
+  "I ate one banana and 2 eggs for dinner",
+  "I ate too many bananas and zero eggs for dinner",
+  "I ate many bananas and one egg for dinner",
+];
+
 values.forEach((v, i) => {
-  test("translate plural " + expected[i], () => {
-    expect(translations.translate(lang, key, v)).toBe(expected[i]);
+  test("translate plural " + expectedEn[i], () => {
+    expect(translations.translate('en', key, v)).toBe(expectedEn[i]);
+  });
+});
+
+let expectedRu = [
+  "Я съел нуль бананов и 3 яйца на обед",
+  "Я съел 3 банана и 4 яйца на обед",
+  "Я съел один банан и два яйца на обед",
+  "Я съел слишком много бананов и нуль яиц на обед",
+  "Я съел много бананов и одно яйцо на обед",
+];
+
+values.forEach((v, i) => {
+  test("translate plural " + expectedRu[i], () => {
+    expect(translations.translate('ru', key, v)).toBe(expectedRu[i]);
   });
 });
 
 test("cached", () => {
-  expect(Object.keys(translations.dynamicCache).length).toBe(5);
+  expect(Object.keys(translations.dynamicCache['en']).length).toBe(5);
 });
