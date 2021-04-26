@@ -41,7 +41,7 @@ const dics = {
   },
 };
 ```
-###Translate
+### Translate
 by calling `translate` function
 ```javascript
 // create translations with dictionary:
