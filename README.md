@@ -36,7 +36,7 @@ const dics = {
     "hello_world":"Hello World",
     "goodbye_world":{
       "value":"Goodbye World",
-      "description":"When you want to say goodbye tho the world"
+      "description":"When you want to say goodbye to the world"
     },
   },
 };
