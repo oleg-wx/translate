@@ -1,5 +1,5 @@
 # Simply Translate
-Simplest translations for JS
+Simplest translations for JS. Consider it even more as a mapper of keys to values, this is not AI or something... :)
 
 ### Install
 ```javascript
@@ -81,8 +81,48 @@ const translated = translations.translate('en-US', 'hello_{user}', {user:'Oleg'}
 // Hello Oleg!
 ```
 ### Pluralization
+As this is Simple translation lib, so it works with pluralization in the simple way as well.
 ```javascript
+let translations = new Translations(
+{
+ 'en-US': {
+   'i-ate-{eggs}-{bananas}-dinner': {
+     value: "I ate {bananas} and {eggs} for dinner",
+     plural: {
+       bananas: [
+         ["= 0", "no bananas"],
+         ["= 1", "one banana"],
+         ["in [3,4]", "{$} bananas"],
+         ["> 10", "too many bananas"],
+         ["> 5", "many bananas"],
+         ["_", "{$} bananas"],
+       ],
+       eggs: [
+         ["= 0", "zero eggs"],
+         ["= 1", "one egg"],
+         ["_", "{$} eggs"],
+       ],
+     },
+     description: "translations",
+   },
+ }
+});
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 0, eggs: 3 });
+// I ate no bananas and 3 eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 3, eggs: 4 });
+// I ate 3 bananas and 4 eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 1, eggs: 2 });
+// I ate one banana and 2 eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 11, eggs: 0 });
+// I ate too many bananas and zero eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 6, eggs: 1 });
+// I ate many bananas and one egg for dinner
 ```
+Pluralizations are added to `plural` property of translation value as an array to keep executio order.
+The structure of pluralization entry is a tupple: `[operation, value]`.
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=` and `in []`.
+Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
+
 ### Cache
 As dictionalrues are plan JS objects reaching out to values by a key is not a big deal for engine, but when yiu use *dynamic values* translator needs to parse string fill it with data, etc. Do to encrease performace you might want to store dynamically translated values in some cache.
 To do so just pass the option to `Translations` constructor like so: `new Translations({...}, {cacheDynamic: true});`. 
