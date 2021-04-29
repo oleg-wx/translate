@@ -9,6 +9,15 @@ test("compile in",()=>{
     expect(fn(0)).toBeFalsy();
 });
 
+test("compile between",()=>{
+    var fn = compileFunction("between 1 and 3");
+    expect(fn(1)).toBeTruthy();
+    expect(fn(2)).toBeTruthy();
+    expect(fn(3)).toBeTruthy();
+    expect(fn(4)).toBeFalsy();
+    expect(fn(0)).toBeFalsy();
+});
+
 test("compile <",()=>{
     var fn = compileFunction("< 1");
     expect(fn(0)).toBeTruthy();
@@ -60,3 +69,4 @@ test("compile <=",()=>{
     expect(fn(10)).toBeTruthy();
     expect(fn(11)).toBeFalsy();
 })
+

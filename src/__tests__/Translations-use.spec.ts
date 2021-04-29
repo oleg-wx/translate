@@ -3,7 +3,7 @@ import { Dictionary } from "../Translations";
 
 let lang = "en";
 let key = "clean-{numberOfRooms}-rooms-at-{numberOfFloors}";
-let cache:{[key:string]:string} = {};
+let cache: { [key: string]: string } = {};
 let dictionary: Dictionary = {
   [key]: {
     value: "clean {numberOfRooms} at {numberOfFloors}",
@@ -24,7 +24,7 @@ let translations = new Translations(undefined, { cacheDynamic: true });
 
 let values = [
   {
-    numberOfRooms:3,
+    numberOfRooms: 3,
     numberOfFloors: 3,
   },
   {
@@ -33,16 +33,13 @@ let values = [
   },
 ];
 
-let expected = [
-  "clean 3 rooms at 3 floors",
-  "clean no rooms at zero floors",
-];
+let expected = ["clean 3 rooms at 3 floors", "clean no rooms at zero floors"];
 
 beforeEach(() => {});
 
 values.forEach((v, i) => {
   test("translate plural " + expected[i], () => {
-    expect(translations.use(dictionary,cache)(key, v)).toBe(expected[i]);
+    expect(translations.use(dictionary, cache)(key, v)).toBe(expected[i]);
   });
 });
 

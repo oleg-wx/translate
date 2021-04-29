@@ -32,13 +32,10 @@ let values = [
   }
 ];
 
-beforeEach(() => {});
-
 let expectedEn = [
   "I ate 0 banana(s) for Dinner",
   "I ate 3 banana(s) for Breakfast",
 ];
-
 values.forEach((v, i) => {
   test("translate plural " + expectedEn[i], () => {
     expect(translations.translate('en', key, v)).toBe(expectedEn[i]);
@@ -49,7 +46,6 @@ let expectedRu = [
   "Я съел 0 банан(а/ов) на ужин",
   "Я съел 3 банан(а/ов) на завтрак",
 ];
-
 values.forEach((v, i) => {
   test("translate plural " + expectedRu[i], () => {
     expect(translations.translate('ru', key, v)).toBe(expectedRu[i]);

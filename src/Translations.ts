@@ -23,8 +23,6 @@ export interface DictionaryEntry {
 }
 
 export class Translations {
-  static regexProps = /(\$T)?{([\w|\d]+)\}/g;
-
   readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
   readonly absent: { [key: string]: string } = {};
 
@@ -46,7 +44,7 @@ export class Translations {
   translate(
     lang: string,
     key: string,
-    stringParams?: { [key: string]: string | number },
+    dynamicProps?: { [key: string]: string | number },
     fallback?: string
   ): string {
     if (key == null || key == "") {
@@ -59,7 +57,7 @@ export class Translations {
     let result = translate(
       this.dictionaries ? this.dictionaries[lang] : undefined,
       key,
-      stringParams,
+      dynamicProps,
       fallback,
       this.cacheDynamic ? (this.dynamicCache[lang] = (this.dynamicCache[lang] || {})) : undefined,
       this.storeAbsent ? this._storeAbsent : undefined
