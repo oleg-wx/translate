@@ -18,8 +18,6 @@ let values = [
   },
 ];
 
-beforeEach(() => {});
-
 let expectedEn = [
   "I ate 0 banana(s) for dinner",
   "I ate 3 banana(s) for breakfast",
@@ -38,7 +36,7 @@ values.forEach((v, i) => {
   });
 });
 
-test("translate with key", () => {
+test("translate with no fallback", () => {
   expect(
     translations.translate("en", "i-ate-{bananas}-{when}", {
       bananas: 3,

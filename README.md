@@ -3,7 +3,7 @@ Simplest translations for JS. Consider it even more as a mapper of keys to value
 
 ### Install
 ```javascript
-npm i simply-translate;
+npm i simply-translate
 ```
 ### Import
 ```javascript
@@ -36,7 +36,7 @@ const dics = {
     "hello_world":"Hello World",
     "goodbye_world":{
       "value":"Goodbye World",
-      "description":"When you want to say goodbye to the world"
+      "description":"When you want to say goodbye tho the world"
     },
   },
 };
@@ -55,7 +55,8 @@ const dics = {
     "hello_user":"Hello {name}!",
   },
 };
-const translated = translations.translate('en-US', 'hello_user', {user:'Oleg'});
+const translations = new Translations(dics);
+translations.translate('en-US', 'hello_user', {user:'Oleg'});
 // Hello Oleg!
 ```
 ### Fallback value
@@ -66,7 +67,8 @@ const dics = {
     "hello_world":"Hello World",
   },
 };
-const translated = translations.translate('en-US', 'hello_{user}', {user:'Oleg'}, 'Hello);
+const translations = new Translations(dics);
+translations.translate('en-US', 'hello_{user}', {user:'Oleg'}, 'Hello');
 // Hello Oleg!
 ```
 To add clarity you can use `{...}` in keys.
@@ -77,8 +79,23 @@ const dics = {
     "hello_{user}":"Hello {name}!",
   },
 };
-const translated = translations.translate('en-US', 'hello_{user}', {user:'Oleg'});
+const translations = new Translations(dics);
+translations.translate('en-US', 'hello_{user}', {user:'Oleg'});
 // Hello Oleg!
+```
+It is possible to use fallback values for dynamic parameters _(v0.0.4+)_:
+```javascript
+const dics = {
+  "en-US": {
+    "hello_{user}":"Hello {name?User}!",
+  },
+};
+const translations = new Translations(dics);
+
+translations.translate('en-US', 'hello_{user}', {user:undefined});
+// Hello User!
+translations.translate('en-US', 'hello_{user}', {user:undefined}, 'hello_{user?Friend}');
+// Hello Friend!
 ```
 ### Pluralization
 As this is Simple translation lib, so it works with pluralization in the simple way as well.
@@ -90,16 +107,16 @@ let translations = new Translations(
      value: "I ate {bananas} and {eggs} for dinner",
      plural: {
        bananas: [
-         ["= 0", "no bananas"],
+         ["<= 0", "no bananas"],
          ["= 1", "one banana"],
-         ["in [3,4]", "{$} bananas"],
+         ["in [3,4]", "few bananas"],
          ["> 10", "too many bananas"],
-         ["> 5", "many bananas"],
-         ["_", "{$} bananas"],
+         [">= 5", "many bananas"]
        ],
        eggs: [
          ["= 0", "zero eggs"],
          ["= 1", "one egg"],
+         ["between 2 and 4", "some eggs"],
          ["_", "{$} eggs"],
        ],
      },
@@ -107,24 +124,56 @@ let translations = new Translations(
    },
  }
 });
-translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 0, eggs: 3 });
-// I ate no bananas and 3 eggs for dinner
-translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 3, eggs: 4 });
-// I ate 3 bananas and 4 eggs for dinner
-translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 1, eggs: 2 });
-// I ate one banana and 2 eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 0, eggs: 1 });
+// I ate no bananas and one egg for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 3, eggs: 2 });
+// I ate few bananas and 2 eggs for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 1, eggs: 1 });
+// I ate one banana and one egg for dinner
 translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 11, eggs: 0 });
 // I ate too many bananas and zero eggs for dinner
-translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 6, eggs: 1 });
-// I ate many bananas and one egg for dinner
+translations.translate('en-US', 'i-ate-{eggs}-{bananas}-dinner', { bananas: 6, eggs: 3 });
+// I ate many bananas and some eggs for dinner
 ```
-Pluralizations are added to `plural` property of disxtionary entry as an array (to keep execution order).
-The structure of pluralization entry is a tupple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, and `_` for *default*. Operations can only be done with static numbers provided in `operation`;
+Pluralization are added to `plural` property of translation value as an array to keep execution order.
+The structure of pluralization entry is a tuple: `[operation, value]`.
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between` _(v0.0.4+)_, and `_` for _default_. Operations can only be done with static numbers provided in `operation`;
 Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
 
+### Inner translations
+_(v0.0.4+)_ In case if dynamic parameters have to be translated you can use `$T` prefix before placeholder in translation.
+```javascript
+let translations = new Translations(
+  {
+    "en-US": {
+      "i-ate-{apples}-{when}": {
+        value: "I ate {apples} for $T{when}",
+        plural: {
+          apples: [
+            ["= 1", "$T{$} apple"],
+            ["in [2,3]", "$T{$} apples"],
+            ["_", "$T{$} apple(s)"],
+          ],
+        },
+      },
+      "dinner": "Dinner",
+      "breakfast": "Breakfast",
+      "1":"One",
+      "2":"Two",
+      "3":"Three",
+    },
+  }
+);
+translations.translate("en-US", "i-ate-{apples}-{when}", { apples: 1, when: "dinner" });
+// I ate One apple for Dinner
+translations.translate("en-US", "i-ate-{apples}-{when}", { apples: 2, when: "breakfast" });
+// I ate Two apples for Breakfast
+translations.translate("en-US", "i-ate-{apples}-{when}", { apples: 4, when: "breakfast" });
+// I ate 4 apple(s) for Breakfast
+```
+
 ### Cache
-As dictionalrues are plan JS objects reaching out to values by a key is not a big deal for engine, but when yiu use *dynamic values* translator needs to parse string fill it with data, etc. Do to encrease performace you might want to store dynamically translated values in some cache.
+As dictionaries are plan JS objects, getting values by a key is not a big deal for engine, but when yiu use *dynamic values* translator needs to parse string and fill it with data, etc. To increase performance you might want to store dynamically translated values in some cache.
 To do so just pass the option to `Translations` constructor like so: `new Translations({...}, {cacheDynamic: true});`. 
 Translator will keep translation with unique identifier made from the dynamic value so if you have way to dynamic application, consider this tradeoff.
 

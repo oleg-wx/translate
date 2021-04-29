@@ -1,6 +1,6 @@
 {
   "name": "simply-translate",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Simplest translation functionality ever",
   "main": "dist/index.js",
   "files": [
@@ -8,7 +8,8 @@
   ],
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "publish:patch": "npm --no-git-tag-version version patch && npm publish"
   },
   "devDependencies": {
     "@types/jest": "^26.0.22",
