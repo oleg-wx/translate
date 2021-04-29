@@ -2,62 +2,73 @@ import { compileFunction } from "./compileFunction";
 import { getTranslationValue } from "./getTranslationValue";
 import { Dictionary, Translations } from "./Translations";
 
+const regexProps = /(\$T)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
 
 export function translate(
   dictionary: Dictionary | undefined,
   key: string,
-  stringParams?: { [key: string]: string | number; },
+  dynamicProps?: { [key: string]: string | number },
   fallback?: string,
-  dynamicCache?: { [key: string]: string; },
+  dynamicCache?: { [key: string]: string },
   storeAbsent?: (key: string, fallback?: string) => void
 ): string {
   if (key == null || key == "") {
     return "";
   }
+  if (typeof key === "number") {
+    key = "" + key;
+  }
+
   if (typeof key !== "string") {
     throw new Error('"key" parameter is required');
   }
 
-  let result = dictionary ? getTranslationValue(dictionary, key) : key;
+  let result = getTranslationValue(dictionary, key);
 
   let fallingBack = false;
   if (!result) {
     if (storeAbsent) {
-      storeAbsent(key, fallback || '');
+      storeAbsent(key, fallback || "");
     }
     fallingBack = true;
     result = fallback || key;
   }
 
-  if (!stringParams) {
-    if (typeof result === "string")
-      return result;
+  if (!dynamicProps) {
+    if (typeof result === "string") return result;
     return result?.value || "";
   } else {
     const val = typeof result === "string" ? result : result?.value;
     let dynamicKey: string = "";
     if (dynamicCache && !fallingBack) {
-      dynamicKey = `${key}::${JSON.stringify(stringParams)}`;
+      dynamicKey = `${key}::${JSON.stringify(dynamicProps)}`;
       if (Object.prototype.hasOwnProperty.call(dynamicCache, dynamicKey)) {
         return dynamicCache[dynamicKey];
       }
     }
-    var res = val.replace(
-      Translations.regexProps,
+    const res = val.replace(
+      regexProps,
       (
         all: string,
         leadingT: string | undefined,
         prop: string,
+        propAll: string,
+        propFallback: string,
         ind: number
       ): string => {
-        var res;
-        if (Object.prototype.hasOwnProperty.call(stringParams, prop)) {
-          res = stringParams[prop];
-        } else {
-          res = prop;
+        var res: string | number | undefined;
+        if (Object.prototype.hasOwnProperty.call(dynamicProps, prop)) {
+          res = dynamicProps[prop];
+        }
+        if (res === undefined) {
+          res = propFallback || prop;
         }
 
-        if (typeof result !== "string" && result?.plural) {
+        if (
+          typeof result !== "string" &&
+          result?.plural &&
+          !isNaN(res as number)
+        ) {
           var tr_values = result.plural[prop];
           var ret = "{$}";
           if (tr_values) {
@@ -79,19 +90,16 @@ export function translate(
               }
             }
           }
-          res = ret.replace(/\{\$\}/g, res as string);
+          res = ret.replace(/(\$T)?\{\$\}/g, (all: string, subT: string) =>
+            subT && res ? translate(dictionary, res as string) : (res as string)
+          );
           return res;
         }
 
         if (!leadingT) {
           return res as string;
         } else {
-          return translate(
-            dictionary,
-            res as string,
-            undefined,
-            undefined
-          );
+          return translate(dictionary, res as string, undefined, undefined);
         }
       }
     );

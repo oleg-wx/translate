@@ -4,7 +4,7 @@ export function compileFunction(
   operation: SimpleCompare | Contains
 ): (val: string | number) => boolean {
   var _operExec;
-  if ((_operExec = /^([>=<]{1,2})\s?(-?\d+)/.exec(operation))) {
+  if ((_operExec = /^\s*([>=<]{1,2})\s?(-?\d+)\s*$/.exec(operation))) {
     let _operator = _operExec[1];
     let _value = _operExec[2];
     switch (_operator) {
@@ -28,24 +28,39 @@ export function compileFunction(
         return function (val: string | number) {
           return val <= _value;
         };
-        default: throw `operator \"${_operator}\" is unknown`
+      default:
+        throw new Error(`operator \"${_operator}\" is unknown`);
     }
-  } else if (operation.indexOf("in [") == 0) {
-    let array = operation.replace(/in (\[[\d\s,]+\])/g, function (all, arr) {
+  } else if (operation.indexOf("in ") == 0) {
+    const array = operation.replace(/in (\[[\d\s,]+\])/g, function (all, arr) {
       return arr;
     });
-    var _array = JSON.parse(array) as Array<number>;
+    var _array: number[];
+    try {
+      _array = JSON.parse(array) as Array<number>;
+    } catch (e) {
+      throw new Error(`wrong array format: "${array}"`);
+    }
     return function (val: string | number) {
       return _array.includes(+val);
     };
+  } else if (operation.indexOf("between ") == 0) {
+    const match = /between (\-?\d+) and (\-?\d+)/.exec(operation);
+    if (match) {
+      const from = Math.min(+match[1], +match[2]);
+      const to = Math.max(+match[1], +match[2]);
+      return function (val: string | number) {
+        return val <= to && val >= from;
+      };
+    }
   }
-  try {
-    let _otmp = "this " + operation;
-    var fn = Function('"use strict"; return ' + _otmp) as any;
-    return function (val) {
-      return fn(val);
-    };
-  } catch (e) {
-    throw `operator \"${operation}\" not supported`;
-  }
+  throw new Error(`operator "${operation}" not supported`);
+  // try {
+  //   let _otmp = "this " + operation;
+  //   var fn = Function('"use strict"; return ' + _otmp) as any;
+  //   return function (val) {
+  //     return fn(val);
+  //   };
+  // } catch (e) {
+  //}
 }
