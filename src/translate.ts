@@ -78,6 +78,7 @@ export function translate(
         ) {
           var tr_values = result.plural[prop];
           var ret = "{$}";
+          let num = +res as number;
           if (tr_values) {
             for (let i = 0; i < tr_values.length; i++) {
               let tr_value = tr_values[i];
@@ -90,7 +91,7 @@ export function translate(
                   fn = compileFunction(key);
                   tr_value[2] = fn;
                 }
-                if (fn(res)) {
+                if (fn(num)) {
                   ret = tr_value[1];
                   break;
                 }
