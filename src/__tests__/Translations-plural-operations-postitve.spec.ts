@@ -1,10 +1,10 @@
 import { Translations } from "..";
 
-let key = "i-ate-{eggs}-{bananas}-dinner";
+let key = "i-ate-${eggs}-${bananas}-dinner";
 let translations = new Translations({
   en: {
     [key]: {
-      value: "I ate {bananas} for dinner",
+      value: "I ate ${bananas} for dinner",
       plural: {
         bananas: [
           ["= 1", "one banana"],

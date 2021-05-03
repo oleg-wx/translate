@@ -1,11 +1,11 @@
 import { Translations } from "..";
 
-let key = "i-ate-{eggs}-{bananas}-dinner";
+let key = "i-ate-${eggs}-${bananas}-dinner";
 let translations = new Translations(
   {
     en: {
       [key]: {
-        value: "I ate {bananas} and {eggs} for dinner",
+        value: "I ate ${bananas} and ${eggs} for dinner",
         plural: {
           bananas: [
             [" = 0", "no bananas"],
@@ -27,7 +27,7 @@ let translations = new Translations(
     },
     ru: {
       [key]: {
-        value: "Я съел {bananas} и {eggs} на обед",
+        value: "Я съел ${bananas} и ${eggs} на обед",
         plural: {
           bananas: [
             ["= 0", "нуль бананов"],

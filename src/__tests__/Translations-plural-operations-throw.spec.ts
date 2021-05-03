@@ -18,8 +18,8 @@ operations.forEach((v, i) => {
   test(`throw ${v}`, () => {
     let translations = new Translations({
       en: {
-        "i-ate-{bananas}": {
-          value: "I ate {bananas}",
+        "i-ate-${bananas}": {
+          value: "I ate ${bananas}",
           plural: {
             bananas: [
               [v, "few bananas"],
@@ -30,7 +30,7 @@ operations.forEach((v, i) => {
       },
     });
 
-    expect(()=>translations.translate("en", "i-ate-{bananas}", { bananas: 1 })).toThrowError(new Error(`operator "${v}" not supported`));
+    expect(()=>translations.translate("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`operator "${v}" not supported`));
   });
 });
 
@@ -43,8 +43,8 @@ operations.forEach((v, i) => {
   test(`throw wrong array format ${v}`, () => {
     let translations = new Translations({
       en: {
-        "i-ate-{bananas}": {
-          value: "I ate {bananas}",
+        "i-ate-${bananas}": {
+          value: "I ate ${bananas}",
           plural: {
             bananas: [
               [v, "few bananas"],
@@ -55,6 +55,6 @@ operations.forEach((v, i) => {
       },
     });
 
-    expect(()=>translations.translate("en", "i-ate-{bananas}", { bananas: 1 })).toThrowError(new Error(`wrong array format: "${v}"`));
+    expect(()=>translations.translate("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`wrong array format: "${v}"`));
   });
 });

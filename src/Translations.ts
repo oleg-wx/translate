@@ -25,14 +25,16 @@ export interface DictionaryEntry {
 export class Translations {
   readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
   readonly absent: { [key: string]: string } = {};
-
+  $less = false;
+  dictionaries?: { [lang: string]: Dictionary }
   storeAbsent: boolean;
   cacheDynamic: boolean;
 
   constructor(
-    private dictionaries?: { [lang: string]: Dictionary },
+    dictionaries?: { [lang: string]: Dictionary },
     options?: { cacheDynamic?: boolean; storeAbsent?: boolean }
   ) {
+    this.dictionaries = dictionaries || {};
     this.cacheDynamic = !!options?.cacheDynamic;
     this.storeAbsent = !!options?.storeAbsent;
     // var a: DictionaryEntry = {
@@ -59,21 +61,22 @@ export class Translations {
       key,
       dynamicProps,
       fallback,
-      this.cacheDynamic ? (this.dynamicCache[lang] = (this.dynamicCache[lang] || {})) : undefined,
-      this.storeAbsent ? this._storeAbsent : undefined
+      this.cacheDynamic
+        ? (this.dynamicCache[lang] = this.dynamicCache[lang] || {})
+        : undefined,
+      this.storeAbsent ? this._storeAbsent : undefined,
+      this.$less
     );
 
     return result;
   }
 
-  appendDictionary(lang: string, dictionary: Dictionary) {
+  extendDictionary(lang: string, dictionary: Dictionary) {
     this.dictionaries = this.dictionaries || {};
     let existingDictionary = this.dictionaries[lang];
 
     if (existingDictionary) {
-      for (let n in dictionary) {
-        existingDictionary[n] = dictionary[n];
-      }
+      Object.assign(existingDictionary, dictionary);
     } else {
       this.dictionaries[lang] = dictionary;
     }
@@ -84,7 +87,7 @@ export class Translations {
       key: string,
       stringParams?: { [key: string]: string | number },
       fallback?: string
-    ) => translate(dictionary, key, stringParams, fallback, dynamicCache);
+    ) => translate(dictionary, key, stringParams, fallback, dynamicCache, undefined, this.$less);
   }
 
   private _storeAbsent(key: string, fallback?: string) {

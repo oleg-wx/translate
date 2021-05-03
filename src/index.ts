@@ -1,7 +1,7 @@
-import { Translations } from './Translations';
+import { Dictionary, Translations } from './Translations';
 
 export default function(){
     return new Translations();
 }
 
-export { Translations };
+export { Translations, Dictionary };
