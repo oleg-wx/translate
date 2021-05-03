@@ -30,9 +30,9 @@ values.forEach((v, i) => {
     expect(
       translations.translate(
         "en",
-        "i-ate-{bananas}-{when}-fallback",
+        "i-ate-bananas-when-fallback",
         v,
-        "I ate {bananas} banana(s) for $T{when}"
+        "I ate ${bananas} banana(s) for $T{when}"
       )
     ).toBe(expectedDef[i]);
   });
@@ -48,9 +48,9 @@ values.forEach((v, i) => {
     expect(
       translations.translate(
         "en",
-        "i-ate-{bananas}-{when}-fallback-dynamic",
+        "i-ate-bananas-when-fallback-dynamic",
         v,
-        "I ate {bananas?some amount of} banana(s) for $T{when?launch}"
+        "I ate ${bananas?some amount of} banana(s) for $T{when?launch}"
       )
     ).toBe(expectedFallback[i]);
   });

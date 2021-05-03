@@ -1,18 +1,18 @@
 import { Translations } from "..";
 
-let key = "i-ate-{bananas}-{when}";
+let key = "i-ate-${bananas}-${when}";
 let translations = new Translations(
   {
     'en': {
       [key]: {
-        value: "I ate {bananas} banana(s) for $T{when}",
+        value: "I ate ${bananas} banana(s) for $T{when}",
       },
       'dinner':'Dinner',
       'breakfast':'Breakfast',
     },
     'ru': {
       [key]: {
-        value: "Я съел {bananas} банан(а/ов) на $T{when}",
+        value: "Я съел ${bananas} банан(а/ов) на $T{when}",
       },
       'dinner':'ужин',
       'breakfast':'завтрак',

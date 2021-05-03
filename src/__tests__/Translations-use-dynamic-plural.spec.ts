@@ -1,12 +1,11 @@
 import { Translations } from "..";
 import { Dictionary } from "../Translations";
 
-let lang = "en";
-let key = "clean-{numberOfRooms}-rooms-at-{numberOfFloors}";
+let key = "clean-rooms-at-floors";
 let cache: { [key: string]: string } = {};
 let dictionary: Dictionary = {
   [key]: {
-    value: "clean {numberOfRooms} at {numberOfFloors}",
+    value: "clean ${numberOfRooms} at ${numberOfFloors}",
     plural: {
       numberOfRooms: [
         ["= 0", "no rooms"],

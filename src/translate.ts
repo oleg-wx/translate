@@ -2,15 +2,19 @@ import { compileFunction } from "./compileFunction";
 import { getTranslationValue } from "./getTranslationValue";
 import { Dictionary, Translations } from "./Translations";
 
-const regexProps = /(\$T)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
+const regexProps = /\$(T)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
+const regex$lessProps = /(\$T)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
+
+const regexSubProps = /(\$T)?\{([\d\w\-_]*\$[\d\w\-_]*)\}/g;
 
 export function translate(
   dictionary: Dictionary | undefined,
   key: string,
-  dynamicProps?: { [key: string]: string | number },
-  fallback?: string,
-  dynamicCache?: { [key: string]: string },
-  storeAbsent?: (key: string, fallback?: string) => void
+  dynamicProps: { [key: string]: string | number } | undefined,
+  fallback: string | undefined,
+  dynamicCache: { [key: string]: string } | undefined,
+  storeAbsent: ((key: string, fallback?: string) => void) | undefined,
+  $less: boolean
 ): string {
   if (key == null || key == "") {
     return "";
@@ -41,13 +45,16 @@ export function translate(
     const val = typeof result === "string" ? result : result?.value;
     let dynamicKey: string = "";
     if (dynamicCache && !fallingBack) {
-      dynamicKey = `${key}::${JSON.stringify(dynamicProps)}`;
+      dynamicKey = `${key}::${JSON.stringify(dynamicProps).replace(
+        /[\"\{\}]/g,
+        ""
+      )}`;
       if (Object.prototype.hasOwnProperty.call(dynamicCache, dynamicKey)) {
         return dynamicCache[dynamicKey];
       }
     }
     const res = val.replace(
-      regexProps,
+      !!$less ? regex$lessProps : regexProps,
       (
         all: string,
         leadingT: string | undefined,
@@ -90,8 +97,20 @@ export function translate(
               }
             }
           }
-          res = ret.replace(/(\$T)?\{\$\}/g, (all: string, subT: string) =>
-            subT && res ? translate(dictionary, res as string) : (res as string)
+          res = ret.replace(
+            regexSubProps,
+            (all: string, subT: string, val: string) =>
+              subT && res
+                ? translate(
+                    dictionary,
+                    val.replace(/\$/, res as string),
+                    undefined,
+                    undefined,
+                    undefined,
+                    undefined,
+                    $less
+                  )
+                : (res as string)
           );
           return res;
         }
@@ -99,7 +118,15 @@ export function translate(
         if (!leadingT) {
           return res as string;
         } else {
-          return translate(dictionary, res as string, undefined, undefined);
+          return translate(
+            dictionary,
+            res as string,
+            undefined,
+            undefined,
+            undefined,
+            undefined,
+            $less
+          );
         }
       }
     );

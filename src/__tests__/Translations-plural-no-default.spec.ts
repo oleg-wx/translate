@@ -1,12 +1,12 @@
 import { Translations } from "..";
 
 let lang = "en";
-let key = "clean-{numberOfRooms}-rooms-at-{numberOfFloors}";
+let key = "clean-${numberOfRooms}-rooms-at-${numberOfFloors}";
 let translations = new Translations(
   {
     [lang]: {
       [key]: {
-        value: "clean {numberOfRooms} at {numberOfFloors}",
+        value: "clean ${numberOfRooms} at ${numberOfFloors}",
         plural: {
           numberOfRooms: [
             ["= 0", "no rooms"],
