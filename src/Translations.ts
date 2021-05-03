@@ -10,7 +10,7 @@ export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmpt
 export type PluralOptions = [
   SimpleCompare | Contains,
   string,
-  ((val: string | number) => boolean)?
+  ((val: number) => boolean)?
 ];
 
 export interface Dictionary {

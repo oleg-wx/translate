@@ -27,6 +27,10 @@ test("compile <",()=>{
     expect(fn(9)).toBeTruthy();
     expect(fn(11)).toBeFalsy();
 
+    var fn = compileFunction("< 180");
+    expect(fn(90)).toBeTruthy();
+    expect(fn(180)).toBeFalsy();
+
     var fn = compileFunction("< -1");
     expect(fn(-2)).toBeTruthy();
     expect(fn(0)).toBeFalsy();
@@ -40,6 +44,10 @@ test("compile >",()=>{
     var fn = compileFunction("> 10");
     expect(fn(11)).toBeTruthy();
     expect(fn(9)).toBeFalsy();
+
+    var fn = compileFunction("> 180");
+    expect(fn(181)).toBeTruthy();
+    expect(fn(90)).toBeFalsy();
 
     var fn = compileFunction("> -1");
     expect(fn(0)).toBeTruthy();

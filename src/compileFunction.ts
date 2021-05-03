@@ -2,7 +2,7 @@ import { SimpleCompare, Contains } from "./Translations";
 
 export function compileFunction(
   operation: SimpleCompare | Contains
-): (val: string | number) => boolean {
+): (val: number) => boolean {
   var _operExec;
   if ((_operExec = /^\s*([>=<]{1,2})\s?(-?\d+)\s*$/.exec(operation))) {
     let _operator = _operExec[1];
