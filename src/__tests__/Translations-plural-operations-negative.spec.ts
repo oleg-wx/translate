@@ -34,7 +34,7 @@ let values = [
 
 beforeEach(() => {});
   test(`no crossing plural `, () => {
-    var translated = values.map(v=>translations.translate("en", key, v));
+    var translated = values.map(v=>translations.translateTo("en", key, v));
     expect(translated).not.toContain('I ate no bananas for dinner');
     expect(translated).not.toContain('I ate too many bananas for dinner');
     expect(translated).not.toContain('I ate one banana for dinner');

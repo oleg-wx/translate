@@ -18,28 +18,24 @@ beforeEach(() => {
   };
   translations = new Translations(
     { "en-US": dictionary },
-    { cacheDynamic: false }
+    { cacheDynamic: false, defaultLang: "en-US" }
   );
 });
 
 test("extend dictionary no value", () => {
-  expect(
-    translations.translate("en-US", "test_test_${value}", { value: 1 })
-  ).toBe("test_test_1");
+  expect(translations.translate("test_test_${value}", { value: 1 })).toBe(
+    "test_test_1"
+  );
   translations.extendDictionary("en-US", {
     "test_test_${value}": "test it: ${value}",
   });
-  expect(translations.translate("en-US", "test_test_${value}", { value: 1 })).toBe(
+  expect(translations.translate("test_test_${value}", { value: 1 })).toBe(
     "test it: 1"
   );
 });
 
 test("extend dictionary replace", () => {
-  expect(translations.translate("en-US", "test", { value: 1 })).toBe(
-    "test: one test"
-  );
+  expect(translations.translate("test", { value: 1 })).toBe("test: one test");
   translations.extendDictionary("en-US", { test: "test it: ${value}" });
-  expect(translations.translate("en-US", "test", { value: 1 })).toBe(
-    "test it: 1"
-  );
+  expect(translations.translate("test", { value: 1 })).toBe("test it: 1");
 });

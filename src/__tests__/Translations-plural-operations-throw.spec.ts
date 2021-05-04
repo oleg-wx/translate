@@ -30,7 +30,7 @@ operations.forEach((v, i) => {
       },
     });
 
-    expect(()=>translations.translate("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`operator "${v}" not supported`));
+    expect(()=>translations.translateTo("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`operator "${v}" not supported`));
   });
 });
 
@@ -55,6 +55,6 @@ operations.forEach((v, i) => {
       },
     });
 
-    expect(()=>translations.translate("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`wrong array format: "${v}"`));
+    expect(()=>translations.translateTo("en", "i-ate-${bananas}", { bananas: 1 })).toThrowError(new Error(`wrong array format: "${v}"`));
   });
 });

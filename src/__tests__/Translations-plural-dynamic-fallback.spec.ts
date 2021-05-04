@@ -26,7 +26,7 @@ let expectedEn = [
 values.forEach((v, i) => {
   test("translate with fallback" + expectedEn[i], () => {
     expect(
-      translations.translate(
+      translations.translateTo(
         "en",
         "i-ate-${bananas}-${when}",
         v,
@@ -38,7 +38,7 @@ values.forEach((v, i) => {
 
 test("translate with no fallback", () => {
   expect(
-    translations.translate("en", "i-ate-${bananas}-${when}", {
+    translations.translateTo("en", "i-ate-${bananas}-${when}", {
       bananas: 3,
       when: "breakfast",
     })

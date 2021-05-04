@@ -3,33 +3,33 @@ import { Translations } from "..";
 let key = "i-ate-${bananas}-${when}";
 let translations = new Translations(
   {
-    'en': {
+    en: {
       [key]: {
         value: "I ate ${bananas} banana(s) for $T{when}",
       },
-      'dinner':'Dinner',
-      'breakfast':'Breakfast',
+      dinner: "Dinner",
+      breakfast: "Breakfast",
     },
-    'ru': {
+    ru: {
       [key]: {
         value: "Я съел ${bananas} банан(а/ов) на $T{when}",
       },
-      'dinner':'ужин',
-      'breakfast':'завтрак',
+      dinner: "ужин",
+      breakfast: "завтрак",
     },
   },
-  {cacheDynamic: true}
+  { cacheDynamic: true }
 );
 
 let values = [
   {
     bananas: 0,
-    when: 'dinner'
+    when: "dinner",
   },
   {
     bananas: 3,
-    when: 'breakfast'
-  }
+    when: "breakfast",
+  },
 ];
 
 let expectedEn = [
@@ -38,7 +38,7 @@ let expectedEn = [
 ];
 values.forEach((v, i) => {
   test("translate plural " + expectedEn[i], () => {
-    expect(translations.translate('en', key, v)).toBe(expectedEn[i]);
+    expect(translations.translateTo("en", key, v)).toBe(expectedEn[i]);
   });
 });
 
@@ -48,6 +48,6 @@ let expectedRu = [
 ];
 values.forEach((v, i) => {
   test("translate plural " + expectedRu[i], () => {
-    expect(translations.translate('ru', key, v)).toBe(expectedRu[i]);
+    expect(translations.translateTo("ru", key, v)).toBe(expectedRu[i]);
   });
 });

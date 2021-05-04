@@ -1,12 +1,13 @@
 import { Translations } from "..";
 
-
 test("translate with old placeholder", () => {
   let translations = new Translations(
     {
-      en: {"i-ate-bananas":{
-        value:"I ate {bananas} banana(s)"
-      }},
+      en: {
+        "i-ate-bananas": {
+          value: "I ate {bananas} banana(s)",
+        },
+      },
     },
     { cacheDynamic: true }
   );
@@ -15,8 +16,8 @@ test("translate with old placeholder", () => {
   translations.$less = true;
 
   expect(
-    translations.translate("en", "i-ate-bananas", {
-      bananas: 3
+    translations.translateTo("en","i-ate-bananas", {
+      bananas: 3,
     })
   ).toBe("I ate 3 banana(s)");
 });
@@ -24,16 +25,19 @@ test("translate with old placeholder", () => {
 test("translate with $ placeholder", () => {
   let translations = new Translations(
     {
-      en: {"i-ate-bananas":{
-        value:"I ate ${bananas} banana(s)"
-      }},
+      en: {
+        "i-ate-bananas": {
+          value: "I ate ${bananas} banana(s)",
+        },
+      },
     },
     { cacheDynamic: true }
   );
-  
+  translations.defaultLang = "en";
+
   expect(
-    translations.translate("en", "i-ate-bananas", {
-      bananas: 3
+    translations.translateTo("en","i-ate-bananas", {
+      bananas: 3,
     })
   ).toBe("I ate 3 banana(s)");
 });

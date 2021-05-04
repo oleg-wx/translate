@@ -17,6 +17,7 @@ let translations = new Translations(
     }
   }
 );
+translations.defaultLang = "en";
 
 let values = [
   {
@@ -49,6 +50,6 @@ let expected = [
 ];
 values.forEach((v, i) => {
   test("translate plural numbers" + expected[i], () => {
-    expect(translations.translate('en', key, v)).toBe(expected[i]);
+    expect(translations.translate(key, v)).toBe(expected[i]);
   });
 });

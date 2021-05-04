@@ -59,7 +59,7 @@ let expectedEn = [
 
 values.forEach((v, i) => {
   test("translate sub " + expectedEn[i], () => {
-    expect(translations.translate("en", "i-ate-{apples}-{when}", v)).toBe(
+    expect(translations.translateTo("en", "i-ate-{apples}-{when}", v)).toBe(
       expectedEn[i]
     );
   });

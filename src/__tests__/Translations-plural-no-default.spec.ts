@@ -39,6 +39,6 @@ beforeEach(() => {});
 
 values.forEach((v, i) => {
   test("translate plural " + expected[i], () => {
-    expect(translations.translate(lang, key, v)).toBe(expected[i]);
+    expect(translations.translateTo(lang, key, v)).toBe(expected[i]);
   });
 });

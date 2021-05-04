@@ -62,6 +62,6 @@ let expectedEn = [
 
 values.forEach((v, i) => {
   test(`translate plural ${v.bananas} => ${expectedEn[i]}`, () => {
-    expect(translations.translate("en", key, v)).toBe(expectedEn[i]);
+    expect(translations.translateTo("en", key, v)).toBe(expectedEn[i]);
   });
 });

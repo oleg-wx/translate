@@ -26,17 +26,26 @@ export class Translations {
   readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
   readonly absent: { [key: string]: string } = {};
   $less = false;
-  dictionaries?: { [lang: string]: Dictionary }
+  dictionaries: { [lang: string]: Dictionary };
   storeAbsent: boolean;
   cacheDynamic: boolean;
+  defaultLang: string | undefined;
+  fallbackLang: string | undefined;
 
   constructor(
     dictionaries?: { [lang: string]: Dictionary },
-    options?: { cacheDynamic?: boolean; storeAbsent?: boolean }
+    options?: {
+      cacheDynamic?: boolean;
+      storeAbsent?: boolean;
+      defaultLang?: string;
+      fallbackLang?: string;
+    }
   ) {
     this.dictionaries = dictionaries || {};
     this.cacheDynamic = !!options?.cacheDynamic;
     this.storeAbsent = !!options?.storeAbsent;
+    this.defaultLang = options?.defaultLang;
+    this.fallbackLang = options?.fallbackLang;
     // var a: DictionaryEntry = {
     //   value: "",
     //   plural: [">2", "string"],
@@ -44,6 +53,14 @@ export class Translations {
   }
 
   translate(
+    key: string,
+    dynamicProps?: { [key: string]: string | number },
+    fallback?: string
+  ) {
+    return this.translateTo(this.defaultLang!, key, dynamicProps, fallback);
+  }
+
+  translateTo(
     lang: string,
     key: string,
     dynamicProps?: { [key: string]: string | number },
@@ -56,16 +73,35 @@ export class Translations {
       throw new Error('"key" parameter is required');
     }
 
+    if (!lang) {
+      lang = Object.keys(this.dictionaries)[0];
+    }
+
     let result = translate(
       this.dictionaries ? this.dictionaries[lang] : undefined,
       key,
       dynamicProps,
-      fallback,
-      this.cacheDynamic
-        ? (this.dynamicCache[lang] = this.dynamicCache[lang] || {})
-        : undefined,
-      this.storeAbsent ? this._storeAbsent : undefined,
-      this.$less
+      {
+        dynamicCache: this.cacheDynamic
+          ? (this.dynamicCache[lang] = this.dynamicCache[lang] || {})
+          : undefined,
+
+        fallback,
+
+        fallbackDictionary: this.fallbackLang
+          ? this.dictionaries[this.fallbackLang]
+          : undefined,
+
+        fallbackCache:
+          this.fallbackLang && this.cacheDynamic
+            ? (this.dynamicCache[this.fallbackLang] =
+                this.dynamicCache[this.fallbackLang] || {})
+            : undefined,
+
+        storeAbsent: this.storeAbsent ? this._storeAbsent : undefined,
+
+        $less: this.$less,
+      }
     );
 
     return result;
@@ -80,14 +116,6 @@ export class Translations {
     } else {
       this.dictionaries[lang] = dictionary;
     }
-  }
-
-  use(dictionary: Dictionary, dynamicCache?: { [key: string]: string }) {
-    return (
-      key: string,
-      stringParams?: { [key: string]: string | number },
-      fallback?: string
-    ) => translate(dictionary, key, stringParams, fallback, dynamicCache, undefined, this.$less);
   }
 
   private _storeAbsent(key: string, fallback?: string) {
