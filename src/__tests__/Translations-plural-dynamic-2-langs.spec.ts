@@ -10,8 +10,11 @@ let translations = new Translations(
           bananas: [
             [" = 0", "no bananas"],
             ["= 1 ", "one banana"],
-            [`in [3,4]
-            `, "{$} bananas"],
+            [
+              `in [3,4]
+            `,
+              "{$} bananas",
+            ],
             ["> 10", "too many bananas"],
             [">= 5", "many bananas"],
             ["_", "{$} bananas"],
@@ -61,7 +64,9 @@ let values = [
   { bananas: 11, eggs: 1 },
 ];
 
-beforeEach(() => {});
+beforeEach(() => {
+  translations.defaultLang = undefined;
+});
 
 let expectedEn = [
   "I ate no bananas and 3 eggs for dinner",
@@ -73,7 +78,13 @@ let expectedEn = [
 
 values.forEach((v, i) => {
   test("translate plural EN: " + expectedEn[i], () => {
-    expect(translations.translate("en", key, v)).toBe(expectedEn[i]);
+    expect(translations.translateTo("en", key, v)).toBe(expectedEn[i]);
+  });
+});
+values.forEach((v, i) => {
+  test("translate plural EN default lang: " + expectedEn[i], () => {
+    translations.defaultLang = 'en';
+    expect(translations.translate(key, v)).toBe(expectedEn[i]);
   });
 });
 
@@ -87,7 +98,13 @@ let expectedRu = [
 
 values.forEach((v, i) => {
   test("translate plural RU:" + expectedRu[i], () => {
-    expect(translations.translate("ru", key, v)).toBe(expectedRu[i]);
+    expect(translations.translateTo("ru", key, v)).toBe(expectedRu[i]);
+  });
+});
+values.forEach((v, i) => {
+  test("translate plural RU default lang:" + expectedRu[i], () => {
+    translations.defaultLang = 'ru';
+    expect(translations.translate(key, v)).toBe(expectedRu[i]);
   });
 });
 

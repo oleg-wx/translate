@@ -28,7 +28,7 @@ let expectedDef = [
 values.forEach((v, i) => {
   test("translate with default prop fallback" + expectedDef[i], () => {
     expect(
-      translations.translate(
+      translations.translateTo(
         "en",
         "i-ate-bananas-when-fallback",
         v,
@@ -46,7 +46,7 @@ let expectedFallback = [
 values.forEach((v, i) => {
   test("translate with default custom prop fallback" + expectedFallback[i], () => {
     expect(
-      translations.translate(
+      translations.translateTo(
         "en",
         "i-ate-bananas-when-fallback-dynamic",
         v,
