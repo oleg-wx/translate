@@ -5,14 +5,14 @@ let translations = new Translations(
   {
     en: {
       [key]: {
-        value: "I ate ${bananas} banana(s) for $${when}",
+        value: "I ate ${bananas} banana(s) for $&{when}",
       },
       dinner: "Dinner",
       breakfast: "Breakfast",
     },
     ru: {
       [key]: {
-        value: "Я съел ${bananas} банан(а/ов) на $${when}",
+        value: "Я съел ${bananas} банан(а/ов) на $&{when}",
       },
       dinner: "ужин",
       breakfast: "завтрак",

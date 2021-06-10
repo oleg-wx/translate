@@ -5,13 +5,13 @@ let translations = new Translations(
     en: {
       hello_world: "Hello World!",
       goodbye_world: "Goodbye World!",
-      hello_user: "Hello $${user?user_def}",
-      goodbye_user: "Goodbye $${user?user_def}",
+      hello_user: "Hello $&{user?user_def}",
+      goodbye_user: "Goodbye $&{user?user_def}",
       user_def: "User",
     },
     ru: {
       hello_world: "Привет, мир!",
-      goodbye_user: "Пока, $${user?user_def}",
+      goodbye_user: "Пока, $&{user?user_def}",
       user_def: "Пользователь",
       Basil: "Василий",
     },

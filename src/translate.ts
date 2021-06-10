@@ -3,9 +3,9 @@ import { getTranslationValue } from "./getTranslationValue";
 import { Dictionary, DictionaryEntry, Translations } from "./Translations";
 
 const regexProps =
-  /\$(\$)?{([\$\#\w|\d\-\:]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
+  /\$(\&)?{([\$\#\w|\d\-\:]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
 const regex$lessProps =
-  /(\$\$)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
+  /(\$\&)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g;
 
 const numProps = "$#";
 const regexNumProps = /\$\#/g;
@@ -38,7 +38,9 @@ export function translate(
   }
 
   const _regexp = !!options?.$less ? regex$lessProps : regexProps;
-
+  if (typeof key === "string" && key.indexOf(":") >= 0) {
+    key = key.split(":").filter((o) => o);
+  }
   let result = getTranslationValue(dictionary, key);
 
   let fallingBack = false;
@@ -57,7 +59,8 @@ export function translate(
       });
     }
     fallingBack = true;
-    result = options?.fallback || key;
+    result =
+      options?.fallback || (typeof key ==="string" ? key as string : key.join(":"));
   }
 
   if (!dynamicProps) {

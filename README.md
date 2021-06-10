@@ -2,6 +2,12 @@
 
 Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
 
+## (v0.1.0+) **Breaking changes**
+`$T{...}` replaced with `$&{...}`.
+`{$}` and `$T{$}` removed from **pluralization**, use `$#` and `${$#}` instead.
+
+---
+
 ### Install
 
 ```javascript
@@ -25,8 +31,6 @@ translations with dictionaries
 const dics = {...};
 const translations = new Translations(dics, {cacheDynamic: true});
 ```
-### _(v0.1.0+)_ Breaking changes
-`{$}` and `$T{$}` removed from **pluralization**, instead use `$#` and `${$#}`.
 
 ### Dictionaries
 
@@ -86,6 +90,22 @@ Please note: _starting from v0.0.7 it is required to add $ before placeholders_.
 translations.$less = true;
 translations.defaultLang = "en-US";
 translations.translate("hello_user", { user: "Oleg" }, "Hello {user}");
+```
+### Namespaces
+You can group items in dictionary by a _namespace_, which is basically just an object.
+```javascript
+const dics = {
+  "en-US": {
+    user:{
+      hello_user: "Hello ${user}!",
+    }
+  },
+};
+const translations = new Translations(dics, { defaultLang: "en-US" });
+translations.translate(["user","hello_user"], { user: "Oleg" });
+// Hello Oleg!
+translations.translate("user:hello_user"], { user: "Oleg" });
+// Hello Oleg!
 ```
 
 ### Fallback value
@@ -152,7 +172,7 @@ To solve this you may add translation term:
 translations.extendDictionary("ru-RU", {
   User: "Пользователь",
 });
-translations.translateTo("ru-RU", "hi_${user}", { user: undefined }, "Привет $T{user?User}");
+translations.translateTo("ru-RU", "hi_${user}", { user: undefined }, "Привет $&{user?User}");
 // Привет Пользователь
 ```
 
@@ -167,7 +187,7 @@ const dics = {
     "goodbye_${user}": "Goodbye ${user?User}!",
   },
   "ru-RU": {
-    "hello_${user}": "Привет, $T{user}!",
+    "hello_${user}": "Привет, $&{user}!",
     user: "Пользовтель",
     Oleg: "Олег",
   },
@@ -255,18 +275,15 @@ Execution order is important because compare operations run from top to bottom a
 _(v0.1.0+)_ In case if dynamic parameters have to be translated you can use `${$#}` syntax.
 _(v0.1.0+)_ It is possible to modify plural translations a little bit like so: `${my-$#-value}`.
 
-There are some limitation to plural translation,
-it **does not** support any placeholder values except `{$}` and `$T{$}`, so `["=1", "one ${my-item} thing"]` will **not** work. As well surrounding `$` with characters without `$T` prefix will **not** work.
-
 ```javascript
 let translations = new Translations(
   {
     "en-US": {
       "i-ate-apples-for": {
-        value: "I ate ${apples} for $T{when}",
+        value: "I ate ${apples} for $&{when}",
         plural: {
           apples: [
-            ["= 1", "$T{$-o} apple"],
+            ["= 1", "${$#-only} apple"],
             ["in [2,3]", "${$#} apples"],
             ["_", "${$#} apple(s)"],
           ],
@@ -274,7 +291,7 @@ let translations = new Translations(
       },
       dinner: "Dinner",
       breakfast: "Breakfast",
-      "1-o": "Only One",
+      "1-only": "Only One",
       1: "One",
       2: "Two",
       3: "Three",
