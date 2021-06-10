@@ -14,7 +14,7 @@ export type PluralOptions = [
 ];
 
 export interface Dictionary {
-  [key: string]: string | DictionaryEntry;
+  [key: string]: string | DictionaryEntry | Dictionary;
 }
 export interface DictionaryEntry {
   value: string;
@@ -62,17 +62,10 @@ export class Translations {
 
   translateTo(
     lang: string,
-    key: string,
+    key: string | string[],
     dynamicProps?: { [key: string]: string | number },
     fallback?: string
   ): string {
-    if (key == null || key == "") {
-      return "";
-    }
-    if (typeof key !== "string") {
-      throw new Error('"key" parameter is required');
-    }
-
     if (!lang) {
       lang = Object.keys(this.dictionaries)[0];
     }

@@ -8,13 +8,13 @@ let translations = new Translations({
       plural: {
         bananas: [
           ["= 1", "one banana"],
-          ["in [2,3]", "{$} bananas"],
+          ["in [2,3]", "$# bananas"],
           ["between 4 and 6", "4-6 bananas"],
           ["< 1", "no bananas"],
           ["<= 8", "few bananas"],
           ["> 12", "too many bananas"],
           [">= 10", "several bananas"],
-          ["_", "about {$} bananas"],
+          ["_", "about $# bananas"],
         ],
       },
       description: "translations",

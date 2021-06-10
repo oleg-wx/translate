@@ -4,13 +4,13 @@ let translations = new Translations(
   {
     en: {
       "i-ate-{apples}-{when}": {
-        value: "I ate ${apples} for $T{when}",
+        value: "I ate ${apples} for $${when}",
         plural: {
           apples: [
             ["= 1", "One apple"],
-            ["= 4", "$T{$-only} apple"],
-            ["in [2,3]", "$T{$} apples"],
-            ["_", "$T{$} apple(s)"],
+            ["= 4", "${$#-only} apple"],
+            ["in [2,3]", "${$#} apples"],
+            ["_", "${$#} apple(s)"],
           ],
         },
       },

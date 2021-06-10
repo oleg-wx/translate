@@ -4,11 +4,13 @@ import { Dictionary } from "../Translations";
 test("Fallback Property in Dictionary", () => {
   const dics = {
     "en-US": {
-      "hello_${user}": "Hello ${user?User}!",
+      user: {
+        "hello_${user}": "Hello ${user?User}!",
+      },
     },
   };
   const translations = new Translations(dics);
-  const translated = translations.translateTo("en-US", "hello_${user}", {
+  const translated = translations.translateTo("en-US", ["user","hello_${user}"], {
     user: undefined!,
   });
   expect(translated).toBe("Hello User!");
@@ -52,12 +54,9 @@ test("Fallback with dictionary", () => {
       "Bye ${user?User}"
     )
   ).toBe("Goodbye Oleg!");
-  expect(
-    translations.translate(
-      "hello_${user}",
-      { },
-    )
-  ).toBe("Привет, Пользовтель!");
+  expect(translations.translate("hello_${user}", {})).toBe(
+    "Привет, Пользовтель!"
+  );
   expect(
     translations.translate(
       "nice_day_${user}",

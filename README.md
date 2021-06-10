@@ -25,6 +25,8 @@ translations with dictionaries
 const dics = {...};
 const translations = new Translations(dics, {cacheDynamic: true});
 ```
+### _(v0.1.0+)_ Breaking changes
+`{$}` and `$T{$}` removed from **pluralization**, instead use `$#` and `${$#}`.
 
 ### Dictionaries
 
@@ -47,7 +49,7 @@ const dics = {
     hello_world: "Hello World",
     goodbye_world: {
       value: "Goodbye World",
-      description: "When you want to say goodbye tho the world",
+      description: "When you want to say goodbye to the world",
     },
   },
 };
@@ -185,7 +187,7 @@ translations.translate("nice_day_${user}", { user: undefined }, "Have a nice day
 
 ### Pluralization
 
-As this is Simple translation lib, so it works with pluralization in the simple way as well. Use `{$}` to insert number.
+As this is Simple translation lib, so it works with pluralization in the simple way as well. Use `$#` to insert number.
 
 ```javascript
 let translations = new Translations(
@@ -205,7 +207,7 @@ let translations = new Translations(
             ["= 0", "zero eggs"],
             ["= 1", "one egg"],
             ["between 2 and 4", "some eggs"],
-            ["_", "{$} eggs"],
+            ["_", "$# eggs"],
           ],
         },
         description: "translations",
@@ -250,8 +252,11 @@ Execution order is important because compare operations run from top to bottom a
 
 ### Inner translations
 
-_(v0.0.4+)_ In case if dynamic parameters have to be translated you can use `$T` prefix for translation placeholder.
-_(v0.0.6+)_ It is possible to modify plural translations a little bit like so: `$T{my-$-value}`, modifications limited to letters, numbers, `_` and `-` around `$` character. There are some limitation to plural translation, it **does not** support any placeholder values except `{$}` and `$T{$}`, so `["=1", "one ${my-item} thing"]` will **not** work. As well surrounding `$` with characters without `$T` prefix will **not** work.
+_(v0.1.0+)_ In case if dynamic parameters have to be translated you can use `${$#}` syntax.
+_(v0.1.0+)_ It is possible to modify plural translations a little bit like so: `${my-$#-value}`.
+
+There are some limitation to plural translation,
+it **does not** support any placeholder values except `{$}` and `$T{$}`, so `["=1", "one ${my-item} thing"]` will **not** work. As well surrounding `$` with characters without `$T` prefix will **not** work.
 
 ```javascript
 let translations = new Translations(
@@ -262,8 +267,8 @@ let translations = new Translations(
         plural: {
           apples: [
             ["= 1", "$T{$-o} apple"],
-            ["in [2,3]", "$T{$} apples"],
-            ["_", "$T{$} apple(s)"],
+            ["in [2,3]", "${$#} apples"],
+            ["_", "${$#} apple(s)"],
           ],
         },
       },
@@ -308,7 +313,7 @@ translations.extendDictionary("en-US", {
       apples: [
         ["< 1", "no mangos"],
         ["= 1", "one mango"],
-        ["_", "$T{$} mangos"],
+        ["_", "$# mangos"],
       ],
     },
   },

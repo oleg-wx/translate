@@ -30,7 +30,7 @@ values.forEach((v, i) => {
         "en",
         "i-ate-${bananas}-${when}",
         v,
-        "I ate ${bananas} banana(s) for $T{when}"
+        "I ate ${bananas} banana(s) for $${when}"
       )
     ).toBe(expectedEn[i]);
   });
