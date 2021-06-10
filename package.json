@@ -14,11 +14,11 @@
     "publish:patch": "npm run build:patch && npm publish"
   },
   "devDependencies": {
+    "@types/jest": "^26.0.23",
+    "jest": "^27.0.4",
     "rimraf": "^3.0.2",
-    "@types/jest": "^26.0.22",
-    "jest": "^26.6.3",
-    "ts-jest": "^26.5.5",
-    "typescript": "^4.0.5"
+    "ts-jest": "^27.0.3",
+    "typescript": "^4.3.2"
   },
   "repository": {
     "type": "git",
