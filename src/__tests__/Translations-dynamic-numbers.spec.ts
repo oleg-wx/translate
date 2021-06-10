@@ -10,7 +10,7 @@ let translations = new Translations(
           days:[
             ['>183','half of year'],
             ['>93','three months'],
-            ['_','{$} days']
+            ['_','$# days']
           ]
         }
       },

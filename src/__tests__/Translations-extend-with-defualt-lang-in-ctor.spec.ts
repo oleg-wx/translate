@@ -11,7 +11,7 @@ beforeEach(() => {
         value: [
           ["= 0", "none"],
           ["= 1", "one test"],
-          ["_", "{$} tests"],
+          ["_", "$# tests"],
         ],
       },
     },

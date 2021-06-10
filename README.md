@@ -2,6 +2,12 @@
 
 Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
 
+## (v0.1.0+) **Breaking changes**
+`$T{...}` replaced with `$&{...}`.
+`{$}` and `$T{$}` removed from **pluralization**, use `$#` and `${$#}` instead.
+
+---
+
 ### Install
 
 ```javascript
@@ -47,7 +53,7 @@ const dics = {
     hello_world: "Hello World",
     goodbye_world: {
       value: "Goodbye World",
-      description: "When you want to say goodbye tho the world",
+      description: "When you want to say goodbye to the world",
     },
   },
 };
@@ -84,6 +90,22 @@ Please note: _starting from v0.0.7 it is required to add $ before placeholders_.
 translations.$less = true;
 translations.defaultLang = "en-US";
 translations.translate("hello_user", { user: "Oleg" }, "Hello {user}");
+```
+### Namespaces
+You can group items in dictionary by a _namespace_, which is basically just an object.
+```javascript
+const dics = {
+  "en-US": {
+    user:{
+      hello_user: "Hello ${user}!",
+    }
+  },
+};
+const translations = new Translations(dics, { defaultLang: "en-US" });
+translations.translate(["user","hello_user"], { user: "Oleg" });
+// Hello Oleg!
+translations.translate("user:hello_user"], { user: "Oleg" });
+// Hello Oleg!
 ```
 
 ### Fallback value
@@ -150,7 +172,7 @@ To solve this you may add translation term:
 translations.extendDictionary("ru-RU", {
   User: "Пользователь",
 });
-translations.translateTo("ru-RU", "hi_${user}", { user: undefined }, "Привет $T{user?User}");
+translations.translateTo("ru-RU", "hi_${user}", { user: undefined }, "Привет $&{user?User}");
 // Привет Пользователь
 ```
 
@@ -165,7 +187,7 @@ const dics = {
     "goodbye_${user}": "Goodbye ${user?User}!",
   },
   "ru-RU": {
-    "hello_${user}": "Привет, $T{user}!",
+    "hello_${user}": "Привет, $&{user}!",
     user: "Пользовтель",
     Oleg: "Олег",
   },
@@ -185,7 +207,7 @@ translations.translate("nice_day_${user}", { user: undefined }, "Have a nice day
 
 ### Pluralization
 
-As this is Simple translation lib, so it works with pluralization in the simple way as well. Use `{$}` to insert number.
+As this is Simple translation lib, so it works with pluralization in the simple way as well. Use `$#` to insert number.
 
 ```javascript
 let translations = new Translations(
@@ -205,7 +227,7 @@ let translations = new Translations(
             ["= 0", "zero eggs"],
             ["= 1", "one egg"],
             ["between 2 and 4", "some eggs"],
-            ["_", "{$} eggs"],
+            ["_", "$# eggs"],
           ],
         },
         description: "translations",
@@ -250,26 +272,26 @@ Execution order is important because compare operations run from top to bottom a
 
 ### Inner translations
 
-_(v0.0.4+)_ In case if dynamic parameters have to be translated you can use `$T` prefix for translation placeholder.
-_(v0.0.6+)_ It is possible to modify plural translations a little bit like so: `$T{my-$-value}`, modifications limited to letters, numbers, `_` and `-` around `$` character. There are some limitation to plural translation, it **does not** support any placeholder values except `{$}` and `$T{$}`, so `["=1", "one ${my-item} thing"]` will **not** work. As well surrounding `$` with characters without `$T` prefix will **not** work.
+_(v0.1.0+)_ In case if dynamic parameters have to be translated you can use `${$#}` syntax.
+_(v0.1.0+)_ It is possible to modify plural translations a little bit like so: `${my-$#-value}`.
 
 ```javascript
 let translations = new Translations(
   {
     "en-US": {
       "i-ate-apples-for": {
-        value: "I ate ${apples} for $T{when}",
+        value: "I ate ${apples} for $&{when}",
         plural: {
           apples: [
-            ["= 1", "$T{$-o} apple"],
-            ["in [2,3]", "$T{$} apples"],
-            ["_", "$T{$} apple(s)"],
+            ["= 1", "${$#-only} apple"],
+            ["in [2,3]", "${$#} apples"],
+            ["_", "${$#} apple(s)"],
           ],
         },
       },
       dinner: "Dinner",
       breakfast: "Breakfast",
-      "1-o": "Only One",
+      "1-only": "Only One",
       1: "One",
       2: "Two",
       3: "Three",
@@ -308,7 +330,7 @@ translations.extendDictionary("en-US", {
       apples: [
         ["< 1", "no mangos"],
         ["= 1", "one mango"],
-        ["_", "$T{$} mangos"],
+        ["_", "$# mangos"],
       ],
     },
   },

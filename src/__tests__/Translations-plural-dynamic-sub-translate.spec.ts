@@ -4,19 +4,19 @@ let translations = new Translations(
   {
     en: {
       "i-ate-{apples}-{when}": {
-        value: "I ate ${apples} for $T{when}",
+        value: "I ate ${apples} for $&{when}",
         plural: {
           apples: [
             ["= 1", "One apple"],
-            ["= 4", "$T{$-only} apple"],
-            ["in [2,3]", "$T{$} apples"],
-            ["_", "$T{$} apple(s)"],
+            ["= 4", "${my-$#-only} apple"],
+            ["in [2,3]", "${$#} apples"],
+            ["_", "${$#} apple(s)"],
           ],
         },
       },
       dinner: "Dinner",
       breakfast: "Breakfast",
-      "4-only":"Only Four",
+      "my-4-only":"Only Four",
       "1":"One",
       "2":"Two",
       "3":"Three",

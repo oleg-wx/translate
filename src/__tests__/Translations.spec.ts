@@ -32,7 +32,7 @@ test("Fallback with dictionary", () => {
       "goodbye_${user}": "Goodbye ${user?User}!",
     },
     "ru-RU": {
-      "hello_${user}": "Привет, $T{user?User}!",
+      "hello_${user}": "Привет, $&{user?User}!",
       User: "Пользовтель",
       Oleg: "Олег",
     },

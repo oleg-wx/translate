@@ -32,7 +32,7 @@ values.forEach((v, i) => {
         "en",
         "i-ate-bananas-when-fallback",
         v,
-        "I ate ${bananas} banana(s) for $T{when}"
+        "I ate ${bananas} banana(s) for $&{when}"
       )
     ).toBe(expectedDef[i]);
   });
@@ -50,7 +50,7 @@ values.forEach((v, i) => {
         "en",
         "i-ate-bananas-when-fallback-dynamic",
         v,
-        "I ate ${bananas?some amount of} banana(s) for $T{when?launch}"
+        "I ate ${bananas?some amount of} banana(s) for $&{when?launch}"
       )
     ).toBe(expectedFallback[i]);
   });
