@@ -1,4 +1,4 @@
-import { translate } from "./translate";
+import { translate, translateDynamicProps } from "./translate";
 
 export type SimpleCompare = string;
 // | "_"
@@ -7,6 +7,7 @@ export type numberOrEmpty = string; //`${`,${number}` | ""}`;
 export type numberOrEmptyX5 = string; //`${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
 export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
 //export type Between = `between ${number},${number}`;
+
 export type PluralOptions = [
   SimpleCompare | Contains,
   string,
@@ -53,8 +54,8 @@ export class Translations {
   }
 
   translate(
-    key: string,
-    dynamicProps?: { [key: string]: string | number },
+    key: string | string[],
+    dynamicProps?: translateDynamicProps,
     fallback?: string
   ) {
     return this.translateTo(this.defaultLang!, key, dynamicProps, fallback);
@@ -63,7 +64,7 @@ export class Translations {
   translateTo(
     lang: string,
     key: string | string[],
-    dynamicProps?: { [key: string]: string | number },
+    dynamicProps?: translateDynamicProps,
     fallback?: string
   ): string {
     if (!lang) {
