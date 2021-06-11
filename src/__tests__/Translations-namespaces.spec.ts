@@ -1,7 +1,9 @@
 import { Translations } from "..";
 import { Dictionary } from "../Translations";
 
-test("Fallback Property in Dictionary", () => {
+let translations: Translations
+
+beforeEach(()=>{
   const dics = {
     "en-US": {
       user: {
@@ -9,23 +11,19 @@ test("Fallback Property in Dictionary", () => {
       },
     },
   };
-  const translations = new Translations(dics);
-  const translated = translations.translateTo("en-US", ["user","hello_${user}"], {
+  translations = new Translations(dics);
+})
+
+
+test("Translate with namespace", () => {
+  translations.defaultLang = "en-US";
+  const translated = translations.translate(["user","hello_${user}"], {
     user: undefined!,
   });
   expect(translated).toBe("Hello User!");
 });
 
-test("Fallback Property in Dictionary", () => {
-  const dics = {
-    "en-US": {
-      user: {
-        "hello_${user}": "Hello ${user?User}!",
-      },
-    },
-  };
-  const translations = new Translations(dics);
-  translations.defaultLang = "en-US";
+test("TranslateTo with namespace", () => {
   const translated = translations.translateTo("en-US", "user:hello_${user}", {
     user: undefined!,
   });

@@ -14,7 +14,6 @@ test("translate with old placeholder", () => {
 
   // SET no $
   translations.$less = true;
-
   expect(
     translations.translateTo("en","i-ate-bananas", {
       bananas: 3,
