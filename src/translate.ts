@@ -1,217 +1,52 @@
-import { compileFunction } from './compileFunction'
-import { getTranslationValue } from './getTranslationValue'
-import { Dictionary, DictionaryEntry, Translations } from './Translations'
+import {
+    Dictionary,
+    TranslateDynamicProps,
+    TranslateInternalSettings,
+} from './core/types';
+import { getDictionaryEntry } from './core/getDictionaryEntry';
+import { translate as translate_ } from './core/translate';
+import globalSettings from './core/globalSettings';
+import { TranslateKey } from './core/translationKey';
 
-const regexProps =
-    /(\$)?(\&)?{([\$\#\w|\d\-\:]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g
-const regex$lessProps =
-    /()(\&)?{([\w|\d]+)(\?([\d\w\s,.+\-=_?!@#$%^&*()]+))?\}/g
-
-const numProps = '$#'
-const regexNumProps = /\$\#/g
-
-export type translateDynamicProps = {
-    [key: string]: string | number | undefined
-}
-type translateOptions = {
-    fallbackDictionary?: Dictionary
-    fallback?: string | undefined
-    fallbackCache?: { [key: string]: string } | undefined
-    dynamicCache?: { [key: string]: string } | undefined
-    storeAbsent?: ((key: string, fallback?: string) => void) | undefined
-    $less?: boolean
+export interface TranslateSettings extends Partial<TranslateInternalSettings> {
+    fallbackDictionary?: Dictionary;
+    fallback?: string | undefined;
+    dynamicCache?: { [key: string]: string } | undefined;
+    absentCache?: string[];
 }
 
+/**
+ *
+ * @param dictionary - Dictionary to use to translate
+ * @param key - translation key
+ * @param dynamicProps - object to use for placeholders
+ * @param settings - options
+ * @returns
+ */
 export function translate(
     dictionary: Dictionary | undefined,
     key: string | string[],
-    dynamicProps?: translateDynamicProps,
-    options?: translateOptions
+    dynamicProps?: TranslateDynamicProps,
+    settings?: TranslateSettings
 ): string {
     if (key == null || key == '') {
-        return ''
+        return '';
     }
-    if (typeof key === 'number') {
-        key = '' + key
-    }
+    let getEntry = (key: TranslateKey) =>
+        getDictionaryEntry(key, dictionary, settings?.fallbackDictionary);
 
-    if (typeof key !== 'string' && !Array.isArray(key)) {
-        throw new Error('"key" parameter is required')
-    }
-
-    const _regexp = !!options?.$less ? regex$lessProps : regexProps
-    _regexp.lastIndex = 0
-    if (typeof key === 'string' && key.indexOf(':') >= 0) {
-        key = key.split(':').filter((o) => o)
-    }
-    let result = getTranslationValue(dictionary, key)
-
-    let fallingBack = false
-    if (!result) {
-        if (options?.storeAbsent) {
-            options?.storeAbsent(key.toString(), options?.fallback || '')
+    return translate_(
+        key,
+        getEntry,
+        dynamicProps,
+        settings?.fallback,
+        settings?.dynamicCache,
+        settings?.absentCache,
+        {
+            $less:
+                settings?.$less !== undefined
+                    ? settings?.$less
+                    : globalSettings.$less
         }
-        if (
-            options?.fallbackDictionary &&
-            options.fallbackDictionary !== dictionary &&
-            getTranslationValue(options.fallbackDictionary, key)
-        ) {
-            return translate(options.fallbackDictionary, key, dynamicProps, {
-                $less: options.$less,
-                dynamicCache: options.fallbackCache,
-            })
-        }
-        fallingBack = true
-        result =
-            options?.fallback ||
-            (typeof key === 'string' ? (key as string) : key.join(':'))
-    }
-
-    if (!dynamicProps) {
-        let ret = typeof result === 'string' ? result : result.value
-        if (ret.indexOf('{') < 0) return ret
-    }
-
-    const val = typeof result === 'string' ? result : result?.value
-    let dynamicKey: string = ''
-    if (options?.dynamicCache && dynamicProps && !fallingBack) {
-        dynamicKey = `${key}::${JSON.stringify(dynamicProps).replace(
-            /[\"\{\}]/g,
-            ''
-        )}`
-        if (
-            Object.prototype.hasOwnProperty.call(
-                options?.dynamicCache,
-                dynamicKey
-            )
-        ) {
-            return options?.dynamicCache[dynamicKey]
-        }
-    }
-    _regexp.lastIndex = 0
-    const res = val.replace(
-        _regexp,
-        replace(_regexp, dictionary, result, dynamicProps, options)
-    )
-    if (options?.dynamicCache && !fallingBack && dynamicKey) {
-        options.dynamicCache[`${dynamicKey}`] = res
-    }
-    return res
-}
-
-function replace(
-    _regexp: RegExp,
-    dictionary: Dictionary | undefined,
-    result: string | DictionaryEntry | undefined,
-    dynamicProps: translateDynamicProps | undefined,
-    options: translateOptions | undefined
-) {
-    return (
-        all: string,
-        replaceDynamic: string | undefined,
-        leadingT: string | undefined,
-        prop: string,
-        propAll: string,
-        propFallback: string,
-        ind: number,
-        text: string
-    ): string => {
-        var res: string | number | undefined
-        if (replaceDynamic || options?.$less) {
-            if (
-                Object.prototype.hasOwnProperty.call(dynamicProps || {}, prop)
-            ) {
-                res = dynamicProps![prop]
-            }
-            if (res === undefined) {
-                res = propFallback || prop
-            }
-        } else {
-            res = prop
-        }
-
-        if (
-            typeof result !== 'string' &&
-            result?.plural &&
-            !isNaN(res as number)
-        ) {
-            var tr_values = result.plural[prop]
-            var ret = numProps
-            let num = +res as number
-            if (tr_values) {
-                for (let i = 0; i < tr_values.length; i++) {
-                    let tr_value = tr_values[i]
-                    let key = tr_value[0]
-                    if (key === '_') {
-                        ret = tr_value[1]
-                    } else {
-                        let fn = tr_value[2]
-                        if (!fn) {
-                            fn = compileFunction(key)
-                            tr_value[2] = fn
-                        }
-                        if (fn(num)) {
-                            ret = tr_value[1]
-                            break
-                        }
-                    }
-                }
-            }
-            regexNumProps.lastIndex = 0
-            var replaced = ret.replace(
-                regexNumProps,
-                (pattern: string, val: string, text: string) => res as string
-            )
-            _regexp.lastIndex = 0
-            if (_regexp.test(replaced)) {
-                replaced = replaced.replace(
-                    _regexp,
-                    (
-                        all: string,
-                        replaceDynamic: string | undefined,
-                        leadingT: string | undefined,
-                        prop: string,
-                        propAll: string,
-                        propFallback: string,
-                        ind: number,
-                        text: string
-                    ) => {
-                        var ret = prop
-                        if (replaceDynamic) {
-                            ret = replace(
-                                _regexp,
-                                dictionary,
-                                prop,
-                                dynamicProps,
-                                options
-                            )(
-                                all,
-                                replaceDynamic,
-                                leadingT,
-                                prop,
-                                propAll,
-                                propFallback,
-                                ind,
-                                text
-                            )
-                        } else if (leadingT) {
-                            ret = translate(dictionary, prop, dynamicProps, {
-                                $less: options?.$less,
-                            })
-                        }
-                        return ret
-                    }
-                )
-            }
-            return replaced
-        }
-
-        if (!leadingT) {
-            return res as string
-        } else {
-            return translate(dictionary, res as string, dynamicProps, {
-                $less: options?.$less,
-            })
-        }
-    }
+    );
 }

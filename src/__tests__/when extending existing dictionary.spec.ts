@@ -1,6 +1,7 @@
-import { Translations } from "..";
-import { Dictionary } from "../Translations";
+import { Dictionary, Translations } from "..";
 
+
+describe('when extending existing dictionary',()=>{
 let translations: Translations;
 
 beforeEach(() => {
@@ -22,7 +23,7 @@ beforeEach(() => {
   );
 });
 
-test("extend dictionary no value", () => {
+it("should add new entry", () => {
   expect(translations.translate("test_test_${value}", { value: 1 })).toBe(
     "test_test_1"
   );
@@ -34,8 +35,9 @@ test("extend dictionary no value", () => {
   );
 });
 
-test("extend dictionary replace", () => {
+test("should replace an entry", () => {
   expect(translations.translate("test", { value: 1 })).toBe("test: one test");
   translations.extendDictionary("en-US", { test: "test it: ${value}" });
   expect(translations.translate("test", { value: 1 })).toBe("test it: 1");
+});
 });

@@ -1,5 +1,5 @@
-import { Translations } from "..";
-import { Dictionary } from "../Translations";
+import { Dictionary, Translations } from "..";
+
 
 let translations: Translations
 
@@ -24,7 +24,7 @@ test("Translate with namespace", () => {
 });
 
 test("TranslateTo with namespace", () => {
-  const translated = translations.translateTo("en-US", "user:hello_${user}", {
+  const translated = translations.translateTo("en-US", "user.hello_${user}", {
     user: undefined!,
   });
   expect(translated).toBe("Hello User!");
