@@ -1,4 +1,5 @@
-import { Translations } from "..";
+import { Dictionary, Translations } from "..";
+
 
 let key = "i-ate-${eggs}-${bananas}-dinner";
 let translations = new Translations(

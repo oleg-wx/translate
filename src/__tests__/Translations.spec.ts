@@ -1,5 +1,5 @@
-import { Translations } from '..'
-import { Dictionary } from '../Translations'
+import { Translations } from "..";
+
 
 test('Fallback Property in Dictionary', () => {
     const dics = {

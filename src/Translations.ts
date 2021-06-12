@@ -1,31 +1,9 @@
-import { translate, translateDynamicProps } from './translate';
-
-export type SimpleCompare = string;
-// | "_"
-// | `${">" | "<=" | "<" | ">=" | "="}${" " | ""}${number | ""}`;
-export type numberOrEmpty = string; //`${`,${number}` | ""}`;
-export type numberOrEmptyX5 = string; //`${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
-export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
-//export type Between = `between ${number},${number}`;
-
-export type PluralOptions = [
-    SimpleCompare | Contains,
-    string,
-    ((val: number) => boolean)?
-];
-export type Plurals = { [key: string]: PluralOptions[] };
-export interface Dictionary {
-    [key: string]: string | DictionaryEntry | Dictionary;
-}
-export interface DictionaryEntry {
-    value: string;
-    plural?: Plurals;
-    description?: string;
-}
+import { Dictionary, TranslateDynamicProps, TranslateKey } from "./core/types";
+import { translate } from './translate';
 
 export class Translations {
     readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
-    readonly absent: { [key: string]: string } = {};
+    readonly absent: { [key: string]: string[] } = {};
     $less = false;
     dictionaries: { [lang: string]: Dictionary };
     storeAbsent: boolean;
@@ -56,8 +34,8 @@ export class Translations {
     }
 
     translate(
-        key: string | string[],
-        dynamicProps?: translateDynamicProps,
+        key: TranslateKey,
+        dynamicProps?: TranslateDynamicProps,
         fallback?: string
     ) {
         return this.translateTo(this.defaultLang!, key, dynamicProps, fallback);
@@ -65,8 +43,8 @@ export class Translations {
 
     translateTo(
         lang: string,
-        key: string | string[],
-        dynamicProps?: translateDynamicProps,
+        key: TranslateKey,
+        dynamicProps?: TranslateDynamicProps,
         fallback?: string
     ): string {
         if (!lang) {
@@ -88,13 +66,7 @@ export class Translations {
                     ? this.dictionaries[this.fallbackLang]
                     : undefined,
 
-                fallbackCache:
-                    this.fallbackLang && this.cacheDynamic
-                        ? (this.dynamicCache[this.fallbackLang] =
-                              this.dynamicCache[this.fallbackLang] || {})
-                        : undefined,
-
-                storeAbsent: this.storeAbsent ? this._storeAbsent : undefined,
+                absentCache: this.storeAbsent ? (this.absent[lang] = this.absent[lang] || []) : undefined,
 
                 $less: this.$less,
             }
@@ -112,9 +84,5 @@ export class Translations {
         } else {
             this.dictionaries[lang] = dictionary;
         }
-    }
-
-    private _storeAbsent(key: string, fallback?: string) {
-        this.absent[key] = fallback || '';
     }
 }

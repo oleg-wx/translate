@@ -1,5 +1,5 @@
-import { Translations } from "..";
-import { Dictionary } from "../Translations";
+import { Dictionary, Translations } from "..";
+
 
 let translations: Translations
 

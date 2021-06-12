@@ -1,5 +1,4 @@
-import { Translations } from "..";
-import { Dictionary } from "../Translations";
+import { Dictionary, Translations } from "..";
 
 let translations: Translations;
 
@@ -38,6 +37,7 @@ test("Use value from namespace", () => {
 });
 
 test("Use value from namespace", () => {
+  debugger
   const translated = translations.translate("item:test", {
     value: 100,
   });
