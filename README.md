@@ -2,7 +2,7 @@
 
 Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
 
-## **Breaking changes**
+### **Breaking changes**
 #### (v0.10.0) 
 -   `$T{...}` replaced with `$&{...}`.
 -   `{$}` and `$T{$}` removed from **pluralization**, use `$#` instead _(see [Plural translations](#Plural-translations))_.
@@ -137,7 +137,7 @@ const dics = {
 const translations = new Translations(dics, { defaultLang: "en-US" });
 translations.translate(["user","hello_user"], { user: "Oleg" });
 // Hello Oleg!
-translations.translate("user:hello_user"], { user: "Oleg" });
+translations.translate("user:hello_user", { user: "Oleg" });
 // Hello Oleg!
 ```
 
@@ -371,7 +371,7 @@ translations.translate('i-ate-apples-for', {
     when: 'breakfast',
     yay: 'wow',
 })
-// I ate 4 apple(s) for Breakfast
+// I ate 5 (WOW!) apples for Breakfast
 ```
 
 ### Add terms to dictionary

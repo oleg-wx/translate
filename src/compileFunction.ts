@@ -55,12 +55,4 @@ export function compileFunction(
     }
   }
   throw new Error(`operator "${operation}" not supported`);
-  // try {
-  //   let _otmp = "this " + operation;
-  //   var fn = Function('"use strict"; return ' + _otmp) as any;
-  //   return function (val) {
-  //     return fn(val);
-  //   };
-  // } catch (e) {
-  //}
 }
