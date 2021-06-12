@@ -1,4 +1,4 @@
-import { Contains, SimpleCompare } from "./core/types";
+import { Contains, SimpleCompare } from "./types";
 
 export function compileFunction(
   operation: SimpleCompare | Contains

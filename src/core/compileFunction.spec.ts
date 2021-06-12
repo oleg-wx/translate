@@ -1,4 +1,4 @@
-import { compileFunction } from "../compileFunction"
+import { compileFunction } from "./compileFunction"
 
 test("compile in",()=>{
     var fn = compileFunction("in [1,2,3]");

@@ -1,4 +1,4 @@
-import { compileFunction } from "../compileFunction";
+import { compileFunction } from "./compileFunction";
 import { PluralOptions } from "./types";
 
 const numProps = '$#';
