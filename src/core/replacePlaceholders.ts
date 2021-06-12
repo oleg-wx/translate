@@ -1,27 +1,39 @@
-import { replacePlaceholdersRegex_$less } from './global';
-import { DictionaryEntry, Plurals, TranslateDynamicProps } from './types';
+import globalSettings from './globalSettings';
+import {
+    DictionaryEntry,
+    PluralOptions,
+    TranslateDynamicProps,
+    TranslateInternalSettings,
+} from './types';
 
 //import { translate } from "./translate";
 //import { tryToPluralizeAndReplace } from "./tryToPluralizeAndReplace";
 
 export function replacePlaceholders(
-    replacePlaceholdersRegex: RegExp,
-    value: string,
     entry: DictionaryEntry | string,
     dynamicProps: TranslateDynamicProps | undefined,
     handleTranslate: (value: string, fallback?: string) => string,
     handlePluralize: (
         value: string | number,
-        prop: string,
-        plurals: Plurals
-    ) => string
+        plural: PluralOptions
+    ) => string,
+    settings?: TranslateInternalSettings
 ) {
+    var _settings = settings || globalSettings;
+    var value: string;
+    if (typeof entry === 'string') {
+        value = entry;
+    } else {
+        value = entry.value;
+    }
+    var _regexp = _settings.$less
+        ? globalSettings.replacePlaceholdersRx_$less
+        : globalSettings.replacePlaceholdersRx;
     var replaced: string = value.replace(
-        replacePlaceholdersRegex,
+        _regexp,
         (
             all: string,
-            replaceDynamic: string | undefined,
-            shouldTranslate: string | undefined,
+            replaceAndOrTranslate: string,
             prop: string,
             propAll: string,
             propFallback: string | undefined,
@@ -29,9 +41,9 @@ export function replacePlaceholders(
             text: string
         ) => {
             var replaceValue: string | number | undefined;
-            const shouldReplaceDynamic = replaceDynamic
-                ? replaceDynamic
-                : replacePlaceholdersRegex === replacePlaceholdersRegex_$less;
+            const shouldReplaceDynamic =
+                replaceAndOrTranslate?.indexOf('$') >= 0 || _settings.$less;
+            const shouldTranslate = replaceAndOrTranslate?.indexOf('&') >= 0;
             if (shouldReplaceDynamic) {
                 if (
                     dynamicProps &&
@@ -54,42 +66,21 @@ export function replacePlaceholders(
             ) {
                 replaceValue = handlePluralize(
                     replaceValue,
-                    prop,
-                    entry.plural
+                    entry.plural[prop]
                 );
                 if (replaceValue.indexOf('{') >= 0) {
                     // replace again
                     replaceValue = replacePlaceholders(
-                        replacePlaceholdersRegex,
                         replaceValue,
-                        entry,
                         dynamicProps,
                         handleTranslate,
-                        handlePluralize
+                        handlePluralize,
+                        settings
                     );
                 }
-                // replaceValue = tryToPluralizeAndReplace(
-                //     replacePlaceholdersRegex,
-                //     prop,
-                //     replaceValue,
-                //     entry,
-                //     getEntry,
-                //     entry.plural,
-                //     dynamicProps
-                // );
-                // return replaceValue;
             }
             if (shouldTranslate) {
                 replaceValue = handleTranslate(replaceValue as string);
-                // replaceValue = translate(
-                //     replaceValue as string,
-                //     getEntry,
-                //     undefined,
-                //     propFallback,
-                //     replacePlaceholdersRegex,
-                //     undefined,
-                //     undefined
-                // );
             }
 
             return '' + replaceValue || prop;

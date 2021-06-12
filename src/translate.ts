@@ -1,15 +1,18 @@
-import { compileFunction } from './compileFunction';
-import { replacePlaceholdersRegex_$less, replacePlaceholdersRegex } from './core/global';
-import { Dictionary, TranslateDynamicProps, TranslateKey } from "./core/types";
+import {
+    Dictionary,
+    TranslateDynamicProps,
+    TranslateInternalSettings,
+} from './core/types';
 import { getDictionaryEntry } from './core/getDictionaryEntry';
 import { translate as translate_ } from './core/translate';
+import globalSettings from './core/globalSettings';
+import { TranslateKey } from './core/translationKey';
 
-export interface TranslateOptions {
+export interface TranslateSettings extends Partial<TranslateInternalSettings> {
     fallbackDictionary?: Dictionary;
     fallback?: string | undefined;
     dynamicCache?: { [key: string]: string } | undefined;
     absentCache?: string[];
-    $less?: boolean;
 }
 
 /**
@@ -17,32 +20,33 @@ export interface TranslateOptions {
  * @param dictionary - Dictionary to use to translate
  * @param key - translation key
  * @param dynamicProps - object to use for placeholders
- * @param options - options
+ * @param settings - options
  * @returns
  */
 export function translate(
     dictionary: Dictionary | undefined,
-    key: TranslateKey,
+    key: string | string[],
     dynamicProps?: TranslateDynamicProps,
-    options?: TranslateOptions
+    settings?: TranslateSettings
 ): string {
     if (key == null || key == '') {
         return '';
     }
     let getEntry = (key: TranslateKey) =>
-        getDictionaryEntry(key, dictionary, options?.fallbackDictionary);
+        getDictionaryEntry(key, dictionary, settings?.fallbackDictionary);
+
     return translate_(
         key,
         getEntry,
         dynamicProps,
-        options?.fallback,
-        options?.$less ? replacePlaceholdersRegex_$less : replacePlaceholdersRegex,
-        options?.dynamicCache,
-        options?.absentCache
+        settings?.fallback,
+        settings?.dynamicCache,
+        settings?.absentCache,
+        {
+            $less:
+                settings?.$less !== undefined
+                    ? settings?.$less
+                    : globalSettings.$less
+        }
     );
 }
-
-
-
-
-

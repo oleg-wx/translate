@@ -26,10 +26,11 @@ test('Fallback Property in Fallback :) Value', () => {
 })
 
 test('Fallback with dictionary', () => {
+    debugger
     const dics = {
         'en-US': {
             'hello_${user}': 'Hello ${user?User}!',
-            'goodbye_${user}': 'Goodbye ${user?User}!',
+            'goodbye_${user}': 'Goodbye $&{user?User}!',
         },
         'ru-RU': {
             'hello_${user}': 'Привет, $&{user?User}!',
@@ -51,7 +52,8 @@ test('Fallback with dictionary', () => {
             { user: 'Oleg' },
             'Bye ${user?User}'
         )
-    ).toBe('Goodbye Oleg!')
+    ).toBe('Goodbye Олег!')
+
     expect(translations.translate('hello_${user}', {})).toBe(
         'Привет, Пользовтель!'
     )

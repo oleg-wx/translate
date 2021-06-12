@@ -1,13 +1,14 @@
 import { compileFunction } from "../compileFunction";
-import { numProps, regexNumProps } from "./global";
-import { Plurals } from "./types";
+import { PluralOptions } from "./types";
+
+const numProps = '$#';
+const regexNumProps = /\$\#/g;
 
 export function pluralize(
     value: string | number,
-    prop: string,
-    pluralOptions: Plurals,
+    pluralOptions: PluralOptions,
 ) {
-    var pluralValues = pluralOptions[prop];
+    var pluralValues = pluralOptions;
     var pluralValue = numProps;
     if (pluralValues) {
         let num = +value as number;

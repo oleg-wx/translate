@@ -1,4 +1,5 @@
-import { Dictionary, DictionaryEntry, TranslateKey } from "./types";
+import { TranslateKey } from './translationKey';
+import { Dictionary, DictionaryEntry } from './types';
 
 export function getDictionaryEntry(
     key: TranslateKey,
@@ -8,20 +9,25 @@ export function getDictionaryEntry(
     if (!key) {
         return undefined!;
     }
+
     if (!dictionary) {
         if (fallbackDictionary) {
             return getDictionaryEntry(key, fallbackDictionary);
         }
         return undefined;
     }
-    if (Array.isArray(key)) {
+
+    if (key.asArray.length > 1) {
         var _term = dictionary as any;
-        for (var i = 0; i < key.length; i++) {
-            _term = _term[key[i]];
+        var _key = key.asArray;
+        for (var i = 0; i < _key.length; i++) {
+            if (_term == null) break;
+            _term = _term[_key[i]];
         }
-        return _term;
+        return _term == undefined ? key.asString : _term;
     }
-    var term = dictionary[key];
+
+    var term = dictionary[key.asString];
     if (!term && fallbackDictionary) {
         return getDictionaryEntry(key, fallbackDictionary);
     }

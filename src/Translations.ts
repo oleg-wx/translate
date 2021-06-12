@@ -1,4 +1,4 @@
-import { Dictionary, TranslateDynamicProps, TranslateKey } from "./core/types";
+import { Dictionary, TranslateDynamicProps } from "./core/types";
 import { translate } from './translate';
 
 export class Translations {
@@ -34,7 +34,7 @@ export class Translations {
     }
 
     translate(
-        key: TranslateKey,
+        key: string | string[],
         dynamicProps?: TranslateDynamicProps,
         fallback?: string
     ) {
@@ -43,7 +43,7 @@ export class Translations {
 
     translateTo(
         lang: string,
-        key: TranslateKey,
+        key:  string | string[],
         dynamicProps?: TranslateDynamicProps,
         fallback?: string
     ): string {

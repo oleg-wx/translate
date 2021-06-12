@@ -1,5 +1,6 @@
 export interface Dictionary {
     [key: string]: string | DictionaryEntry | Dictionary;
+    // | { [key: string]: any };
 }
 
 export interface DictionaryEntry {
@@ -8,7 +9,9 @@ export interface DictionaryEntry {
     description?: string;
 }
 
-export type TranslateKey = string | string[];
+export interface TranslateInternalSettings {
+    $less: boolean;
+}
 
 export type TranslateDynamicProps = {
     [key: string]: string | number | undefined;
@@ -24,13 +27,10 @@ export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmpt
 
 //export type Between = `between ${number},${number}`;
 
-export type PluralOptions = [
+export type PluralOption = [
     SimpleCompare | Contains,
     string,
     ((val: number) => boolean)?
 ];
-export type Plurals = { [key: string]: PluralOptions[] };
-
-export type GetDictionaryEntry = (
-    key: TranslateKey
-) => DictionaryEntry | string | undefined;
+export type PluralOptions = PluralOption[];
+export type Plurals = { [key: string]: PluralOptions };

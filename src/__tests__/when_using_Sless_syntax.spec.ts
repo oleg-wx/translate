@@ -24,6 +24,7 @@ describe('when using $-less syntax', () => {
     });
 
     test('should translate values in $-less placeholders ', () => {
+        debugger
         let translations = new Translations(
             {
                 en: {

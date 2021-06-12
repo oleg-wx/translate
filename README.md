@@ -3,7 +3,9 @@
 Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
 
 ### **Breaking changes**
-#### (v0.10.0) 
+
+#### (v0.10.0)
+
 -   `$T{...}` replaced with `$&{...}`.
 -   `{$}` and `$T{$}` removed from **pluralization**, use `$#` instead _(see [Plural translations](#Plural-translations))_.
 
@@ -18,7 +20,7 @@ npm i simply-translate
 ### Import
 
 ```javascript
-import { Translations } from 'simply-translate'
+import { Translations } from 'simply-translate';
 ```
 
 _Typescript_ (4.0) supported
@@ -57,12 +59,12 @@ const dics = {
             description: 'When you want to say goodbye to the world',
         },
     },
-}
+};
 ```
 
 ### Translate
 
-by calling `translate` or `translateTo` functions.    
+by calling `translate` or `translateTo` functions.  
 `translate` function uses `defaultLang` property, `translateTo` awaits language parameter.
 
 ```javascript
@@ -79,9 +81,9 @@ const dics = {
     'en-US': {
         hello_user: 'Hello ${user}!',
     },
-}
-const translations = new Translations(dics, { defaultLang: 'en-US' })
-translations.translate('hello_user', { user: 'Oleg' })
+};
+const translations = new Translations(dics, { defaultLang: 'en-US' });
+translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
@@ -110,10 +112,10 @@ const dics = {
         hello_user_t: 'Hello &{user}!',
         hello_user_r: 'Hello ${user}!',
         oleg: 'Oleg',
-        user: 'User'
+        user: 'User',
     },
-}
-const translations = new Translations(dics, { defaultLang: "en-US" });
+};
+const translations = new Translations(dics, { defaultLang: 'en-US' });
 translations.translate('hello_user', { user: 'oleg' });
 // Hello Oleg!
 translations.translate('hello_user_t', { user: 'oleg' });
@@ -128,31 +130,33 @@ You can group items in dictionary by a _namespace_, which is basically just an o
 
 ```javascript
 const dics = {
-  "en-US": {
-    user:{
-      hello_user: "Hello ${user}!",
-    }
-  },
+    'en-US': {
+        user: {
+            hello_user: 'Hello ${user}!',
+        },
+    },
 };
-const translations = new Translations(dics, { defaultLang: "en-US" });
-translations.translate(["user","hello_user"], { user: "Oleg" });
+const translations = new Translations(dics, { defaultLang: 'en-US' });
+translations.translate(['user', 'hello_user'], { user: 'Oleg' });
 // Hello Oleg!
-translations.translate("user:hello_user", { user: "Oleg" });
+translations.translate('user.hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
+Do **not use** namespaces separator (`.` by default) for dictionary keys.
+
 ### Fallback value
 
-can be passed to `translate` function to be shown instead of absent translation.
+can be passed to `translate` function to be used instead of absent translation.
 
 ```javascript
 const dics = {
     'en-US': {
         hello_world: 'Hello World',
     },
-}
-const translations = new Translations(dics, { defaultLang: 'en-US' })
-translations.translate('hello_${user}', { user: 'Oleg' }, 'Hello ${user}')
+};
+const translations = new Translations(dics, { defaultLang: 'en-US' });
+translations.translate('hello_${user}', { user: 'Oleg' }, 'Hello ${user}');
 // Hello Oleg!
 ```
 
@@ -163,16 +167,16 @@ const dics = {
     'en-US': {
         'hello_${user}': 'Hello ${user}!',
     },
-}
-const translations = new Translations(dics)
-translations.translateTo('en-US', 'hello_${user}', { user: 'Oleg' })
+};
+const translations = new Translations(dics);
+translations.translateTo('en-US', 'hello_${user}', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
 It may be useful if translation and fallback values were not provided, so key will be used with dynamic value.
 
 ```javascript
-translations.translateTo('es-ES', 'hello_${user}', { user: 'Oleg' })
+translations.translateTo('es-ES', 'hello_${user}', { user: 'Oleg' });
 // hello_Oleg!
 ```
 
@@ -183,12 +187,12 @@ const dics = {
     'en-US': {
         'hello_${user}': 'Hello ${user?User}!',
     },
-}
-const translations = new Translations(dics, { defaultLang: 'en-US' })
+};
+const translations = new Translations(dics, { defaultLang: 'en-US' });
 
-translations.translate('hello_${user}', { user: undefined })
+translations.translate('hello_${user}', { user: undefined });
 // Hello User!
-translations.translate('hi_${user}', { user: undefined }, 'Hi ${user?Friend}')
+translations.translate('hi_${user}', { user: undefined }, 'Hi ${user?Friend}');
 // Hi Friend!
 ```
 
@@ -200,7 +204,7 @@ translations.translateTo(
     'hi_${user}',
     { user: 'Олег' },
     'Привет ${user?Пользователь}'
-)
+);
 // Привет ${user?Пользователь}
 ```
 
@@ -209,13 +213,13 @@ To solve this you may add translation term:
 ```javascript
 translations.extendDictionary('ru-RU', {
     User: 'Пользователь',
-})
+});
 translations.translateTo(
     'ru-RU',
     'hi_${user}',
     { user: undefined },
     'Привет $&{user?User}'
-)
+);
 // Привет Пользователь
 ```
 
@@ -234,27 +238,24 @@ const dics = {
         user: 'Пользовтель',
         Oleg: 'Олег',
     },
-}
+};
 const translations = new Translations(dics, {
     defaultLang: 'ru-RU',
     fallbackLang: 'en-US',
-})
+});
 
-translations.translate('hello_${user}', { user: 'Oleg' })
+translations.translate('hello_${user}', { user: 'Oleg' });
 // Привет, Олег!
-translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}')
-// Goodbye Oleg!
-translations.translate(
-    'nice_day_${user}',
-    { user: undefined },
-    'Have a nice day ${user?Friend}'
-)
+translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}');
+// Goodbye Олег!
+translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day ${user?Friend}');
 // Have a nice day Friend
 ```
+If caching is turned on, those fallback translations will be added to _default_ language cache, it was `Ru` in example above.
 
 ### Pluralization
 
-As this is Simple translation library, it works with pluralization in the simple way as well. Use `$#` in plural options to insert number.
+As this is Simple translation library, it works with pluralization in the simple way as well. You want to use `$#` in plural options to insert number.
 
 ```javascript
 let translations = new Translations(
@@ -284,31 +285,31 @@ let translations = new Translations(
     {
         defaultLang: 'en-US',
     }
-)
+);
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 0,
     eggs: 1,
-})
+});
 // I ate no bananas and one egg for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 3,
     eggs: 2,
-})
+});
 // I ate few bananas and 2 eggs for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 1,
     eggs: 1,
-})
+});
 // I ate one banana and one egg for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 11,
     eggs: 0,
-})
+});
 // I ate too many bananas and zero eggs for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 6,
     eggs: 3,
-})
+});
 // I ate many bananas and some eggs for dinner
 ```
 
@@ -350,27 +351,27 @@ let translations = new Translations(
     {
         defaultLang: 'en-US',
     }
-)
+);
 translations.translate('i-ate-apples-for', {
     apples: 1,
     when: 'dinner',
-})
+});
 // I ate Only One apple for Dinner
 translations.translate('i-ate-apples-for', {
     apples: 2,
     when: 'breakfast',
-})
+});
 // I ate Two apples for Breakfast
 translations.translate('i-ate-apples-for', {
     apples: 4,
     when: 'breakfast',
-})
+});
 // I ate 4 apple(s) for Breakfast
 translations.translate('i-ate-apples-for', {
     apples: 5,
     when: 'breakfast',
     yay: 'wow',
-})
+});
 // I ate 5 (WOW!) apples for Breakfast
 ```
 
@@ -390,7 +391,7 @@ translations.extendDictionary('en-US', {
             ],
         },
     },
-})
+});
 ```
 
 ### Dynamic Cache

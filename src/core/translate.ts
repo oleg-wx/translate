@@ -1,45 +1,31 @@
-import { getFallbackValueOrKey } from "./fallbackValueOrKey";
-import { namespaceSeparator } from "./global";
-import { GetDictionaryEntry, TranslateDynamicProps, TranslateKey } from "./types";
-import { replacePlaceholders } from "./replacePlaceholders";
-import { pluralize } from "./pluralize";
+import { getFallbackValueOrKey } from './fallbackValueOrKey';
+import { TranslateDynamicProps, TranslateInternalSettings } from './types';
+import { replacePlaceholders } from './replacePlaceholders';
+import { pluralize } from './pluralize';
+import { GetDictionaryEntry, TranslateKey } from './translationKey';
 
 function getDynamicKey(key: string, dynamicProps: TranslateDynamicProps) {
     return `${key}::${JSON.stringify(dynamicProps).replace(/[\"\{\}]/g, '')}`;
 }
 
 export function translate(
-    key: TranslateKey,
+    key: string | string[],
     getEntry: GetDictionaryEntry,
     dynamicProps: TranslateDynamicProps | undefined,
     fallback: string | undefined,
-    replacePlaceholdersRegex: RegExp,
     dynamicCache: { [key: string]: string } | undefined,
-    absentCache: string[] | undefined
+    absentCache: string[] | undefined,
+    settings: TranslateInternalSettings
 ) {
-    // to satisfy type check and 0 value
-    if (typeof key === 'number') {
-        key = '' + key;
-    }
     // guard from wrong key
-    if (typeof key !== 'string' && !Array.isArray(key)) {
+    if (typeof key !== 'string' && !Array.isArray(key) && typeof key !== 'number') {
         throw new Error('"key" parameter is required');
     }
-    // separate key by namespace namespace
-    if (typeof key === 'string' && key.indexOf(':') >= 0) {
-        key = key.split(namespaceSeparator).reduce((res, val) => {
-            val && res.push(val.trim());
-            return res;
-        }, [] as string[]);
-    }
-
-    // as regex is global
-    replacePlaceholdersRegex.lastIndex = 0;
-
-    var entry = getEntry(key);
+    const _key = new TranslateKey(key);
+    var entry = getEntry(_key);
     let fallingBack = false;
     if (!entry) {
-        entry = getFallbackValueOrKey(key, fallback, absentCache);
+        entry = getFallbackValueOrKey(_key, fallback, absentCache, settings);
         fallingBack = true;
     }
 
@@ -58,12 +44,20 @@ export function translate(
     }
 
     const result = replacePlaceholders(
-        replacePlaceholdersRegex,
-        value,
         entry,
         dynamicProps,
-        (value, fallback)=>translate(value,getEntry,dynamicProps,fallback,replacePlaceholdersRegex,undefined,absentCache),
-        (value,prop,plurals)=>pluralize(value,prop,plurals),
+        (value, fallback) =>
+            translate(
+                value,
+                getEntry,
+                dynamicProps,
+                fallback,
+                undefined,
+                absentCache,
+                settings
+            ),
+        (value, plurals) => pluralize(value, plurals),
+        settings
     );
 
     // cache translation
