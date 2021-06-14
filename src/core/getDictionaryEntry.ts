@@ -4,7 +4,7 @@ import { Dictionary, DictionaryEntry } from './types';
 export function getDictionaryEntry(
     key: TranslateKey,
     dictionary: Dictionary | undefined,
-    fallbackDictionary?: Dictionary | undefined
+    fallbackDictionary?: Dictionary | undefined,
 ): string | DictionaryEntry | undefined {
     if (!key) {
         return undefined!;
@@ -24,7 +24,7 @@ export function getDictionaryEntry(
             if (_term == null) break;
             _term = _term[_key[i]];
         }
-        return _term == undefined ? key.asString : _term;
+        return _term;
     }
 
     var term = dictionary[key.asString];

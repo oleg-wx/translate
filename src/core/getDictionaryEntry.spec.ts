@@ -21,10 +21,13 @@ describe('when getting dictionary entry in the namespace', () => {
             'my-entry'
         );
     });
-    it('should return key form namespace with no item in namespace', () => {
+    it('should return undefined if no translation', () => {
         debugger
-        expect(getDictionaryEntry(new TranslateKey(['space','my-key','another-key']), dic, undefined)).toBe(
-            'space.my-key.another-key'
-        );
+        expect(getDictionaryEntry(new TranslateKey(['no-key']), dic)).toBeUndefined();
+    });
+
+    it('should return undefined with namespaces if no translation', () => {
+        debugger
+        expect(getDictionaryEntry(new TranslateKey(['no-key','no']), dic)).toBeUndefined();
     });
 });
