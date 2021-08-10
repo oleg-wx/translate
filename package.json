@@ -1,6 +1,6 @@
 {
   "name": "simply-translate",
-  "version": "0.11.1",
+  "version": "0.11.2",
   "description": "Simplest translation functionality ever",
   "main": "dist/index.js",
   "files": [

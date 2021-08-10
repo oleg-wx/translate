@@ -1,3 +1,5 @@
+export type TranslateKey = string|string[];
+
 export interface Dictionary {
     [key: string]: string | DictionaryEntry | Dictionary;
     // | { [key: string]: any };

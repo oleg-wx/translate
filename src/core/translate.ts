@@ -1,15 +1,15 @@
 import { getFallbackValueOrKey } from './fallbackValueOrKey';
-import { TranslateDynamicProps, TranslateInternalSettings } from './types';
+import { TranslateDynamicProps, TranslateInternalSettings, TranslateKey } from './types';
 import { replacePlaceholders } from './replacePlaceholders';
 import { pluralize } from './pluralize';
-import { GetDictionaryEntry, TranslateKey } from './translationKey';
+import { GetDictionaryEntry, TranslationKey } from './translationKey';
 
 function getDynamicKey(key: string, dynamicProps: TranslateDynamicProps) {
     return `${key}::${JSON.stringify(dynamicProps).replace(/[\"\{\}]/g, '')}`;
 }
 
 export function translate(
-    key: string | string[],
+    key: TranslateKey,
     getEntry: GetDictionaryEntry,
     dynamicProps: TranslateDynamicProps | undefined,
     fallback: string | undefined,
@@ -21,7 +21,7 @@ export function translate(
     if (typeof key !== 'string' && !Array.isArray(key) && typeof key !== 'number') {
         throw new Error('"key" parameter is required');
     }
-    const _key = new TranslateKey(key);
+    const _key = new TranslationKey(key);
     var entry = getEntry(_key);
     let fallingBack = false;
     if (!entry) {

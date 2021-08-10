@@ -1,9 +1,9 @@
 import globalSettings from './globalSettings';
-import { TranslateKey } from './translationKey';
+import { TranslationKey } from './translationKey';
 import { TranslateInternalSettings } from './types';
 
 export function getFallbackValueOrKey(
-    key: TranslateKey,
+    key: TranslationKey,
     fallbackValue: string | undefined,
     absentCache: string[] | undefined,
     options?: TranslateInternalSettings
@@ -14,9 +14,7 @@ export function getFallbackValueOrKey(
     }
     if (absentCache) {
         let absentKey = key.asString;
-        absentCache &&
-            !Object.prototype.hasOwnProperty.call(absentCache, absentKey) &&
-            absentCache.push(absentKey);
+        !absentCache.includes(absentKey) && absentCache.push(absentKey);
     }
     const result = fallbackValue || key.asString;
     return result;

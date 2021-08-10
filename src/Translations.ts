@@ -1,4 +1,4 @@
-import { Dictionary, TranslateDynamicProps } from "./core/types";
+import { Dictionary, TranslateDynamicProps, TranslateKey } from './core/types';
 import { translate } from './translate';
 
 export class Translations {
@@ -33,22 +33,51 @@ export class Translations {
         // };
     }
 
+    translate(key: TranslateKey): string;
+    translate(key: TranslateKey, fallback: string): string;
     translate(
-        key: string | string[],
+        key: TranslateKey,
         dynamicProps?: TranslateDynamicProps,
         fallback?: string
-    ) {
-        return this.translateTo(this.defaultLang!, key, dynamicProps, fallback);
+    ): string;
+    translate(
+        key: TranslateKey,
+        dynamicPropsOrFallback?: TranslateDynamicProps | string,
+        fallback?: string
+    ): string {
+        return this.translateTo(
+            this.defaultLang!,
+            key,
+            dynamicPropsOrFallback as TranslateDynamicProps,
+            fallback as string
+        );
     }
 
+    translateTo(lang: string, key: TranslateKey): string;
+    translateTo(lang: string, key: TranslateKey, fallback: string): string;
     translateTo(
         lang: string,
-        key:  string | string[],
-        dynamicProps?: TranslateDynamicProps,
+        key: TranslateKey,
+        dynamicProps: TranslateDynamicProps,
+        fallback?: string
+    ): string;
+    translateTo(
+        lang: string,
+        key: TranslateKey,
+        dynamicPropsOrFallback?: TranslateDynamicProps | string,
         fallback?: string
     ): string {
         if (!lang) {
             lang = Object.keys(this.dictionaries)[0];
+        }
+
+        let dynamicProps = dynamicPropsOrFallback as { [key: string]: string } | undefined;
+        if (
+            dynamicPropsOrFallback &&
+            typeof dynamicPropsOrFallback === 'string'
+        ) {
+            dynamicProps = undefined;
+            fallback = dynamicPropsOrFallback;
         }
 
         let result = translate(
@@ -66,7 +95,9 @@ export class Translations {
                     ? this.dictionaries[this.fallbackLang]
                     : undefined,
 
-                absentCache: this.storeAbsent ? (this.absent[lang] = this.absent[lang] || []) : undefined,
+                absentCache: this.storeAbsent
+                    ? (this.absent[lang] = this.absent[lang] || [])
+                    : undefined,
 
                 $less: this.$less,
             }
