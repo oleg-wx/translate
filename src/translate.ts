@@ -6,9 +6,9 @@ import {
 import { getDictionaryEntry } from './core/getDictionaryEntry';
 import { translate as translate_ } from './core/translate';
 import globalSettings from './core/globalSettings';
-import { TranslateKey } from './core/translationKey';
+import { TranslationKey } from './core/translationKey';
 
-export interface TranslateSettings extends Partial<TranslateInternalSettings> {
+export interface TranslateOptions extends Partial<TranslateInternalSettings> {
     fallbackDictionary?: Dictionary;
     fallback?: string | undefined;
     dynamicCache?: { [key: string]: string } | undefined;
@@ -27,12 +27,12 @@ export function translate(
     dictionary: Dictionary | undefined,
     key: string | string[],
     dynamicProps?: TranslateDynamicProps,
-    settings?: TranslateSettings
+    settings?: TranslateOptions
 ): string {
     if (key == null || key == '') {
         return '';
     }
-    let getEntry = (key: TranslateKey) =>
+    let getEntry = (key: TranslationKey) =>
         getDictionaryEntry(key, dictionary, settings?.fallbackDictionary);
 
     return translate_(

@@ -1,7 +1,7 @@
 import globalSettings from './globalSettings';
 import { DictionaryEntry } from './types';
 
-export class TranslateKey {
+export class TranslationKey {
     readonly asString: string;
     readonly asArray: string[];
 
@@ -29,5 +29,5 @@ export class TranslateKey {
 }
 
 export type GetDictionaryEntry = (
-    key: TranslateKey
+    key: TranslationKey
 ) => DictionaryEntry | string | undefined;

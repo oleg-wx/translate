@@ -2,7 +2,7 @@ import { Translations } from '..'
 
 describe('when using wrong between operators', () => {
     let operations = [
-        'between',
+        'between ',
         'between a and b',
         'between 3-4',
         'between 1 4',
@@ -24,7 +24,7 @@ describe('when using wrong between operators', () => {
                 translations.translateTo('en', 'i-ate-${bananas}', {
                     bananas: 1,
                 })
-            ).toThrowError(new Error(`operator "${v}" not supported`))
+            ).toThrowError(new Error(`wrong between format: "${v}"`))
         })
     })
 })
