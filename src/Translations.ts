@@ -1,15 +1,23 @@
-import { Dictionary, TranslateDynamicProps, TranslateKey } from './core/types';
+import {
+    Dictionaries,
+    Dictionary,
+    FailureCallback,
+    SimpleDictionaries,
+    TranslateDynamicProps,
+    TranslateKey,
+} from './core/types';
 import { translate } from './translate';
 
 export class Translations {
-    readonly dynamicCache: { [lang: string]: { [key: string]: string } } = {};
+    readonly dynamicCache: SimpleDictionaries = {};
     readonly absent: { [key: string]: string[] } = {};
     $less = false;
-    dictionaries: { [lang: string]: Dictionary };
+    dictionaries: Dictionaries;
     storeAbsent: boolean;
     cacheDynamic: boolean;
     defaultLang: string | undefined;
     fallbackLang: string | undefined;
+    onFailure: FailureCallback | undefined;
 
     constructor(
         dictionaries?: { [lang: string]: Dictionary },
@@ -19,13 +27,15 @@ export class Translations {
             defaultLang?: string;
             fallbackLang?: string;
             $less?: boolean;
+            onFailure?: FailureCallback;
         }
     ) {
-        this.dictionaries = dictionaries || {};
+        this.dictionaries = dictionaries ?? {};
         this.cacheDynamic = !!options?.cacheDynamic;
         this.storeAbsent = !!options?.storeAbsent;
         this.defaultLang = options?.defaultLang;
         this.fallbackLang = options?.fallbackLang;
+        this.onFailure = options?.onFailure;
         this.$less = options?.$less === true;
         // var a: DictionaryEntry = {
         //   value: "",
@@ -71,7 +81,9 @@ export class Translations {
             lang = Object.keys(this.dictionaries)[0];
         }
 
-        let dynamicProps = dynamicPropsOrFallback as { [key: string]: string } | undefined;
+        let dynamicProps = dynamicPropsOrFallback as
+            | { [key: string]: string }
+            | undefined;
         if (
             dynamicPropsOrFallback &&
             typeof dynamicPropsOrFallback === 'string'
@@ -80,34 +92,25 @@ export class Translations {
             fallback = dynamicPropsOrFallback;
         }
 
-        let result = translate(
-            this.dictionaries ? this.dictionaries[lang] : undefined,
-            key,
-            dynamicProps,
-            {
-                dynamicCache: this.cacheDynamic
-                    ? (this.dynamicCache[lang] = this.dynamicCache[lang] || {})
-                    : undefined,
+        let result = translate(lang, this.dictionaries, key, dynamicProps, {
+            dynamicCache: this.cacheDynamic
+                ? this.dynamicCache
+                : undefined,
 
-                fallback,
+            fallback,
 
-                fallbackDictionary: this.fallbackLang
-                    ? this.dictionaries[this.fallbackLang]
-                    : undefined,
+            fallbackLang: this.fallbackLang,
 
-                absentCache: this.storeAbsent
-                    ? (this.absent[lang] = this.absent[lang] || [])
-                    : undefined,
+            onFailure: this.onFailure,
 
-                $less: this.$less,
-            }
-        );
+            $less: this.$less,
+        });
 
         return result;
     }
 
     extendDictionary(lang: string, dictionary: Dictionary) {
-        this.dictionaries = this.dictionaries || {};
+        this.dictionaries = this.dictionaries ?? {};
         let existingDictionary = this.dictionaries[lang];
 
         if (existingDictionary) {

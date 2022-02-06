@@ -1,32 +1,50 @@
 import { getFallbackValueOrKey } from './fallbackValueOrKey';
-import { TranslateDynamicProps, TranslateInternalSettings, TranslateKey } from './types';
+import {
+    Dictionaries,
+    SimpleDictionaries,
+    TranslateDynamicProps,
+    TranslateInternalSettings,
+    TranslateKey,
+} from './types';
 import { replacePlaceholders } from './replacePlaceholders';
 import { pluralize } from './pluralize';
-import { GetDictionaryEntry, TranslationKey } from './translationKey';
+import { GetDictionaryEntry, TranslateKeyInstance } from './translationKey';
 
-function getDynamicKey(key: string, dynamicProps: TranslateDynamicProps) {
+function createDynamicKey(key: string, dynamicProps: TranslateDynamicProps) {
     return `${key}::${JSON.stringify(dynamicProps).replace(/[\"\{\}]/g, '')}`;
 }
 
 export function translate(
+    dictionaries: Dictionaries,
+    lang: string,
     key: TranslateKey,
     getEntry: GetDictionaryEntry,
     dynamicProps: TranslateDynamicProps | undefined,
+    fallbackLang: string | undefined,
     fallback: string | undefined,
-    dynamicCache: { [key: string]: string } | undefined,
-    absentCache: string[] | undefined,
+    dynamicCache: SimpleDictionaries | undefined,
     settings: TranslateInternalSettings
 ) {
     // guard from wrong key
-    if (typeof key !== 'string' && !Array.isArray(key) && typeof key !== 'number') {
+    if (
+        typeof key !== 'string' &&
+        !Array.isArray(key) &&
+        typeof key !== 'number'
+    ) {
         throw new Error('"key" parameter is required');
     }
-    const _key = new TranslationKey(key);
-    var entry = getEntry(_key);
+    const _key = new TranslateKeyInstance(key);
+
     let fallingBack = false;
+    var entry = getEntry(lang, _key);
     if (!entry) {
-        entry = getFallbackValueOrKey(_key, fallback, absentCache, settings);
-        fallingBack = true;
+        if (fallbackLang) {
+            entry = getEntry(fallbackLang, _key);
+        }
+        if (!entry) {
+            entry = getFallbackValueOrKey(_key, fallback);
+            fallingBack = true;
+        }
     }
 
     const value = typeof entry === 'string' ? entry : entry?.value;
@@ -37,9 +55,9 @@ export function translate(
     // trying to get dynamic cache
     let dynamicKey: string | undefined;
     if (dynamicCache && dynamicProps && !fallingBack) {
-        dynamicKey = getDynamicKey(value, dynamicProps);
+        dynamicKey = createDynamicKey(value, dynamicProps);
         if (Object.prototype.hasOwnProperty.call(dynamicCache, dynamicKey)) {
-            return dynamicCache[dynamicKey];
+            return dynamicCache[lang][dynamicKey];
         }
     }
 
@@ -48,12 +66,14 @@ export function translate(
         dynamicProps,
         (value, fallback) =>
             translate(
+                dictionaries,
+                lang,
                 value,
                 getEntry,
                 dynamicProps,
                 fallback,
+                fallbackLang,
                 undefined,
-                absentCache,
                 settings
             ),
         (value, plurals) => pluralize(value, plurals),
@@ -62,7 +82,8 @@ export function translate(
 
     // cache translation
     if (dynamicCache && dynamicKey && !fallingBack) {
-        dynamicCache[`${dynamicKey}`] = result;
+        if(!dynamicCache[lang]) dynamicCache[lang] = {};
+        dynamicCache[lang][`${dynamicKey}`] = result;
     }
     return result;
 }

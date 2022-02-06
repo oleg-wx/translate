@@ -1,8 +1,11 @@
-export type TranslateKey = string|string[];
+export type TranslateKey = string | string[];
 
 export interface Dictionary {
     [key: string]: string | DictionaryEntry | Dictionary;
     // | { [key: string]: any };
+}
+export interface Dictionaries {
+    [lang: string]: Dictionary;
 }
 
 export interface DictionaryEntry {
@@ -36,3 +39,6 @@ export type PluralOption = [
 ];
 export type PluralOptions = PluralOption[];
 export type Plurals = { [key: string]: PluralOptions };
+export type FailureCallback = (lang: string, key: TranslateKey) => void;
+export type SimpleDictionary = { [key: string]: string };
+export type SimpleDictionaries = { [lang: string]: SimpleDictionary };

@@ -8,6 +8,7 @@ describe('when translating plural placeholders', () => {
                     value: 'I ate $&{apples} for $&{when}',
                     plural: {
                         apples: [
+                            ['=0', ''],
                             ['= 1', 'One apple'],
                             ['= 4', '$&{my-$#-only} apple'],
                             ['in [2,3]', '$&{$#} apples'],
@@ -31,6 +32,10 @@ describe('when translating plural placeholders', () => {
     );
 
     let values = [
+        {
+            apples: 0,
+            when: 'breakfast',
+        },
         {
             apples: 101,
             when: 'breakfast',
@@ -68,6 +73,7 @@ describe('when translating plural placeholders', () => {
     ];
 
     let expectedEn = [
+        'I ate  for Breakfast',
         'I ate hundred and One apple for Breakfast',
         'I ate the Ultimate Amount of apples for Dinner',
         'I ate One apple for Dinner',
@@ -80,7 +86,6 @@ describe('when translating plural placeholders', () => {
 
     it('should translate plural placeholder', () => {
         values.forEach((v, i) => {
-            debugger;
             var t = translations.translateTo('en', 'i-ate-{apples}-{when}', v);
             expect(t).toBe(expectedEn[i]);
         });

@@ -1,19 +1,17 @@
-import { TranslationKey } from './translationKey';
+import { TranslateKeyInstance } from './translationKey';
 import { Dictionary, DictionaryEntry } from './types';
 
 export function getDictionaryEntry(
-    key: TranslationKey,
-    dictionary: Dictionary | undefined,
-    fallbackDictionary?: Dictionary | undefined
+    dictionaries: { [lang: string]: Dictionary },
+    lang: string,
+    key: TranslateKeyInstance
 ): string | DictionaryEntry | undefined {
+    let dictionary = dictionaries[lang];
     if (!key) {
         return undefined!;
     }
 
     if (!dictionary) {
-        if (fallbackDictionary) {
-            return getDictionaryEntry(key, fallbackDictionary);
-        }
         return undefined;
     }
 
@@ -36,9 +34,6 @@ export function getDictionaryEntry(
         typeof (result as any)?.value === 'string'
     ) {
         return result as string | DictionaryEntry;
-    }
-    if (fallbackDictionary) {
-        return getDictionaryEntry(key, fallbackDictionary);
     }
     return undefined;
 }

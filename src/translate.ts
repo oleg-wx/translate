@@ -1,18 +1,21 @@
 import {
     Dictionary,
+    FailureCallback,
+    SimpleDictionaries,
     TranslateDynamicProps,
     TranslateInternalSettings,
 } from './core/types';
 import { getDictionaryEntry } from './core/getDictionaryEntry';
 import { translate as translate_ } from './core/translate';
 import globalSettings from './core/globalSettings';
-import { TranslationKey } from './core/translationKey';
+import { TranslateKey } from './core/types';
+import { TranslateKeyInstance } from './core/translationKey';
 
 export interface TranslateOptions extends Partial<TranslateInternalSettings> {
-    fallbackDictionary?: Dictionary;
+    fallbackLang?: string;
     fallback?: string | undefined;
-    dynamicCache?: { [key: string]: string } | undefined;
-    absentCache?: string[];
+    dynamicCache?: SimpleDictionaries | undefined;
+    onFailure?: FailureCallback;
 }
 
 /**
@@ -24,29 +27,39 @@ export interface TranslateOptions extends Partial<TranslateInternalSettings> {
  * @returns
  */
 export function translate(
-    dictionary: Dictionary | undefined,
-    key: string | string[],
+    lang: string,
+    dictionaries: { [key: string]: Dictionary },
+    key: TranslateKey,
     dynamicProps?: TranslateDynamicProps,
     settings?: TranslateOptions
 ): string {
     if (key == null || key == '') {
         return '';
     }
-    let getEntry = (key: TranslationKey) =>
-        getDictionaryEntry(key, dictionary, settings?.fallbackDictionary);
+    let getEntry = (lang: string, key_: TranslateKeyInstance) => {
+        const result = getDictionaryEntry(dictionaries, lang, key_);
+        if (result === undefined) {
+            if (typeof settings?.onFailure === 'function') {
+                settings?.onFailure(lang, key);
+            }
+        }
+        return result;
+    };
 
     return translate_(
+        dictionaries,
+        lang,
         key,
         getEntry,
         dynamicProps,
+        settings?.fallbackLang,
         settings?.fallback,
         settings?.dynamicCache,
-        settings?.absentCache,
         {
             $less:
                 settings?.$less !== undefined
                     ? settings?.$less
-                    : globalSettings.$less
+                    : globalSettings.$less,
         }
     );
 }
