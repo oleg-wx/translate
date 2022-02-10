@@ -1,22 +1,22 @@
 import { getFallbackValueOrKey } from "./fallbackValueOrKey"
-import { TranslationKey } from "./translationKey";
+import { TranslateKeyInstance } from "./translationKey";
 
 describe('when getting fallback value or key',()=>{
     it('should get key if no fallback',()=>{
-        expect(getFallbackValueOrKey(new TranslationKey('my-key'), undefined,undefined)).toBe('my-key');
-        expect(getFallbackValueOrKey(new TranslationKey('my-namespace.my-key'), undefined,undefined)).toBe('my-namespace.my-key');
-        expect(getFallbackValueOrKey(new TranslationKey(['my-namespace','my-key']), undefined,undefined)).toBe('my-namespace.my-key');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance('my-key'), undefined)).toBe('my-key');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance('my-namespace.my-key'), undefined)).toBe('my-namespace.my-key');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance(['my-namespace','my-key']), undefined)).toBe('my-namespace.my-key');
     });
     it('should get fallback when provided',()=>{
-        expect(getFallbackValueOrKey(new TranslationKey('my-key'), 'my-fallback',undefined)).toBe('my-fallback');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance('my-key'), 'my-fallback')).toBe('my-fallback');
     });
     it('should get empty string if key or fallback not provided',()=>{
-        expect(getFallbackValueOrKey(undefined!, undefined,undefined)).toBe('');
+        expect(getFallbackValueOrKey(undefined!, undefined)).toBe('');
     });
     it('should get string if number is provided',()=>{
-        expect(getFallbackValueOrKey(new TranslationKey(10 as any as string), undefined,undefined)).toBe('10');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance(10 as any as string), undefined)).toBe('10');
     });
     it('should get string if number is provided',()=>{
-        expect(getFallbackValueOrKey(new TranslationKey({} as any as string), undefined,undefined)).toBe('[object Object]');
+        expect(getFallbackValueOrKey(new TranslateKeyInstance({} as any as string), undefined)).toBe('[object Object]');
     });
 })

@@ -1,5 +1,5 @@
 import { Translations } from '..';
-describe('when falling back to dictionary', () => {
+describe.only('when falling back to dictionary', () => {
     let translations = new Translations(
         {
             en: {
@@ -71,7 +71,7 @@ describe('when falling back to dictionary', () => {
         'Nice Day',
     ];
 
-    it('should fallback to dictionary for specific terms', () => {
+    fit('should fallback to dictionary for specific terms', () => {
         values.forEach((v, i) => {
             expect(translations.translate(v.key, v.value, v.fallback)).toBe(
                 expected[i]

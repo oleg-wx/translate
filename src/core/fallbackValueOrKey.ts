@@ -1,21 +1,12 @@
-import globalSettings from './globalSettings';
-import { TranslationKey } from './translationKey';
-import { TranslateInternalSettings } from './types';
+import { TranslateKeyInstance } from './translationKey';
 
 export function getFallbackValueOrKey(
-    key: TranslationKey,
-    fallbackValue: string | undefined,
-    absentCache: string[] | undefined,
-    options?: TranslateInternalSettings
+    key: TranslateKeyInstance,
+    fallbackValue: string | undefined
 ): string {
-    options = options || globalSettings;
     if (key == undefined) {
         return '';
     }
-    if (absentCache) {
-        let absentKey = key.asString;
-        !absentCache.includes(absentKey) && absentCache.push(absentKey);
-    }
-    const result = fallbackValue || key.asString;
+    const result = fallbackValue ?? key.asString;
     return result;
 }

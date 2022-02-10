@@ -1,30 +1,43 @@
 import { getDictionaryEntry } from './getDictionaryEntry';
-import { TranslationKey } from './translationKey';
+import { TranslateKeyInstance } from './translationKey';
 
 describe('when getting dictionary entry', () => {
     it('should get value', () => {
         expect(
-            getDictionaryEntry(new TranslationKey('my-key'), { 'my-key': 'my-entry' }, undefined)
+            getDictionaryEntry(
+                { en: { 'my-key': 'my-entry' } },
+                'en',
+                new TranslateKeyInstance('my-key')
+            )
         ).toBe('my-entry');
     });
 });
 describe('when getting dictionary entry in the namespace', () => {
-    const dic = { space: { 'my-key': 'my-entry' } };
+    const lang = 'en';
+    const dics = { [lang]: { space: { 'my-key': 'my-entry' } } };
     it('should get value form namespace with string key', () => {
-        expect(getDictionaryEntry(new TranslationKey('space.my-key'), dic, undefined)).toBe(
-            'my-entry'
-        );
+        expect(
+            getDictionaryEntry(dics, lang, new TranslateKeyInstance('space.my-key'))
+        ).toBe('my-entry');
     });
     it('should get value form namespace with array key', () => {
-        expect(getDictionaryEntry(new TranslationKey(['space','my-key']), dic, undefined)).toBe(
-            'my-entry'
-        );
+        expect(
+            getDictionaryEntry(
+                dics,
+                lang,
+                new TranslateKeyInstance(['space', 'my-key'])
+            )
+        ).toBe('my-entry');
     });
     it('should return undefined if no translation', () => {
-        expect(getDictionaryEntry(new TranslationKey(['no-key']), dic)).toBeUndefined();
+        expect(
+            getDictionaryEntry(dics, lang, new TranslateKeyInstance(['no-key']))
+        ).toBeUndefined();
     });
 
     it('should return undefined with namespaces if no translation', () => {
-        expect(getDictionaryEntry(new TranslationKey(['no-key','no']), dic)).toBeUndefined();
+        expect(
+            getDictionaryEntry(dics, lang, new TranslateKeyInstance(['no-key', 'no']))
+        ).toBeUndefined();
     });
 });

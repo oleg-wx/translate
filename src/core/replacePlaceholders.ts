@@ -19,7 +19,7 @@ export function replacePlaceholders(
     ) => string,
     settings?: TranslateInternalSettings
 ) {
-    var _settings = settings || globalSettings;
+    var _settings = settings ?? globalSettings;
     var value: string;
     if (typeof entry === 'string') {
         value = entry;
@@ -52,7 +52,7 @@ export function replacePlaceholders(
                     replaceValue = dynamicProps![prop];
                 }
                 if (replaceValue === undefined) {
-                    replaceValue = propFallback || prop;
+                    replaceValue = propFallback ?? prop;
                 }
             } else {
                 replaceValue = prop;
@@ -83,7 +83,7 @@ export function replacePlaceholders(
                 replaceValue = handleTranslate(replaceValue as string);
             }
 
-            return '' + replaceValue || prop;
+            return '' + replaceValue ?? prop;
         }
     );
     return replaced;
