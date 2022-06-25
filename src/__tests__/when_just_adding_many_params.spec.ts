@@ -49,7 +49,6 @@ describe('when just adding many params', () => {
 
     it('should just translate', () => {
         values.forEach((v, i) => {
-            debugger
             expect(translations.translateTo(lang, key, v)).toBe(expected[i]);
         });
     });

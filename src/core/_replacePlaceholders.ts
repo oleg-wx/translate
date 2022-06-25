@@ -2,33 +2,26 @@ import globalSettings from './globalSettings';
 import {
     DictionaryEntry,
     PluralOptions,
+    Plurals,
     TranslateDynamicProps,
     TranslateInternalSettings,
 } from './types';
+import { SimpleTranslateFunc } from './types';
 
 //import { translate } from "./translate";
 //import { tryToPluralizeAndReplace } from "./tryToPluralizeAndReplace";
 
 export function replacePlaceholders(
-    entry: DictionaryEntry | string,
+    _regexp: RegExp,
+    value: string,
+    plurals: Plurals | undefined,
     dynamicProps: TranslateDynamicProps | undefined,
-    handleTranslate: (value: string, fallback?: string) => string,
-    handlePluralize: (
-        value: string | number,
-        plural: PluralOptions
-    ) => string,
-    settings?: TranslateInternalSettings
+    handleTranslate: SimpleTranslateFunc | undefined,
+    handlePluralize:
+        | ((value: string | number, plural: PluralOptions) => string)
+        | undefined,
+    settings: TranslateInternalSettings
 ) {
-    var _settings = settings ?? globalSettings;
-    var value: string;
-    if (typeof entry === 'string') {
-        value = entry;
-    } else {
-        value = entry.value;
-    }
-    var _regexp = _settings.$less
-        ? globalSettings.replacePlaceholdersRx_$less
-        : globalSettings.replacePlaceholdersRx;
     var replaced: string = value.replace(
         _regexp,
         (
@@ -42,7 +35,7 @@ export function replacePlaceholders(
         ) => {
             var replaceValue: string | number | undefined;
             const shouldReplaceDynamic =
-                replaceAndOrTranslate?.indexOf('$') >= 0 || _settings.$less;
+                replaceAndOrTranslate?.indexOf('$') >= 0 || settings.$less;
             const shouldTranslate = replaceAndOrTranslate?.indexOf('&') >= 0;
             if (shouldReplaceDynamic) {
                 if (
@@ -59,19 +52,18 @@ export function replacePlaceholders(
             }
 
             if (
+                handlePluralize &&
                 shouldReplaceDynamic &&
-                typeof entry !== 'string' &&
-                entry?.plural &&
+                plurals &&
                 !isNaN(replaceValue as number)
             ) {
-                replaceValue = handlePluralize(
-                    replaceValue,
-                    entry.plural[prop]
-                );
+                replaceValue = handlePluralize(replaceValue, plurals[prop]);
                 if (replaceValue.indexOf('{') >= 0) {
                     // replace again
                     replaceValue = replacePlaceholders(
+                        _regexp,
                         replaceValue,
+                        plurals,
                         dynamicProps,
                         handleTranslate,
                         handlePluralize,
@@ -79,7 +71,7 @@ export function replacePlaceholders(
                     );
                 }
             }
-            if (shouldTranslate) {
+            if (handleTranslate && shouldTranslate) {
                 replaceValue = handleTranslate(replaceValue as string);
             }
 

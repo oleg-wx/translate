@@ -31,7 +31,6 @@ describe('when falling back to property', () => {
             'I ate 3 banana(s) for launch',
         ];
         values.forEach((v, i) => {
-            debugger
             var t = translations.translateTo(
                 'en',
                 'i-ate-bananas-when-fallback-dynamic',

@@ -14,7 +14,7 @@ describe('when using string value for plural placeholder', () => {
             },
         },
     })
-    translations.defaultLang = 'en'
+    translations.lang = 'en'
 
     let values = [{ days: 90 }, { days: 100 }, { days: 'blabla' }]
 

@@ -61,7 +61,7 @@ describe('when translating pluralized to 2 langs', () => {
     ];
 
     beforeEach(() => {
-        translations.defaultLang = undefined;
+        translations.lang = undefined;
     });
 
     let expectedEn = [
@@ -78,7 +78,7 @@ describe('when translating pluralized to 2 langs', () => {
         });
     });
     it('should translate plural to EN default lang', () => {
-        translations.defaultLang = 'en';
+        translations.lang = 'en';
         values.forEach((v, i) => {
             expect(translations.translate(key, v)).toBe(expectedEn[i]);
         });
@@ -98,7 +98,7 @@ describe('when translating pluralized to 2 langs', () => {
         });
     });
     test('should translate plural to RU default lang', () => {
-        translations.defaultLang = 'ru';
+        translations.lang = 'ru';
         values.forEach((v, i) => {
             expect(translations.translate(key, v)).toBe(expectedRu[i]);
         });

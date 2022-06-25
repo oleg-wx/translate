@@ -18,7 +18,7 @@ beforeEach(() => {
 });
 
 test('Translate with namespace', () => {
-    translations.defaultLang = 'en-US';
+    translations.lang = 'en-US';
     const translated = translations.translate(['user', 'hello_${user}'], {
         user: undefined!,
     });

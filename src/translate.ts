@@ -1,21 +1,20 @@
 import {
-    Dictionary,
-    FailureCallback,
+    TranslateKey,
+    Dictionaries,
     SimpleDictionaries,
     TranslateDynamicProps,
     TranslateInternalSettings,
+    Context,
+    Pipeline,
 } from './core/types';
-import { getDictionaryEntry } from './core/getDictionaryEntry';
-import { translate as translate_ } from './core/translate';
 import globalSettings from './core/globalSettings';
-import { TranslateKey } from './core/types';
 import { TranslateKeyInstance } from './core/translationKey';
+import { SimpleDefaultPipeline } from './core/middleware/simplePipeline';
+import { GetEntryMiddleware } from './core/middleware/getEntryMiddleware';
 
 export interface TranslateOptions extends Partial<TranslateInternalSettings> {
     fallbackLang?: string;
-    fallback?: string | undefined;
-    dynamicCache?: SimpleDictionaries | undefined;
-    onFailure?: FailureCallback;
+    dynamicCache?: SimpleDictionaries;
 }
 
 /**
@@ -27,34 +26,30 @@ export interface TranslateOptions extends Partial<TranslateInternalSettings> {
  * @returns
  */
 export function translate(
+    pipeline: Pipeline,
     lang: string,
-    dictionaries: { [key: string]: Dictionary },
+    dictionaries: Dictionaries,
     key: TranslateKey,
     dynamicProps?: TranslateDynamicProps,
+    fallback?: string,
     settings?: TranslateOptions
 ): string {
-    if (key == null || key == '') {
+    if (key == null || key == '' || key.length === 0) {
         return '';
     }
-    let getEntry = (lang: string, key_: TranslateKeyInstance) => {
-        const result = getDictionaryEntry(dictionaries, lang, key_);
-        if (result === undefined) {
-            if (typeof settings?.onFailure === 'function') {
-                settings?.onFailure(lang, key);
-            }
-        }
-        return result;
-    };
 
-    return translate_(
-        dictionaries,
-        lang,
-        key,
-        getEntry,
-        dynamicProps,
-        settings?.fallbackLang,
-        settings?.fallback,
-        settings?.dynamicCache,
+    return pipeline.run(
+        {
+            dictionaries: dictionaries,
+            lang,
+            key: new TranslateKeyInstance(key),
+            dynamicCache: settings?.dynamicCache,
+            dynamicProps,
+            fallback: fallback,
+            data: {
+                fallbackLang: settings?.fallbackLang,
+            },
+        },
         {
             $less:
                 settings?.$less !== undefined
@@ -62,4 +57,17 @@ export function translate(
                     : globalSettings.$less,
         }
     );
+}
+
+export function hasTranslation(
+    lang: string,
+    dictionaries: Dictionaries,
+    key: TranslateKey
+) {
+    const context: Context = {
+        params: { key: new TranslateKeyInstance(key), lang, dictionaries },
+        result: {},
+    };
+    GetEntryMiddleware(context, () => undefined);
+    return !!context.result.value;
 }

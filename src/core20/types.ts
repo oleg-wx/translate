@@ -96,12 +96,12 @@ export type SimpleTranslateFunc = (
     lang?: string
 ) => string;
 
-export interface MiddlewareStatic<T = {}, TProps = any> {
+export interface Middleware<T = {}, TProps = any> {
     exec(context: Context<T, TProps>, next: () => void): void;
 }
 
 export type Middlewares = Array<
-    MiddlewareFunc<any, any> | MiddlewareStatic<any, any>
+    MiddlewareFunc<any, any> | Middleware<any, any>
 >;
 
 export interface Pipeline {

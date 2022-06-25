@@ -1,4 +1,4 @@
-import { compileFunction } from "./compileFunction"
+import { compileFunction } from "../compileFunction"
 
 it('should compile and run "=" operator',()=>{
     var fn = compileFunction("=2");

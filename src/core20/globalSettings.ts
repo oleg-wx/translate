@@ -49,12 +49,6 @@ function escapeRegExp(val: string): string {
     return val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
 }
 
-export function getRegExp($less: boolean | undefined) {
-    return $less
-        ? globalSettings.replacePlaceholdersRx_$less
-        : globalSettings.replacePlaceholdersRx;
-}
-
 const testPlaceholderRx = /[\$\&]\{/;
 const testPlaceholderRx_$less = /\&?\{/;
 export function testPlaceholder(
@@ -64,7 +58,7 @@ export function testPlaceholder(
     if (value == null || typeof value !== 'string') {
         return false;
     }
+    testPlaceholderRx.lastIndex = 0;
     const rx = $less ? testPlaceholderRx_$less : testPlaceholderRx;
-    rx.lastIndex = 0;
     return testPlaceholderRx.test(value);
 }

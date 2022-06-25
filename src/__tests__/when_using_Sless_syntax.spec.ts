@@ -13,7 +13,7 @@ describe('when using $-less syntax', () => {
             },
             { cacheDynamic: true }
         );
-
+        debugger;
         // SET no $
         translations.$less = true;
         expect(
@@ -24,7 +24,6 @@ describe('when using $-less syntax', () => {
     });
 
     test('should translate values in $-less placeholders ', () => {
-        debugger
         let translations = new Translations(
             {
                 en: {
@@ -36,7 +35,7 @@ describe('when using $-less syntax', () => {
             },
             { cacheDynamic: true, $less: true }
         );
-        translations.defaultLang = 'en';
+        translations.lang = 'en';
 
         expect(
             translations.translateTo('en', 'i-ate-bananas', {

@@ -30,10 +30,6 @@ export class TranslateKeyInstance {
             this.asArray = [key];
         }
     }
-
-    toString() {
-        return this.asString;
-    }
 }
 
 export type GetDictionaryEntry = (

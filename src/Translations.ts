@@ -1,46 +1,60 @@
 import {
     Dictionaries,
     Dictionary,
-    FailureCallback,
+    Pipeline,
     SimpleDictionaries,
     TranslateDynamicProps,
     TranslateKey,
 } from './core/types';
-import { translate } from './translate';
+import { SimpleDefaultPipeline } from './core/middleware/simplePipeline';
+import { translate, hasTranslation } from './translate';
 
 export class Translations {
     readonly dynamicCache: SimpleDictionaries = {};
     readonly absent: { [key: string]: string[] } = {};
+    pipeline: Pipeline;
+
     $less = false;
     dictionaries: Dictionaries;
-    storeAbsent: boolean;
     cacheDynamic: boolean;
-    defaultLang: string | undefined;
+    lang: string | undefined;
     fallbackLang: string | undefined;
-    onFailure: FailureCallback | undefined;
+
+    get defaultLang() {
+        return this.lang;
+    }
+
+    set defaultLang(val: string | undefined) {
+        this.lang = val;
+    }
 
     constructor(
         dictionaries?: { [lang: string]: Dictionary },
         options?: {
             cacheDynamic?: boolean;
-            storeAbsent?: boolean;
+            lang?: string;
+            /**
+             * @deprecated defaultLang will be removed. Use lang instead
+             */
             defaultLang?: string;
+            /**
+             * @deprecated Fallback Lang will be removed soon as a parameter. It can be added as a middleware in pipeline before regular Fallback.
+             */
             fallbackLang?: string;
             $less?: boolean;
-            onFailure?: FailureCallback;
-        }
+        },
+        pipeline?: Pipeline
     ) {
         this.dictionaries = dictionaries ?? {};
         this.cacheDynamic = !!options?.cacheDynamic;
-        this.storeAbsent = !!options?.storeAbsent;
-        this.defaultLang = options?.defaultLang;
+        this.lang = options?.lang ?? options?.defaultLang;
         this.fallbackLang = options?.fallbackLang;
-        this.onFailure = options?.onFailure;
         this.$less = options?.$less === true;
-        // var a: DictionaryEntry = {
-        //   value: "",
-        //   plural: [">2", "string"],
-        // };
+        if (pipeline) {
+            this.pipeline = pipeline;
+        } else {
+            this.pipeline = new SimpleDefaultPipeline();
+        }
     }
 
     translate(key: TranslateKey): string;
@@ -56,7 +70,7 @@ export class Translations {
         fallback?: string
     ): string {
         return this.translateTo(
-            this.defaultLang!,
+            this.lang!,
             key,
             dynamicPropsOrFallback as TranslateDynamicProps,
             fallback as string
@@ -92,21 +106,31 @@ export class Translations {
             fallback = dynamicPropsOrFallback;
         }
 
-        let result = translate(lang, this.dictionaries, key, dynamicProps, {
-            dynamicCache: this.cacheDynamic
-                ? this.dynamicCache
-                : undefined,
-
+        let result = translate(
+            this.pipeline,
+            lang,
+            this.dictionaries,
+            key,
+            dynamicProps,
             fallback,
+            {
+                dynamicCache: this.cacheDynamic ? this.dynamicCache : undefined,
 
-            fallbackLang: this.fallbackLang,
+                fallbackLang: this.fallbackLang,
 
-            onFailure: this.onFailure,
-
-            $less: this.$less,
-        });
+                $less: this.$less,
+            }
+        );
 
         return result;
+    }
+
+    hasTranslationTo(lang: string, key: TranslateKey): boolean {
+        return hasTranslation(lang as string, this.dictionaries, key);
+    }
+
+    hasTranslation(key: TranslateKey): boolean {
+        return hasTranslation(this.lang as string, this.dictionaries, key);
     }
 
     extendDictionary(lang: string, dictionary: Dictionary) {
