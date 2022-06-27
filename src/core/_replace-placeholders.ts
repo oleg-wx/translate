@@ -39,7 +39,6 @@ export function replacePlaceholders(
             ind: number,
             text: string
         ) => {
-            debugger
             var replaceValue: string | number | undefined;
             const shouldReplaceDynamic =
                 settings.shouldReplaceDynamic &&
