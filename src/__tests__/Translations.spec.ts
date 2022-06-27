@@ -99,6 +99,7 @@ fdescribe('main test', () => {
                                 ['= 1', '&{$#-only} apple'],
                                 ['in [2,3]', '&{$#} apples'],
                                 ['= 5', '$# ($&{yay}) apples'],
+                                ['% 11', '$# (divisible by eleven) apples'],
                                 ['_', '$# apple(s)'],
                             ],
                         },
@@ -134,6 +135,12 @@ fdescribe('main test', () => {
                 when: 'breakfast',
             })
         ).toBe('I ate 4 apple(s) for Breakfast');
+        expect(
+            translations.translate('i-ate-apples-for', {
+                apples: 121,
+                when: 'dinner',
+            })
+        ).toBe('I ate 121 (divisible by eleven) apples for Dinner');
         expect(
             translations.translate('i-ate-apples-for', {
                 apples: 5,

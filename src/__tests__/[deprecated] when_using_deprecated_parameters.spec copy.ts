@@ -13,9 +13,12 @@ describe('when using $-less syntax', () => {
             },
             { cacheDynamic: true }
         );
-        debugger;
         // SET no $
         translations.$less = true;
+        translations.defaultLang = 'en';
+
+        expect(translations.lang).toBe('en');
+        expect(translations.placeholder).toBe('single');
         expect(
             translations.translateTo('en', 'i-ate-bananas', {
                 bananas: 3,
@@ -33,10 +36,11 @@ describe('when using $-less syntax', () => {
                     3: 'three',
                 },
             },
-            { cacheDynamic: true, $less: true }
+            { cacheDynamic: true, $less: true, defaultLang: 'en' }
         );
-        translations.lang = 'en';
 
+        expect(translations.lang).toBe('en');
+        expect(translations.placeholder).toBe('single');
         expect(
             translations.translateTo('en', 'i-ate-bananas', {
                 bananas: 3,

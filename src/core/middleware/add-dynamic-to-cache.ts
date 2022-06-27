@@ -1,6 +1,6 @@
 import { CachedResult, MiddlewareFunc } from '../types';
 
-export const AddToDynamicCacheMiddleware: MiddlewareFunc<CachedResult> = (
+export const AddDynamicToCacheMiddleware: MiddlewareFunc<CachedResult> = (
     { params, result },
     next
 ) => {

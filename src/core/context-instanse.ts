@@ -1,10 +1,9 @@
-import { TranslateKeyInstance } from './translationKey';
+import { TranslateKeyInstance } from './translation-key';
 import {
-    TranslateInternalSettings,
     TranslateDynamicProps,
     Pipeline,
 } from './types';
-import { SimpleDefaultPipeline } from './middleware/simplePipeline';
+import { SimpleDefaultPipeline } from './middleware/simple-pipeline';
 import { Context, ContextParams, ContextBaseResult } from './types';
 
 export class ContextInstance<T = {}> implements Context<T> {
@@ -12,7 +11,6 @@ export class ContextInstance<T = {}> implements Context<T> {
 
     constructor(
         public params: ContextParams,
-        public settings: TranslateInternalSettings,
         public pipeline: Pipeline
     ) {
         this.result = {} as any;
@@ -31,6 +29,6 @@ export class ContextInstance<T = {}> implements Context<T> {
             fallback,
             dynamicProps,
         };
-        return this.pipeline.run(params, this.settings);
+        return this.pipeline.run(params);
     }
 }

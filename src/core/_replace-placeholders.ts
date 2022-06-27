@@ -1,10 +1,7 @@
-import globalSettings from './globalSettings';
 import {
-    DictionaryEntry,
     PluralOptions,
     Plurals,
     TranslateDynamicProps,
-    TranslateInternalSettings,
 } from './types';
 import { SimpleTranslateFunc } from './types';
 
@@ -20,7 +17,16 @@ export function replacePlaceholders(
     handlePluralize:
         | ((value: string | number, plural: PluralOptions) => string)
         | undefined,
-    settings: TranslateInternalSettings
+    settings: {
+        shouldReplaceDynamic?: (
+            placeholderPrefix: string,
+            placeholder: string
+        ) => boolean;
+        shouldTranslate?: (
+            placeholderPrefix: string,
+            placeholder: string
+        ) => boolean;
+    }
 ) {
     var replaced: string = value.replace(
         _regexp,
@@ -33,10 +39,14 @@ export function replacePlaceholders(
             ind: number,
             text: string
         ) => {
+            debugger
             var replaceValue: string | number | undefined;
             const shouldReplaceDynamic =
-                replaceAndOrTranslate?.indexOf('$') >= 0 || settings.$less;
-            const shouldTranslate = replaceAndOrTranslate?.indexOf('&') >= 0;
+                settings.shouldReplaceDynamic &&
+                settings.shouldReplaceDynamic(replaceAndOrTranslate, prop);
+            const shouldTranslate =
+                settings.shouldTranslate &&
+                settings.shouldTranslate(replaceAndOrTranslate, prop);
             if (shouldReplaceDynamic) {
                 if (
                     dynamicProps &&

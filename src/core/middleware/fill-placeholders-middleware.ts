@@ -1,26 +1,27 @@
-import globalSettings, { testPlaceholder } from '../globalSettings';
 import { pluralize } from '../pluralize';
-import { replacePlaceholders } from '../_replacePlaceholders';
-import { MiddlewareFunc } from '../types';
+import { replacePlaceholders } from '../_replace-placeholders';
+import { MiddlewareFunc, RegExpResult } from '../types';
 import { TranslateDynamicProps } from '../types';
 
-export const FillPlaceholdersMiddleware: MiddlewareFunc = (context, next) => {
-    const { params, result, settings } = context;
+export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
+    context,
+    next
+) => {
+    const { params, result } = context;
     const value = result.value;
     const dynamicProps = params.dynamicProps;
 
-    if (
-        !dynamicProps ||
-        !value ||
-        !testPlaceholder(value, context.settings?.$less)
-    ) {
+    if (!value || !result._testPlaceholder || !result._replacePlaceholders) {
         return next();
     }
 
-    const _settings = settings ?? globalSettings;
-    var regexp = _settings.$less
-        ? globalSettings.replacePlaceholdersRx_$less
-        : globalSettings.replacePlaceholdersRx;
+    const hasPlaceholder = result._testPlaceholder(value);
+
+    if (!hasPlaceholder) {
+        return next();
+    }
+
+    var regexp = result._replacePlaceholders;
     const _plurals = result.plural;
 
     const replaced: string = replacePlaceholders(
@@ -36,7 +37,10 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc = (context, next) => {
               ) => context.translate!(key, dynamicProps, fallback)
             : undefined,
         pluralize,
-        _settings
+        {
+            shouldReplaceDynamic: result._shouldReplace,
+            shouldTranslate: result._shouldTranslate,
+        }
     );
 
     result.value = replaced;

@@ -1,12 +1,11 @@
-import { TranslateKeyInstance } from '../../translationKey';
+import { TranslateKeyInstance } from '../../translation-key';
 import { Dictionaries, TranslateKey } from '../../types';
 import { Context } from '../../types';
-import { FallbackMiddleware } from '../../middleware/fallbackMiddleware';
+import { FallbackMiddleware } from '../../middleware/fallback-middleware';
 
 describe('when getting fallback value or key', () => {
     function createContextWithKey(key: TranslateKey,fallback?:string): Context {
         const lang = 'en';
-        const settings = { $less: false };
         const dictionaries: Dictionaries = {
             [lang]: {
                 'my-key': 'my-entry',
@@ -20,7 +19,6 @@ describe('when getting fallback value or key', () => {
                 key: new TranslateKeyInstance(key),
                 fallback
             },
-            settings,
             result: {},
         };
     }

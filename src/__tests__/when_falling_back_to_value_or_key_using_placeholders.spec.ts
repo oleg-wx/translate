@@ -23,8 +23,8 @@ describe('when falling back to value or key using placeholders', () => {
         'I ate 3 banana(s) for breakfast',
     ];
 
-    it('should fallback to value with dynamic', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should fallback to value with dynamic ${expectedEn[i]}`, () => {
             var t = translations.translateTo(
                 'en',
                 'i-ate-${bananas}-${when}',

@@ -39,7 +39,7 @@ describe.only('when falling back to dictionary', () => {
         'Nice Day',
     ];
 
-    beforeEach(()=>{
+    beforeEach(() => {
         translations = new Translations(
             {
                 en: {
@@ -54,11 +54,11 @@ describe.only('when falling back to dictionary', () => {
                     },
                     main: {
                         theme: 'Theme',
-                        no:{
-                            nothing:{
-                                value:'test'
-                            }
-                        }
+                        no: {
+                            nothing: {
+                                value: 'test',
+                            },
+                        },
                     },
                 },
                 ru: {
@@ -73,10 +73,10 @@ describe.only('when falling back to dictionary', () => {
             },
             { cacheDynamic: true, lang: 'ru', fallbackLang: 'en' }
         );
-    })
+    });
 
-    it('should fallback to dictionary for specific terms', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should fallback to dictionary for specific terms ${expected[i]}`, () => {
             expect(translations.translate(v.key, v.value, v.fallback)).toBe(
                 expected[i]
             );
@@ -92,14 +92,14 @@ describe.only('when falling back to dictionary', () => {
     });
 
     it('should fallback to value absent value in namespace', () => {
-        expect(translations.translate('main.no','Fallback')).toBe('Fallback');
+        expect(translations.translate('main.no', 'Fallback')).toBe('Fallback');
     });
 
     it('should contain cached translations for main language only', () => {
-        translations.translate('hello_user',{ user: 'Basil' });
-        translations.translate('hello_user',{ user: 'Basil' });
-        translations.translate('hello_user',{ user: 'Ivan' });
-        translations.translate('not_hello_user',{ user: 'Ivan' });
+        translations.translate('hello_user', { user: 'Basil' });
+        translations.translate('hello_user', { user: 'Basil' });
+        translations.translate('hello_user', { user: 'Ivan' });
+        translations.translate('not_hello_user', { user: 'Ivan' });
         expect(Object.keys(translations.dynamicCache['ru']).length).toBe(2);
         expect(translations.dynamicCache['en']).toBeUndefined();
     });

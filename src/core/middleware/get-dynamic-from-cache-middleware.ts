@@ -1,15 +1,12 @@
-import { testPlaceholder } from '../globalSettings';
-import {
-    TranslateDynamicProps,
-} from '../types';
+import { RegExpResult, TranslateDynamicProps } from '../types';
 import { CachedResult, MiddlewareFunc } from '../types';
 
 function createDynamicKey(key: string, dynamicProps: TranslateDynamicProps) {
     return `${key}::${JSON.stringify(dynamicProps).replace(/[\"\{\}]/g, '')}`;
 }
 
-export const GetFromDynamicCacheMiddleware: MiddlewareFunc<CachedResult> = (
-    { params, result, settings },
+export const GetDynamicFromCacheMiddleware: MiddlewareFunc<CachedResult & RegExpResult> = (
+    { params, result },
     next
 ) => {
     if (!result.entry || result.fallingBack) {
@@ -17,13 +14,12 @@ export const GetFromDynamicCacheMiddleware: MiddlewareFunc<CachedResult> = (
     }
 
     const dynamicProps = params.dynamicProps;
+    const dynamicCache = params.dynamicCache;
     const value = result.value;
 
-    if (!dynamicProps || !value || !testPlaceholder(value,settings?.$less)) {
+    if (!dynamicCache || !value || !result._testPlaceholder(value)) {
         return next();
     }
-
-    const dynamicCache = params.dynamicCache;
 
     // trying to get dynamic cache
     let dynamicKey: string | undefined;

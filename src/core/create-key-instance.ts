@@ -1,5 +1,5 @@
 import { TranslateKey } from './types';
-import { TranslateKeyInstance } from './translationKey';
+import { TranslateKeyInstance } from './translation-key';
 
 export function createKeyInstance(key: TranslateKey) {
     // guard from wrong key

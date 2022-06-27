@@ -11,15 +11,15 @@ const simpleOperators: { [key: string]: Function } = {
 };
 
 const operators: [RegExp, Function][] = [];
+
+const _in = [/^in\s/g, /^in (\[(\-?\d+(\.\d+)?[\,\s]*)+\])/];
 operators.push([
-    /^in\s/,
+    _in[0],
     (operation: string) => {
-        const array = operation.replace(
-            /in (\[(\-?\d+(\.\d+)?[\,\s]*)+\])/g,
-            function (all, arr) {
-                return arr;
-            }
-        );
+        _in[1].lastIndex = 0;
+        const array = operation.replace(_in[1], function (all, arr) {
+            return arr;
+        });
         var _array: number[];
         try {
             _array = JSON.parse(array) as Array<number>;
@@ -31,28 +31,54 @@ operators.push([
         };
     },
 ]);
+
+const _between = [
+    /^between\s/g,
+    /^between (\-?\d+(\.\d+)?) and (\-?\d+(\.\d+)?)/,
+];
 operators.push([
-    /^between\s/,
+    _between[0],
     (operation: string) => {
-        const match = /between (\-?\d+(\.\d+)?) and (\-?\d+(\.\d+)?)/g.exec(operation);
+        _between[1].lastIndex = 0;
+        const match = _between[1].exec(operation);
         if (match) {
             const from = Math.min(+match[1], +match[3]);
             const to = Math.max(+match[1], +match[3]);
             return function (val: string | number) {
                 return val <= to && val >= from;
             };
-        }else{
-          throw new Error(`wrong between format: "${operation}"`);
+        } else {
+            throw new Error(`wrong between format: "${operation}"`);
         }
     },
 ]);
 
+const _remainder = [/^%\s?[\d\.]+/g, /^%\s?([\d\.]+)\s?(=\s?([\d\.]+))?/];
+operators.push([
+    _remainder[0],
+    (operation: string) => {
+        _remainder[1].lastIndex = 0;
+        const match = _remainder[1].exec(operation);
+        if (match) {
+            const div = +match[1];
+            const compare = +(match[3] ?? 0);
+            return function (val: string | number) {
+                return +val % div == compare;
+            };
+        } else {
+            throw new Error(`wrong modulo format: "${operation}"`);
+        }
+    },
+]);
+
+const _simple = /^\s*([>!=<]{1,2})\s?(-?\d+(\.\d+)?)\s*$/;
 export function compileFunction(
     operation: SimpleCompare | Contains
 ): (val: number) => boolean {
     var _operExec;
     // Simple
-    if ((_operExec = /^\s*([>!=<]{1,2})\s?(-?\d+(\.\d+)?)\s*$/.exec(operation))) {
+    _simple.lastIndex = 0;
+    if ((_operExec = _simple.exec(operation))) {
         let _operator = _operExec[1].trim();
         let _value = _operExec[2];
         const operatorFunc = simpleOperators[_operator];
@@ -62,7 +88,11 @@ export function compileFunction(
         throw new Error(`operator \"${_operator}\" is unknown`);
     }
 
-    let operatorFunc = operators.find((o) => (o[0].lastIndex = 0) || o[0].test(operation));
+    let operatorFunc = operators.find((o) => {
+        o[0].lastIndex = 0;
+        return o[0].test(operation);
+    });
+    
     if (operatorFunc) {
         return operatorFunc[1](operation);
     }

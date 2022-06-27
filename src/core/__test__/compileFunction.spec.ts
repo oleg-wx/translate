@@ -1,7 +1,7 @@
-import { compileFunction } from "../compileFunction"
+import { compileFunction } from "../compile-function"
 
 it('should compile and run "=" operator',()=>{
-    var fn = compileFunction("=2");
+    let fn = compileFunction("=2");
     expect(fn(2)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
     expect(fn(0)).toBeFalsy();
@@ -11,14 +11,14 @@ it('should compile and run "=" operator',()=>{
     expect(fn(2.2)).toBeFalsy();
     expect(fn(1.8)).toBeFalsy();
 
-    var fn = compileFunction("=2.2");
+    fn = compileFunction("=2.2");
     expect(fn(2.2)).toBeTruthy();
     expect(fn(2)).toBeFalsy();
     expect(fn(3)).toBeFalsy();
 
 });
 it('should compile and run "==" operator',()=>{
-    var fn = compileFunction("==2");
+    let fn = compileFunction("==2");
     expect(fn(2)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
     expect(fn(0)).toBeFalsy();
@@ -28,14 +28,14 @@ it('should compile and run "==" operator',()=>{
     expect(fn(2.2)).toBeFalsy();
     expect(fn(1.8)).toBeFalsy();
 
-    var fn = compileFunction("==2.2");
+    fn = compileFunction("==2.2");
     expect(fn(2.2)).toBeTruthy();
     expect(fn(2)).toBeFalsy();
     expect(fn(3)).toBeFalsy();
 });
 
 it('should compile and run "in" operator',()=>{
-    var fn = compileFunction("in [1,2,3]");
+    let fn = compileFunction("in [1,2,3]");
     expect(fn(1)).toBeTruthy();
     expect(fn(2)).toBeTruthy();
     expect(fn(3)).toBeTruthy();
@@ -44,7 +44,7 @@ it('should compile and run "in" operator',()=>{
     expect(fn(12)).toBeFalsy();
     expect(fn(1.2)).toBeFalsy();
 
-    var fn = compileFunction("in [1.1, 2.2]");
+    fn = compileFunction("in [1.1, 2.2]");
     expect(fn(1.1)).toBeTruthy();
     expect(fn(2.2)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
@@ -52,7 +52,7 @@ it('should compile and run "in" operator',()=>{
 });
 
 it('should compile and run "between" operator',()=>{
-    var fn = compileFunction("between 1 and 3");
+    let fn = compileFunction("between 1 and 3");
     expect(fn(1)).toBeTruthy();
     expect(fn(2)).toBeTruthy();
     expect(fn(2.5)).toBeTruthy();
@@ -62,7 +62,7 @@ it('should compile and run "between" operator',()=>{
     expect(fn(13)).toBeFalsy();
     expect(fn(3.1)).toBeFalsy();
 
-    var fn = compileFunction("between 1.5 and 3.5");
+    fn = compileFunction("between 1.5 and 3.5");
     expect(fn(1.5)).toBeTruthy();
     expect(fn(2)).toBeTruthy();
     expect(fn(3.5)).toBeTruthy();
@@ -74,29 +74,29 @@ it('should compile and run "between" operator',()=>{
 });
 
 it('should compile and run "<" operator',()=>{
-    var fn = compileFunction("< 1");
+    let fn = compileFunction("< 1");
     expect(fn(-1)).toBeTruthy();
     expect(fn(0)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
     expect(fn(11)).toBeFalsy();
 
-    var fn = compileFunction("< 10");
+    fn = compileFunction("< 10");
     expect(fn(9)).toBeTruthy();
     expect(fn(10)).toBeFalsy();
     expect(fn(11)).toBeFalsy();
 
-    var fn = compileFunction("< 180");
+    fn = compileFunction("< 180");
     expect(fn(90)).toBeTruthy();
     expect(fn(179)).toBeTruthy();
     expect(fn(180)).toBeFalsy();
     expect(fn(181)).toBeFalsy();
 
-    var fn = compileFunction("< -1");
+    fn = compileFunction("< -1");
     expect(fn(-2)).toBeTruthy();
     expect(fn(0)).toBeFalsy();
     expect(fn(-1)).toBeFalsy();
 
-    var fn = compileFunction("< 1.5");
+    fn = compileFunction("< 1.5");
     expect(fn(-1)).toBeTruthy();
     expect(fn(0)).toBeTruthy();
     expect(fn(1)).toBeTruthy();
@@ -107,23 +107,23 @@ it('should compile and run "<" operator',()=>{
 })
 
 it('should compile and run ">" operator',()=>{
-    var fn = compileFunction("> 1");
+    let fn = compileFunction("> 1");
     expect(fn(2)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
 
-    var fn = compileFunction("> 10");
+    fn = compileFunction("> 10");
     expect(fn(11)).toBeTruthy();
     expect(fn(9)).toBeFalsy();
 
-    var fn = compileFunction("> 180");
+    fn = compileFunction("> 180");
     expect(fn(181)).toBeTruthy();
     expect(fn(90)).toBeFalsy();
 
-    var fn = compileFunction("> -1");
+    fn = compileFunction("> -1");
     expect(fn(0)).toBeTruthy();
     expect(fn(-2)).toBeFalsy();
 
-    var fn = compileFunction("> 1.5");
+    fn = compileFunction("> 1.5");
     expect(fn(-1)).toBeFalsy();
     expect(fn(0)).toBeFalsy();
     expect(fn(1)).toBeFalsy();
@@ -134,7 +134,7 @@ it('should compile and run ">" operator',()=>{
 })
 
 it('should compile and run ">=" operator',()=>{
-    var fn = compileFunction(">= 1");
+    let fn = compileFunction(">= 1");
     expect(fn(2)).toBeTruthy();
     expect(fn(1)).toBeTruthy();
     expect(fn(1.1)).toBeTruthy();
@@ -142,12 +142,12 @@ it('should compile and run ">=" operator',()=>{
     expect(fn(0.9)).toBeFalsy();
     expect(fn(-1)).toBeFalsy();
 
-    var fn = compileFunction(">= 10");
+    fn = compileFunction(">= 10");
     expect(fn(11)).toBeTruthy();
     expect(fn(10)).toBeTruthy();
     expect(fn(9)).toBeFalsy();
 
-    var fn = compileFunction(">= 1.5");
+    fn = compileFunction(">= 1.5");
     expect(fn(1.5)).toBeTruthy();
     expect(fn(2)).toBeTruthy();
     expect(fn(1)).toBeFalsy();
@@ -155,7 +155,7 @@ it('should compile and run ">=" operator',()=>{
 })
 
 it('should compile and run "<=" operator',()=>{
-    var fn = compileFunction("<= 1");
+    let fn = compileFunction("<= 1");
     expect(fn(-1)).toBeTruthy();
     expect(fn(0)).toBeTruthy();
     expect(fn(1)).toBeTruthy();
@@ -163,15 +163,51 @@ it('should compile and run "<=" operator',()=>{
     expect(fn(2)).toBeFalsy();
     expect(fn(1.1)).toBeFalsy();
 
-    var fn = compileFunction("<= 10");
+    fn = compileFunction("<= 10");
     expect(fn(9)).toBeTruthy();
     expect(fn(10)).toBeTruthy();
     expect(fn(11)).toBeFalsy();
 
-    var fn = compileFunction("<= 1.5");
+    fn = compileFunction("<= 1.5");
     expect(fn(1.5)).toBeTruthy();
     expect(fn(1)).toBeTruthy();
     expect(fn(2)).toBeFalsy();
     expect(fn(1.6)).toBeFalsy();
+})
+
+it('should compile and run "% (reminder)" operator',()=>{
+    let fn = compileFunction("%2");
+    expect(fn(2)).toBeTruthy();
+    expect(fn(0)).toBeTruthy();
+    expect(fn(12)).toBeTruthy();
+    expect(fn(6)).toBeTruthy();
+    expect(fn(3)).toBeFalsy();
+    expect(fn(1)).toBeFalsy();
+    expect(fn(9)).toBeFalsy();
+
+    fn = compileFunction("% 2");
+    expect(fn(2)).toBeTruthy();
+    expect(fn(3)).toBeFalsy();
+
+    fn = compileFunction("%0");
+    expect(fn(9)).toBeFalsy();
+    expect(fn(10)).toBeFalsy();
+    expect(fn(11)).toBeFalsy();
+
+    fn = compileFunction("% 1.5");
+    expect(fn(1.5)).toBeTruthy();
+    expect(fn(3)).toBeTruthy();
+    expect(fn(2)).toBeFalsy();
+    expect(fn(4)).toBeFalsy();
+
+    fn = compileFunction("% 1 = 0.5");
+    expect(fn(1.5)).toBeTruthy();
+    expect(fn(2.5)).toBeTruthy();
+    expect(fn(3)).toBeFalsy();
+    expect(fn(3.3)).toBeFalsy();
+
+    fn = compileFunction("%7.5=3");
+    expect(fn(10.5)).toBeTruthy();
+    expect(fn(10)).toBeFalsy();
 })
 

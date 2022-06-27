@@ -1,4 +1,4 @@
-import { TranslateKeyInstance } from './translationKey';
+import { TranslateKeyInstance } from './translation-key';
 
 export interface ContextParams<TData = any> {
     dictionaries: Dictionaries;
@@ -20,7 +20,6 @@ export interface ContextBaseResult {
 export interface Context<T = {}, TParamsData = any> {
     params: ContextParams<TParamsData>;
     result: ContextBaseResult & T;
-    settings?: TranslateInternalSettings;
     translate?: SimpleTranslateFunc;
 }
 
@@ -29,8 +28,21 @@ export interface CachedResult {
     fromCache: boolean;
 }
 
+export interface RegExpResult {
+    _replacePlaceholders: RegExp;
+    _testPlaceholder: (val: string) => boolean;
+    _shouldReplace: (prefix: string, placeholder: string) => boolean;
+    _shouldTranslate: (prefix: string, placeholder: string) => boolean;
+}
+
 export interface FallbackLangParams {
     fallbackLang?: string;
+}
+
+export type PlaceholderType = 'default' | 'single' | 'double';
+
+export interface PlaceholderParams {
+    placeholder?: PlaceholderType;
 }
 
 export type TranslateKey = string | string[];
@@ -50,10 +62,6 @@ export interface Dictionary {
 
 export interface Dictionaries {
     [lang: string]: Dictionary;
-}
-
-export interface TranslateInternalSettings {
-    $less: boolean;
 }
 
 export type TranslateDynamicProps = {
@@ -105,5 +113,5 @@ export type Middlewares = Array<
 >;
 
 export interface Pipeline {
-    run(params: ContextParams, settings: TranslateInternalSettings): string;
+    run<T = {}>(params: ContextParams<T>): string;
 }

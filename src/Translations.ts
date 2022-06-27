@@ -2,11 +2,12 @@ import {
     Dictionaries,
     Dictionary,
     Pipeline,
+    PlaceholderType,
     SimpleDictionaries,
     TranslateDynamicProps,
     TranslateKey,
 } from './core/types';
-import { SimpleDefaultPipeline } from './core/middleware/simplePipeline';
+import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { translate, hasTranslation } from './translate';
 
 export class Translations {
@@ -14,18 +15,31 @@ export class Translations {
     readonly absent: { [key: string]: string[] } = {};
     pipeline: Pipeline;
 
-    $less = false;
+    placeholder?: PlaceholderType;
     dictionaries: Dictionaries;
     cacheDynamic: boolean;
     lang: string | undefined;
     fallbackLang: string | undefined;
 
+    /**
+     * @deprecated defaultLang will be removed. Use lang instead.
+     */
     get defaultLang() {
         return this.lang;
     }
-
     set defaultLang(val: string | undefined) {
         this.lang = val;
+    }
+
+    /**
+     * @deprecated $less will be removed. Use placeholder='singe' instead.
+     */
+    get $less() {
+        return this.placeholder ? this.placeholder === 'single' : undefined;
+    }
+    set $less(val: boolean | undefined) {
+        this.placeholder =
+            val === undefined ? undefined : val ? 'single' : 'default';
     }
 
     constructor(
@@ -41,6 +55,10 @@ export class Translations {
              * @deprecated Fallback Lang will be removed soon as a parameter. It can be added as a middleware in pipeline before regular Fallback.
              */
             fallbackLang?: string;
+            placeholder?: PlaceholderType;
+            /**
+             * @deprecated $less will be removed. Use placeholder='singe' instead.
+             */
             $less?: boolean;
         },
         pipeline?: Pipeline
@@ -49,7 +67,8 @@ export class Translations {
         this.cacheDynamic = !!options?.cacheDynamic;
         this.lang = options?.lang ?? options?.defaultLang;
         this.fallbackLang = options?.fallbackLang;
-        this.$less = options?.$less === true;
+        this.placeholder =
+            options?.placeholder ?? (options?.$less ? 'single' : undefined);
         if (pipeline) {
             this.pipeline = pipeline;
         } else {
@@ -118,7 +137,7 @@ export class Translations {
 
                 fallbackLang: this.fallbackLang,
 
-                $less: this.$less,
+                placeholder: this.placeholder,
             }
         );
 

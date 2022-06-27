@@ -1,25 +1,22 @@
-import { TranslateKeyInstance } from '../translationKey';
 import {
     Middlewares,
     Pipeline,
-    TranslateDynamicProps,
-    TranslateInternalSettings,
-    TranslateKey,
 } from '../types';
-import { AddToDynamicCacheMiddleware } from './addToDynamicCache';
-import { ContextInstance } from '../contextInstanse';
-import { execMiddleware } from './execMiddleware';
-import { FallbackMiddleware } from './fallbackMiddleware';
-import { FallbackWithDifferentLanguageMiddleware } from './FallbackWithDifferentLanguageMiddleware';
-import { FillPlaceholdersMiddleware } from './fillPlaceholders';
-import { GetEntryMiddleware } from './getEntryMiddleware';
-import { GetFromDynamicCacheMiddleware } from './getFromDynamicCache';
+import { AddDynamicToCacheMiddleware } from './add-dynamic-to-cache';
+import { ContextInstance } from '../context-instanse';
+import { execMiddleware } from './exec-middleware';
+import { FallbackMiddleware } from './fallback-middleware';
+import { FallbackWithDifferentLanguageMiddleware } from './fallback-with-different-language-middleware';
+import { FillPlaceholdersMiddleware } from './fill-placeholders-middleware';
+import { GetEntryMiddleware } from './get-entry-middleware';
+import { GetDynamicFromCacheMiddleware } from './get-dynamic-from-cache-middleware';
 import {
     Context,
     ContextParams,
     MiddlewareStatic,
     MiddlewareFunc,
 } from '../types';
+import { PrepareRegularExpressionsMiddleware } from './prepare-regular-expressions-middleware';
 
 export class SimplePipeline implements Pipeline {
     private _middlewares: Middlewares = [];
@@ -29,16 +26,17 @@ export class SimplePipeline implements Pipeline {
 
     constructor() {
         this.middlewares.push(
+            PrepareRegularExpressionsMiddleware,
             GetEntryMiddleware,
             FallbackMiddleware,
-            GetFromDynamicCacheMiddleware,
+            GetDynamicFromCacheMiddleware,
             FillPlaceholdersMiddleware,
-            AddToDynamicCacheMiddleware
+            AddDynamicToCacheMiddleware
         );
     }
 
-    run(params: ContextParams, settings: TranslateInternalSettings): string {
-        return runPipeline(params, settings, this, this.middlewares);
+    run(params: ContextParams): string {
+        return runPipeline(params, this, this.middlewares);
     }
 
     /** adds middleware in the end of pipeline queue */
@@ -69,29 +67,28 @@ export class SimpleDefaultPipeline implements Pipeline {
 
     constructor() {
         this._middlewares = [
+            PrepareRegularExpressionsMiddleware,
             GetEntryMiddleware,
             new FallbackWithDifferentLanguageMiddleware(GetEntryMiddleware),
             FallbackMiddleware,
-            GetFromDynamicCacheMiddleware,
+            GetDynamicFromCacheMiddleware,
             FillPlaceholdersMiddleware,
-            AddToDynamicCacheMiddleware,
+            AddDynamicToCacheMiddleware,
         ];
     }
 
-    run(params: ContextParams, settings: TranslateInternalSettings): string {
-        return runPipeline(params, settings, this, this._middlewares);
+    run(params: ContextParams): string {
+        return runPipeline(params, this, this._middlewares);
     }
 }
 
 export function runPipeline(
     params: ContextParams,
-    settings: TranslateInternalSettings,
     currentPipeline: Pipeline,
     middlewares: Middlewares
 ): string {
     const context: Context = new ContextInstance(
         params,
-        settings,
         currentPipeline
     );
 

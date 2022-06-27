@@ -1,4 +1,4 @@
-import { SimpleDefaultPipeline } from './core/middleware/simplePipeline';
+import { SimplePipeline } from './core/middleware/simple-pipeline';
 import {
     Dictionaries,
     Dictionary,
@@ -6,6 +6,9 @@ import {
     TranslateDynamicProps,
     TranslateKey,
     Pipeline,
+    MiddlewareFunc,
+    MiddlewareStatic,
+    PlaceholderType,
 } from './core/types';
 import { TranslateOptions } from './translate';
 import { Translations } from './Translations';
@@ -23,5 +26,8 @@ export {
     TranslateDynamicProps,
     TranslateKey,
     Pipeline,
-    SimpleDefaultPipeline,
+    SimplePipeline,
+    MiddlewareFunc,
+    MiddlewareStatic,
+    PlaceholderType,
 };

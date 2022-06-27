@@ -1,6 +1,6 @@
-import { TranslateKeyInstance } from '../../translationKey';
+import { TranslateKeyInstance } from '../../translation-key';
 import { Dictionaries, TranslateKey } from '../../types';
-import { GetEntryMiddleware } from '../../middleware/getEntryMiddleware';
+import { GetEntryMiddleware } from '../../middleware/get-entry-middleware';
 import { Context } from '../../types';
 
 describe('when getting dictionary entry', () => {
@@ -24,7 +24,6 @@ describe('when getting dictionary entry', () => {
                 dictionaries,
                 key: new TranslateKeyInstance(key),
             },
-            settings,
             result: {},
         };
     }
@@ -55,7 +54,6 @@ describe('when getting dictionary entry in the namespace', () => {
                 dictionaries,
                 key: new TranslateKeyInstance(key),
             },
-            settings,
             result: {},
         };
     }

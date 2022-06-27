@@ -1,4 +1,4 @@
-import { SimplePipeline } from '../core/middleware/simplePipeline';
+import { SimplePipeline } from '../core/middleware/simple-pipeline';
 import { Translations } from '../Translations';
 
 describe('when using custom middleware', () => {

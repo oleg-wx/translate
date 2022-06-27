@@ -1,15 +1,15 @@
-import { execMiddleware } from './execMiddleware';
+import { execMiddleware } from './exec-middleware';
 import {
     Context,
     FallbackLangParams,
-    Middleware,
+    MiddlewareStatic,
     MiddlewareFunc,
 } from '../types';
 
 export class FallbackWithDifferentLanguageMiddleware
-    implements Middleware<{}, FallbackLangParams>
+    implements MiddlewareStatic<{}, FallbackLangParams>
 {
-    constructor(protected fallbackMiddleware: Middleware | MiddlewareFunc) {}
+    constructor(protected fallbackMiddleware: MiddlewareStatic | MiddlewareFunc) {}
 
     exec(context: Context<{}, FallbackLangParams>, next: () => void): void {
         if (!context.result.value && context.params.data?.fallbackLang) {

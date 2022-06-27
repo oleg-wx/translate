@@ -1,4 +1,3 @@
-import globalSettings from './globalSettings';
 import { DictionaryEntry } from './types';
 
 export class TranslateKeyInstance {
@@ -13,7 +12,7 @@ export class TranslateKeyInstance {
                 key = '' + key;
             }
         }
-        var namespaceSeparator = globalSettings.namespaceSeparator;
+        var namespaceSeparator = '.';
         // separate key by namespace namespace
         if (typeof key === 'string' && key.indexOf(namespaceSeparator) >= 0) {
             this.asString = key;

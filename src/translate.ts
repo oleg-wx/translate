@@ -3,17 +3,18 @@ import {
     Dictionaries,
     SimpleDictionaries,
     TranslateDynamicProps,
-    TranslateInternalSettings,
     Context,
     Pipeline,
+    FallbackLangParams,
+    PlaceholderParams,
 } from './core/types';
-import globalSettings from './core/globalSettings';
-import { TranslateKeyInstance } from './core/translationKey';
-import { SimpleDefaultPipeline } from './core/middleware/simplePipeline';
-import { GetEntryMiddleware } from './core/middleware/getEntryMiddleware';
+import { TranslateKeyInstance } from './core/translation-key';
+import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
+import { GetEntryMiddleware } from './core/middleware/get-entry-middleware';
 
-export interface TranslateOptions extends Partial<TranslateInternalSettings> {
-    fallbackLang?: string;
+export interface TranslateOptions
+    extends PlaceholderParams,
+        FallbackLangParams {
     dynamicCache?: SimpleDictionaries;
 }
 
@@ -38,25 +39,18 @@ export function translate(
         return '';
     }
 
-    return pipeline.run(
-        {
-            dictionaries: dictionaries,
-            lang,
-            key: new TranslateKeyInstance(key),
-            dynamicCache: settings?.dynamicCache,
-            dynamicProps,
-            fallback: fallback,
-            data: {
-                fallbackLang: settings?.fallbackLang,
-            },
+    return pipeline.run<PlaceholderParams & FallbackLangParams>({
+        dictionaries: dictionaries,
+        lang,
+        key: new TranslateKeyInstance(key),
+        dynamicCache: settings?.dynamicCache,
+        dynamicProps,
+        fallback: fallback,
+        data: {
+            fallbackLang: settings?.fallbackLang,
+            placeholder: settings?.placeholder,
         },
-        {
-            $less:
-                settings?.$less !== undefined
-                    ? settings?.$less
-                    : globalSettings.$less,
-        }
-    );
+    });
 }
 
 export function hasTranslation(

@@ -12,9 +12,13 @@ describe('when falling back to property', () => {
         'I ate 3 banana(s) for when',
         'I ate 3 banana(s) for when',
     ];
-
-    it('should fallback to property name', () => {
-        values.forEach((v, i) => {
+    let expectedFallback = [
+        'I ate some amount of banana(s) for breakfast',
+        'I ate 3 banana(s) for launch',
+        'I ate 3 banana(s) for launch',
+    ];
+    values.forEach((v, i) => {
+        it(`should fallback to property name: ${expectedDef[i]}`, () => {
             var t = translations.translateTo(
                 'en',
                 'i-ate-bananas-when-fallback',
@@ -24,13 +28,9 @@ describe('when falling back to property', () => {
             expect(t).toBe(expectedDef[i]);
         });
     });
-    it('should fallback to property fallback value', () => {
-        let expectedFallback = [
-            'I ate some amount of banana(s) for breakfast',
-            'I ate 3 banana(s) for launch',
-            'I ate 3 banana(s) for launch',
-        ];
-        values.forEach((v, i) => {
+
+    values.forEach((v, i) => {
+        it(`should fallback to property fallback value: ${expectedFallback[i]}`, () => {
             var t = translations.translateTo(
                 'en',
                 'i-ate-bananas-when-fallback-dynamic',
