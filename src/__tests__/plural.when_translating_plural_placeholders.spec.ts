@@ -84,8 +84,8 @@ describe('when translating plural placeholders', () => {
         'I ate H U N D R E D apples for Dinner',
     ];
 
-    it('should translate plural placeholder', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should translate plural placeholder: ${expectedEn[i]}`, () => {
             var t = translations.translateTo('en', 'i-ate-{apples}-{when}', v);
             expect(t).toBe(expectedEn[i]);
         });

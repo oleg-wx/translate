@@ -24,7 +24,7 @@ describe('when using namespaces', () => {
     };
     const translations = new Translations(
         { 'en-US': dictionary },
-        { cacheDynamic: false, defaultLang: 'en-US' }
+        { cacheDynamic: false, lang: 'en-US' }
     );
 
     it('should use value from namespace', () => {
@@ -42,7 +42,6 @@ describe('when using namespaces', () => {
     });
 
     it('should use value from namespace and placeholder from namespace', () => {
-        debugger
         const translated = translations.translate('item.test', {
             num: 200,
         });

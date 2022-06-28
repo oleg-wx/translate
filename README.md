@@ -4,6 +4,14 @@ Simplest translations for JS. Consider it even more as a object mapper, a Dictio
 
 ### **Breaking changes**
 
+#### (v0.20.0)
+
+-   added **middleware pipeline** _(see [Pipeline](#Pipeline))_..
+-   added remainder (modulo) operator `%`.
+-   added double curly brackets `{{...}}` support for placeholder.
+-   deprecated `fallbackLang` and `defaultLang` properties. It is recommended to use `lang` and custom middleware for `fallbackLang` if needed in future.
+-   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
+
 #### (v0.10.0)
 
 -   `$T{...}` replaced with `$&{...}`.
@@ -65,11 +73,11 @@ const dics = {
 ### Translate
 
 by calling `translate` or `translateTo` functions.  
-`translate` function uses `defaultLang` property, `translateTo` awaits language parameter.
+`translate` function uses `lang` property, `translateTo` awaits language parameter.
 
 ```javascript
 // create translations with dictionary:
-const translations = new Translations({...}, {cacheDynamic: true, defaultLang:'en-US'});
+const translations = new Translations({...}, {cacheDynamic: true, lang:'en-US'});
 const translated = translations.translate('hello_world');
 const translated = translations.translateTo('en-US', 'hello_world');
 ```
@@ -82,11 +90,12 @@ const dics = {
         hello_user: 'Hello ${user}!',
     },
 };
-const translations = new Translations(dics, { defaultLang: 'en-US' });
+const translations = new Translations(dics, { lang: 'en-US' });
 translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
+In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.
 Please note: _starting from v0.0.7 it is required to add $ before placeholders_. It is still possible to use _$-less_ placeholders by setting `$less` property of `Translations` to `true`, however it is _not recommended_.
 
 ```javascript
@@ -95,11 +104,14 @@ const dics = {
     hello_user: "Hello {user}!",
   },
 };
-const translations = new Translations(dics, { defaultLang: "en-US", $less = true });
-// or
-translations.$less = true;
+const translations = new Translations(dics, { lang: "en-US", placeholder = 'single' });
 
 translations.translate("hello_user", { user: "Oleg" }, "Hello {user}");
+// Hello Oleg
+
+// or
+translations.placeholder = 'double';
+translations.translate("hello_user", { user: "Oleg" }, "Hello {{user}}");
 // Hello Oleg
 ```
 
@@ -115,7 +127,7 @@ const dics = {
         user: 'User',
     },
 };
-const translations = new Translations(dics, { defaultLang: 'en-US' });
+const translations = new Translations(dics, { lang: 'en-US' });
 translations.translate('hello_user', { user: 'oleg' });
 // Hello Oleg!
 translations.translate('hello_user_t', { user: 'oleg' });
@@ -136,7 +148,7 @@ const dics = {
         },
     },
 };
-const translations = new Translations(dics, { defaultLang: 'en-US' });
+const translations = new Translations(dics, { lang: 'en-US' });
 translations.translate(['user', 'hello_user'], { user: 'Oleg' });
 // Hello Oleg!
 translations.translate('user.hello_user', { user: 'Oleg' });
@@ -155,7 +167,7 @@ const dics = {
         hello_world: 'Hello World',
     },
 };
-const translations = new Translations(dics, { defaultLang: 'en-US' });
+const translations = new Translations(dics, { lang: 'en-US' });
 translations.translate('hello_${user}', { user: 'Oleg' }, 'Hello ${user}');
 // Hello Oleg!
 ```
@@ -188,7 +200,7 @@ const dics = {
         'hello_${user}': 'Hello ${user?User}!',
     },
 };
-const translations = new Translations(dics, { defaultLang: 'en-US' });
+const translations = new Translations(dics, { lang: 'en-US' });
 
 translations.translate('hello_${user}', { user: undefined });
 // Hello User!
@@ -240,7 +252,7 @@ const dics = {
     },
 };
 const translations = new Translations(dics, {
-    defaultLang: 'ru-RU',
+    lang: 'ru-RU',
     fallbackLang: 'en-US',
 });
 
@@ -248,9 +260,14 @@ translations.translate('hello_${user}', { user: 'Oleg' });
 // Привет, Олег!
 translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}');
 // Goodbye Олег!
-translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day ${user?Friend}');
+translations.translate(
+    'nice_day_${user}',
+    { user: undefined },
+    'Have a nice day ${user?Friend}'
+);
 // Have a nice day Friend
 ```
+
 If caching is turned on, those fallback translations will be added to _default_ language cache, it was `Ru` in example above.
 
 ### Pluralization
@@ -268,6 +285,7 @@ let translations = new Translations(
                         ['<= 0', 'no bananas'],
                         ['= 1', 'one banana'],
                         ['in [3,4]', 'few bananas'],
+                        ['% 11', 'many bananas that is divisible by eleven'],
                         ['> 10', 'too many bananas'],
                         ['>= 5', 'many bananas'],
                     ],
@@ -283,7 +301,7 @@ let translations = new Translations(
         },
     },
     {
-        defaultLang: 'en-US',
+        lang: 'en-US',
     }
 );
 translations.translate('i-ate-eggs-bananas-dinner', {
@@ -302,10 +320,15 @@ translations.translate('i-ate-eggs-bananas-dinner', {
 });
 // I ate one banana and one egg for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 11,
+    bananas: 12,
     eggs: 0,
 });
 // I ate too many bananas and zero eggs for dinner
+translations.translate('i-ate-apples-for', {
+    apples: 121,
+    when: 'dinner',
+});
+// I ate many bananas that is divisible by eleven and some eggs for dinner
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 6,
     eggs: 3,
@@ -315,11 +338,13 @@ translations.translate('i-ate-eggs-bananas-dinner', {
 
 Pluralization are added to `plural` property of translation value as an array to keep execution order.
 The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`;
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`;
+Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0.
 Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
 
 ### Plural translations
 
+_(v0.20.0+)_ Added remainder (modulo) operator `%`.
 _(v0.10.3+)_ In case if dynamic parameters have to be translated you can use `$&{$#}` syntax.  
 _(v0.10.3+)_ It is possible to modify plural translations a little bit like so: `$&{my-$#-value}`.  
 _(v0.10.3+)_ In rare cases you are able to use dynamic replacement `${...}` placeholders as well.
@@ -349,7 +374,7 @@ let translations = new Translations(
         },
     },
     {
-        defaultLang: 'en-US',
+        lang: 'en-US',
     }
 );
 translations.translate('i-ate-apples-for', {
@@ -366,7 +391,7 @@ translations.translate('i-ate-apples-for', {
     apples: 4,
     when: 'breakfast',
 });
-// I ate 4 apple(s) for Breakfast
+// I ate Two apples for Breakfast
 translations.translate('i-ate-apples-for', {
     apples: 5,
     when: 'breakfast',
@@ -374,7 +399,6 @@ translations.translate('i-ate-apples-for', {
 });
 // I ate 5 (WOW!) apples for Breakfast
 ```
-
 ### Add terms to dictionary
 
 To **extend** dictionary with new values use `extendDictionary` method.
@@ -398,3 +422,30 @@ translations.extendDictionary('en-US', {
 
 As dictionaries are plan JS objects it is not a big deal for engine to get values by a key, but when you add _dynamic values_, translator needs to parse, build, do inner translations etc., so to increase performance you might want to store dynamically translated values in some cache.  
 To do so just pass the option to `Translations` constructor like so: `new Translations({...}, {cacheDynamic: true})`. Translations will be cached for dynamic values with unique identifier, more different dynamic values you use, bigger cache becomes, consider this when setting up translations.
+
+### Pipeline
+
+**(experimental)**
+To manage translation flow now there is a **pipeline** functionality that runs **middlewares**.  
+Default flow is the same, but now it is possible to add custom **middlewares** to the flow or build custom one from the scratch.
+At the moment there is `SimpleDefaultPipeline` which is the old one with _fallback language_ which will be _removed_ in future. And `SimplePipeline` with access to **middlewares** collection.  
+In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.  
+When `Middleware` did its logic you would set the result value and must call `next` function.
+
+```javascript
+const pipeline = new SimplePipeline();
+pipeline.addMiddleware((context, next) => {
+        const { params, result } = context;
+        if (result.fallingBack) {
+            // do some logic here for NOT translated values
+            console.warn(`the value for ${params.key} is not translated`);
+            result.value = `!WARNING: ${result.value} [${params.key}]`;
+        } else {
+            // do some logic here for translated values
+            result.value = `${result.value}: YAY!`;
+        }
+        next();
+    });
+let translations = new Translations(..., pipeline);
+```
+`addMiddleware` adds (as it named) middleware to the end of the queue of pipeline. `addMiddlewareAt` and `removeMiddlewareAt` uses index of the middleware in queue.  

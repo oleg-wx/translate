@@ -1,46 +1,79 @@
 import {
     Dictionaries,
     Dictionary,
-    FailureCallback,
+    Pipeline,
+    PlaceholderType,
     SimpleDictionaries,
     TranslateDynamicProps,
     TranslateKey,
 } from './core/types';
-import { translate } from './translate';
+import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
+import { translate, hasTranslation } from './translate';
 
 export class Translations {
     readonly dynamicCache: SimpleDictionaries = {};
     readonly absent: { [key: string]: string[] } = {};
-    $less = false;
+    pipeline: Pipeline;
+
+    placeholder?: PlaceholderType;
     dictionaries: Dictionaries;
-    storeAbsent: boolean;
     cacheDynamic: boolean;
-    defaultLang: string | undefined;
+    lang: string | undefined;
     fallbackLang: string | undefined;
-    onFailure: FailureCallback | undefined;
+
+    /**
+     * @deprecated defaultLang will be removed. Use lang instead.
+     */
+    get defaultLang() {
+        return this.lang;
+    }
+    set defaultLang(val: string | undefined) {
+        this.lang = val;
+    }
+
+    /**
+     * @deprecated $less will be removed. Use placeholder='singe' instead.
+     */
+    get $less() {
+        return this.placeholder ? this.placeholder === 'single' : undefined;
+    }
+    set $less(val: boolean | undefined) {
+        this.placeholder =
+            val === undefined ? undefined : val ? 'single' : 'default';
+    }
 
     constructor(
         dictionaries?: { [lang: string]: Dictionary },
         options?: {
             cacheDynamic?: boolean;
-            storeAbsent?: boolean;
+            lang?: string;
+            /**
+             * @deprecated defaultLang will be removed. Use lang instead
+             */
             defaultLang?: string;
+            /**
+             * @deprecated Fallback Lang will be removed soon as a parameter. It can be added as a middleware in pipeline before regular Fallback.
+             */
             fallbackLang?: string;
+            placeholder?: PlaceholderType;
+            /**
+             * @deprecated $less will be removed. Use placeholder='singe' instead.
+             */
             $less?: boolean;
-            onFailure?: FailureCallback;
-        }
+        },
+        pipeline?: Pipeline
     ) {
         this.dictionaries = dictionaries ?? {};
         this.cacheDynamic = !!options?.cacheDynamic;
-        this.storeAbsent = !!options?.storeAbsent;
-        this.defaultLang = options?.defaultLang;
+        this.lang = options?.lang ?? options?.defaultLang;
         this.fallbackLang = options?.fallbackLang;
-        this.onFailure = options?.onFailure;
-        this.$less = options?.$less === true;
-        // var a: DictionaryEntry = {
-        //   value: "",
-        //   plural: [">2", "string"],
-        // };
+        this.placeholder =
+            options?.placeholder ?? (options?.$less ? 'single' : undefined);
+        if (pipeline) {
+            this.pipeline = pipeline;
+        } else {
+            this.pipeline = new SimpleDefaultPipeline();
+        }
     }
 
     translate(key: TranslateKey): string;
@@ -56,7 +89,7 @@ export class Translations {
         fallback?: string
     ): string {
         return this.translateTo(
-            this.defaultLang!,
+            this.lang!,
             key,
             dynamicPropsOrFallback as TranslateDynamicProps,
             fallback as string
@@ -92,21 +125,31 @@ export class Translations {
             fallback = dynamicPropsOrFallback;
         }
 
-        let result = translate(lang, this.dictionaries, key, dynamicProps, {
-            dynamicCache: this.cacheDynamic
-                ? this.dynamicCache
-                : undefined,
-
+        let result = translate(
+            this.pipeline,
+            lang,
+            this.dictionaries,
+            key,
+            dynamicProps,
             fallback,
+            {
+                dynamicCache: this.cacheDynamic ? this.dynamicCache : undefined,
 
-            fallbackLang: this.fallbackLang,
+                fallbackLang: this.fallbackLang,
 
-            onFailure: this.onFailure,
-
-            $less: this.$less,
-        });
+                placeholder: this.placeholder,
+            }
+        );
 
         return result;
+    }
+
+    hasTranslationTo(lang: string, key: TranslateKey): boolean {
+        return hasTranslation(lang as string, this.dictionaries, key);
+    }
+
+    hasTranslation(key: TranslateKey): boolean {
+        return hasTranslation(this.lang as string, this.dictionaries, key);
     }
 
     extendDictionary(lang: string, dictionary: Dictionary) {

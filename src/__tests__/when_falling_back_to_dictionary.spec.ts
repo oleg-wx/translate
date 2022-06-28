@@ -1,38 +1,6 @@
 import { Translations } from '..';
 describe.only('when falling back to dictionary', () => {
-    let translations = new Translations(
-        {
-            en: {
-                hello_world: 'Hello World!',
-                goodbye_world: 'Goodbye World!',
-                hello_user: 'Hello $&{user?user_def}',
-                goodbye_user: 'Goodbye $&{user?user_def}',
-                user_def: 'User',
-                user: {
-                    authenticated: 'Authenticated',
-                    authorized: 'Authorized',
-                },
-                main: {
-                    theme: 'Theme',
-                    no:{
-                        nothing:{
-                            value:'test'
-                        }
-                    }
-                },
-            },
-            ru: {
-                hello_world: 'Привет, мир!',
-                goodbye_user: 'Пока, $&{user?user_def}',
-                user_def: 'Пользователь',
-                Basil: 'Василий',
-                user: {
-                    authenticated: 'Аутентифицирован',
-                },
-            },
-        },
-        { cacheDynamic: true, defaultLang: 'ru', fallbackLang: 'en' }
-    );
+    let translations!: Translations;
 
     let values = [
         {
@@ -71,8 +39,44 @@ describe.only('when falling back to dictionary', () => {
         'Nice Day',
     ];
 
-    fit('should fallback to dictionary for specific terms', () => {
-        values.forEach((v, i) => {
+    beforeEach(() => {
+        translations = new Translations(
+            {
+                en: {
+                    hello_world: 'Hello World!',
+                    goodbye_world: 'Goodbye World!',
+                    hello_user: 'Hello $&{user?user_def}',
+                    goodbye_user: 'Goodbye $&{user?user_def}',
+                    user_def: 'User',
+                    user: {
+                        authenticated: 'Authenticated',
+                        authorized: 'Authorized',
+                    },
+                    main: {
+                        theme: 'Theme',
+                        no: {
+                            nothing: {
+                                value: 'test',
+                            },
+                        },
+                    },
+                },
+                ru: {
+                    hello_world: 'Привет, мир!',
+                    goodbye_user: 'Пока, $&{user?user_def}',
+                    user_def: 'Пользователь',
+                    Basil: 'Василий',
+                    user: {
+                        authenticated: 'Аутентифицирован',
+                    },
+                },
+            },
+            { cacheDynamic: true, lang: 'ru', fallbackLang: 'en' }
+        );
+    });
+
+    values.forEach((v, i) => {
+        it(`should fallback to dictionary for specific terms ${expected[i]}`, () => {
             expect(translations.translate(v.key, v.value, v.fallback)).toBe(
                 expected[i]
             );
@@ -88,11 +92,14 @@ describe.only('when falling back to dictionary', () => {
     });
 
     it('should fallback to value absent value in namespace', () => {
-        debugger
-        expect(translations.translate('main.no','Fallback')).toBe('Fallback');
+        expect(translations.translate('main.no', 'Fallback')).toBe('Fallback');
     });
 
     it('should contain cached translations for main language only', () => {
+        translations.translate('hello_user', { user: 'Basil' });
+        translations.translate('hello_user', { user: 'Basil' });
+        translations.translate('hello_user', { user: 'Ivan' });
+        translations.translate('not_hello_user', { user: 'Ivan' });
         expect(Object.keys(translations.dynamicCache['ru']).length).toBe(2);
         expect(translations.dynamicCache['en']).toBeUndefined();
     });

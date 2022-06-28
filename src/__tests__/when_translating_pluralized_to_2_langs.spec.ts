@@ -12,6 +12,10 @@ describe('when translating pluralized to 2 langs', () => {
                             ['= 1 ', 'one banana'],
                             [`in [2,3,4]`, '$# bananas'],
                             ['< 1', 'no bananas'],
+                            [
+                                '% 11',
+                                'many bananas that is divisible by eleven',
+                            ],
                             ['> 10', 'too many bananas'],
                             ['>= 5', 'many bananas'],
                             ['_', '$# bananas'],
@@ -33,6 +37,10 @@ describe('when translating pluralized to 2 langs', () => {
                             ['= 1', 'один банан'],
                             ['< 1', 'нуль бананов'],
                             ['in [2,3,4]', '$# банана'],
+                            [
+                                '% 11',
+                                'много бананов (делимое на 11)',
+                            ],
                             ['> 10', 'слишком много бананов'],
                             ['> 5', 'много бананов'],
                             ['_', '$# бананов'],
@@ -57,11 +65,12 @@ describe('when translating pluralized to 2 langs', () => {
         { bananas: 1, eggs: 2 },
         { bananas: 3, eggs: 4 },
         { bananas: 10, eggs: 0 },
-        { bananas: 11, eggs: 1 },
+        { bananas: 121, eggs: 1 },
+        { bananas: 12, eggs: 1 },
     ];
 
     beforeEach(() => {
-        translations.defaultLang = undefined;
+        translations.lang = undefined;
     });
 
     let expectedEn = [
@@ -69,17 +78,19 @@ describe('when translating pluralized to 2 langs', () => {
         'I ate one banana and 2 eggs for dinner',
         'I ate 3 bananas and 4 eggs for dinner',
         'I ate many bananas and zero eggs for dinner',
+        'I ate many bananas that is divisible by eleven and one egg for dinner',
         'I ate too many bananas and one egg for dinner',
     ];
 
-    it('should translate plural to EN', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should translate plural to EN: ${expectedEn[i]}`, () => {
             expect(translations.translateTo('en', key, v)).toBe(expectedEn[i]);
         });
     });
-    it('should translate plural to EN default lang', () => {
-        translations.defaultLang = 'en';
-        values.forEach((v, i) => {
+
+    values.forEach((v, i) => {
+        translations.lang = 'en';
+        it(`should translate plural to EN default lang: ${expectedEn[i]}`, () => {
             expect(translations.translate(key, v)).toBe(expectedEn[i]);
         });
     });
@@ -89,22 +100,23 @@ describe('when translating pluralized to 2 langs', () => {
         'Я съел один банан и два яйца на обед',
         'Я съел 3 банана и 4 яйца на обед',
         'Я съел много бананов и нуль яиц на обед',
+        'Я съел много бананов (делимое на 11) и одно яйцо на обед',
         'Я съел слишком много бананов и одно яйцо на обед',
     ];
 
-    it('should translate plural to RU', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should translate plural to RU: ${expectedRu[i]}`, () => {
             expect(translations.translateTo('ru', key, v)).toBe(expectedRu[i]);
         });
     });
-    test('should translate plural to RU default lang', () => {
-        translations.defaultLang = 'ru';
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should translate plural to RU default lang: ${expectedRu[i]}`, () => {
+            translations.lang = 'ru';
             expect(translations.translate(key, v)).toBe(expectedRu[i]);
         });
     });
 
-    test('cached', () => {
-        expect(Object.keys(translations.dynamicCache['en']).length).toBe(5);
+    it('cached', () => {
+        expect(Object.keys(translations.dynamicCache['en']).length).toBe(6);
     });
 });

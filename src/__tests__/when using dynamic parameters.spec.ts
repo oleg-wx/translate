@@ -19,7 +19,7 @@ describe('when using dynamic parameters', () => {
                 breakfast: 'завтрак',
             },
         },
-        { cacheDynamic: true, defaultLang: 'en' }
+        { cacheDynamic: true, lang: 'en' }
     );
 
     let values = [
@@ -34,8 +34,8 @@ describe('when using dynamic parameters', () => {
         'I ate 0 banana(s) for Dinner',
         'I ate 3 banana(s) for Breakfast',
     ];
-    it('should insert params when translate', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should insert params when translate: ${expectedEn[i]}`, () => {
             const res = translations.translate(key, v);
             expect(res).toBe(expectedEn[i]);
         });
@@ -46,8 +46,8 @@ describe('when using dynamic parameters', () => {
         'Я съел 3 банан(а/ов) на завтрак',
     ];
 
-    it('should insert params when translate to', () => {
-        values.forEach((v, i) => {
+    values.forEach((v, i) => {
+        it(`should insert params when translate to: ${expectedRu[i]}`, () => {
             expect(translations.translateTo('ru', key, v)).toBe(expectedRu[i]);
         });
     });
