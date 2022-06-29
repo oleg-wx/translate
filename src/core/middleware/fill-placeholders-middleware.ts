@@ -5,20 +5,19 @@ import { TranslateDynamicProps } from '../types';
 
 export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
     context,
-    next
 ) => {
     const { params, result } = context;
     const value = result.value;
     const dynamicProps = params.dynamicProps;
 
     if (!value || !result._testPlaceholder || !result._replacePlaceholders) {
-        return next();
+        return;
     }
 
     const hasPlaceholder = result._testPlaceholder(value);
 
     if (!hasPlaceholder) {
-        return next();
+        return;
     }
 
     var regexp = result._replacePlaceholders;
@@ -44,5 +43,4 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
     );
 
     result.value = replaced;
-    next();
 };

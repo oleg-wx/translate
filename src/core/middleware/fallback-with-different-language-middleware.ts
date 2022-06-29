@@ -9,9 +9,11 @@ import {
 export class FallbackWithDifferentLanguageMiddleware
     implements MiddlewareStatic<{}, FallbackLangParams>
 {
-    constructor(protected fallbackMiddleware: MiddlewareStatic | MiddlewareFunc) {}
+    constructor(
+        protected fallbackMiddleware: MiddlewareStatic | MiddlewareFunc
+    ) {}
 
-    exec(context: Context<{}, FallbackLangParams>, next: () => void): void {
+    exec(context: Context<{}, FallbackLangParams>): void {
         if (!context.result.value && context.params.data?.fallbackLang) {
             const tempContext = {
                 ...context,
@@ -20,12 +22,8 @@ export class FallbackWithDifferentLanguageMiddleware
                     lang: context.params.data?.fallbackLang,
                 },
             };
-            execMiddleware(this.fallbackMiddleware, tempContext, () => {
-                context.result.value = tempContext.result.value;
-                next();
-            });
-            return;
+            execMiddleware(this.fallbackMiddleware, tempContext);
+            context.result.value = tempContext.result.value;
         }
-        next();
     }
 }

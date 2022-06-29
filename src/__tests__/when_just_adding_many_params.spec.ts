@@ -19,7 +19,6 @@ describe('when just adding many params', () => {
                 },
             },
         },
-        { cacheDynamic: true }
     );
 
     let values = [

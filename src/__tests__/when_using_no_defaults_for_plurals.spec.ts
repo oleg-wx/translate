@@ -1,22 +1,19 @@
-import { Translations } from '..'
+import { Translations } from '..';
 
 describe('when just adding many params', () => {
-    let lang = 'en'
-    let key = 'clean-${numberOfRooms}-rooms-at-${numberOfFloors}'
-    let translations = new Translations(
-        {
-            [lang]: {
-                [key]: {
-                    value: 'clean ${numberOfRooms} at ${numberOfFloors}.',
-                    plural: {
-                        numberOfRooms: [['= 0', 'no rooms']],
-                    },
-                    description: 'blah',
+    let lang = 'en';
+    let key = 'clean-${numberOfRooms}-rooms-at-${numberOfFloors}';
+    let translations = new Translations({
+        [lang]: {
+            [key]: {
+                value: 'clean ${numberOfRooms} at ${numberOfFloors}.',
+                plural: {
+                    numberOfRooms: [['= 0', 'no rooms']],
                 },
+                description: 'blah',
             },
         },
-        { cacheDynamic: true }
-    )
+    });
 
     let values = [
         {
@@ -27,18 +24,15 @@ describe('when just adding many params', () => {
             numberOfRooms: 1,
             numberOfFloors: 2,
         },
-    ]
+    ];
 
-    let expected = [
-        'clean no rooms at 3.',
-        'clean 1 at 2.',
-    ]
+    let expected = ['clean no rooms at 3.', 'clean 1 at 2.'];
 
-    beforeEach(() => {})
+    beforeEach(() => {});
 
     values.forEach((v, i) => {
         it('should just translate to: ' + expected[i], () => {
-            expect(translations.translateTo(lang, key, v)).toBe(expected[i])
-        })
-    })
-})
+            expect(translations.translateTo(lang, key, v)).toBe(expected[i]);
+        });
+    });
+});

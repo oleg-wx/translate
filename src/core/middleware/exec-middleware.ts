@@ -3,12 +3,11 @@ import { Context, MiddlewareStatic, MiddlewareFunc } from '../types';
 
 export const execMiddleware = (
     middleware: MiddlewareStatic | MiddlewareFunc,
-    context: Context,
-    next: () => void
+    context: Context
 ) => {
     if (typeof middleware === 'function') {
-        middleware(context, next);
+        middleware(context);
     } else {
-        middleware.exec(context, next);
+        middleware.exec(context);
     }
 };

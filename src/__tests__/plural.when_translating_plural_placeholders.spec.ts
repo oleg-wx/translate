@@ -28,7 +28,6 @@ describe('when translating plural placeholders', () => {
                 'the-ultimate': 'the Ultimate Amount of',
             },
         },
-        { cacheDynamic: true }
     );
 
     let values = [

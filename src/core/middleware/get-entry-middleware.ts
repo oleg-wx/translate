@@ -1,10 +1,7 @@
 import { DictionaryEntry, DictionaryValue } from '../types';
 import { MiddlewareFunc } from '../types';
 
-export const GetEntryMiddleware: MiddlewareFunc = (
-    { params, result },
-    next
-) => {
+export const GetEntryMiddleware: MiddlewareFunc = ({ params, result }) => {
     const dictionary =
         params.lang && params.dictionaries
             ? params.dictionaries[params.lang]
@@ -12,7 +9,7 @@ export const GetEntryMiddleware: MiddlewareFunc = (
     const key = params.key;
 
     if (!key || !dictionary) {
-        return next();
+        return;
     }
 
     let value: string | DictionaryEntry | undefined;
@@ -37,5 +34,4 @@ export const GetEntryMiddleware: MiddlewareFunc = (
         result.plural = value?.plural;
         result.entry = value;
     }
-    return next();
 };

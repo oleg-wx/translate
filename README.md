@@ -6,11 +6,12 @@ Simplest translations for JS. Consider it even more as a object mapper, a Dictio
 
 #### (v0.20.0)
 
--   added **middleware pipeline** _(see [Pipeline](#Pipeline))_..
+-   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
 -   added remainder (modulo) operator `%`.
 -   added double curly brackets `{{...}}` support for placeholder.
 -   deprecated `fallbackLang` and `defaultLang` properties. It is recommended to use `lang` and custom middleware for `fallbackLang` if needed in future.
 -   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
+-   removed **dynamic cache**.
 
 #### (v0.10.0)
 
@@ -40,7 +41,7 @@ translations with dictionaries
 ```javascript
 // create translations with dictionary and storing dynamically translated values:
 const dics = {...};
-const translations = new Translations(dics, {cacheDynamic: true});
+const translations = new Translations(dics, {lang:'en-US'});
 ```
 
 ### Dictionaries
@@ -77,7 +78,7 @@ by calling `translate` or `translateTo` functions.
 
 ```javascript
 // create translations with dictionary:
-const translations = new Translations({...}, {cacheDynamic: true, lang:'en-US'});
+const translations = new Translations({...}, {lang:'en-US'});
 const translated = translations.translate('hello_world');
 const translated = translations.translateTo('en-US', 'hello_world');
 ```
@@ -95,8 +96,8 @@ translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.
-Please note: _starting from v0.0.7 it is required to add $ before placeholders_. It is still possible to use _$-less_ placeholders by setting `$less` property of `Translations` to `true`, however it is _not recommended_.
+In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.   
+It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to *single* (`{...}`) or *double* (`{{...}}`), however it is _not recommended_.
 
 ```javascript
 const dics = {
@@ -268,11 +269,9 @@ translations.translate(
 // Have a nice day Friend
 ```
 
-If caching is turned on, those fallback translations will be added to _default_ language cache, it was `Ru` in example above.
-
 ### Pluralization
 
-As this is Simple translation library, it works with pluralization in the simple way as well. You want to use `$#` in plural options to insert number.
+Use `$#` in plural options to insert number.
 
 ```javascript
 let translations = new Translations(
@@ -338,16 +337,15 @@ translations.translate('i-ate-eggs-bananas-dinner', {
 
 Pluralization are added to `plural` property of translation value as an array to keep execution order.
 The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`;
-Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0.
-Execution order is important because compare operations run from top to bottom and as soon criteria is met translation will use a `value` provided for `operation`.
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.   
+Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.    
+Execution order is important because compare operations runs from top to bottom and when criteria is met then translation will use `value` provided for `operation`.
 
 ### Plural translations
 
-_(v0.20.0+)_ Added remainder (modulo) operator `%`.
-_(v0.10.3+)_ In case if dynamic parameters have to be translated you can use `$&{$#}` syntax.  
-_(v0.10.3+)_ It is possible to modify plural translations a little bit like so: `$&{my-$#-value}`.  
-_(v0.10.3+)_ In rare cases you are able to use dynamic replacement `${...}` placeholders as well.
+In case if dynamic parameters have to be translated you can use `$&{$#}` syntax.  
+It is possible to modify plural translations a little bit like so: `$&{my-$#-value}`.  
+In rare cases you are able to use dynamic replacement `${...}` placeholders as well.
 
 ```javascript
 let translations = new Translations(
@@ -418,23 +416,17 @@ translations.extendDictionary('en-US', {
 });
 ```
 
-### Dynamic Cache
-
-As dictionaries are plan JS objects it is not a big deal for engine to get values by a key, but when you add _dynamic values_, translator needs to parse, build, do inner translations etc., so to increase performance you might want to store dynamically translated values in some cache.  
-To do so just pass the option to `Translations` constructor like so: `new Translations({...}, {cacheDynamic: true})`. Translations will be cached for dynamic values with unique identifier, more different dynamic values you use, bigger cache becomes, consider this when setting up translations.
-
 ### Pipeline
-
+_(v0.20.0+)_    
 **(experimental)**
 To manage translation flow now there is a **pipeline** functionality that runs **middlewares**.  
 Default flow is the same, but now it is possible to add custom **middlewares** to the flow or build custom one from the scratch.
 At the moment there is `SimpleDefaultPipeline` which is the old one with _fallback language_ which will be _removed_ in future. And `SimplePipeline` with access to **middlewares** collection.  
 In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.  
-When `Middleware` did its logic you would set the result value and must call `next` function.
 
 ```javascript
 const pipeline = new SimplePipeline();
-pipeline.addMiddleware((context, next) => {
+pipeline.addMiddleware((context) => {
         const { params, result } = context;
         if (result.fallingBack) {
             // do some logic here for NOT translated values
@@ -444,8 +436,7 @@ pipeline.addMiddleware((context, next) => {
             // do some logic here for translated values
             result.value = `${result.value}: YAY!`;
         }
-        next();
     });
 let translations = new Translations(..., pipeline);
 ```
-`addMiddleware` adds (as it named) middleware to the end of the queue of pipeline. `addMiddlewareAt` and `removeMiddlewareAt` uses index of the middleware in queue.  
+`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.  
