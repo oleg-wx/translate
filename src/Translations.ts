@@ -11,13 +11,11 @@ import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { translate, hasTranslation } from './translate';
 
 export class Translations {
-    readonly dynamicCache: SimpleDictionaries = {};
     readonly absent: { [key: string]: string[] } = {};
     pipeline: Pipeline;
 
     placeholder?: PlaceholderType;
     dictionaries: Dictionaries;
-    cacheDynamic: boolean;
     lang: string | undefined;
     fallbackLang: string | undefined;
 
@@ -45,7 +43,6 @@ export class Translations {
     constructor(
         dictionaries?: { [lang: string]: Dictionary },
         options?: {
-            cacheDynamic?: boolean;
             lang?: string;
             /**
              * @deprecated defaultLang will be removed. Use lang instead
@@ -64,7 +61,6 @@ export class Translations {
         pipeline?: Pipeline
     ) {
         this.dictionaries = dictionaries ?? {};
-        this.cacheDynamic = !!options?.cacheDynamic;
         this.lang = options?.lang ?? options?.defaultLang;
         this.fallbackLang = options?.fallbackLang;
         this.placeholder =
@@ -133,8 +129,6 @@ export class Translations {
             dynamicProps,
             fallback,
             {
-                dynamicCache: this.cacheDynamic ? this.dynamicCache : undefined,
-
                 fallbackLang: this.fallbackLang,
 
                 placeholder: this.placeholder,

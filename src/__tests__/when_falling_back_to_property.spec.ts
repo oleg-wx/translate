@@ -1,7 +1,7 @@
 import { Dictionary, Translations } from '..';
 
 describe('when falling back to property', () => {
-    let translations = new Translations({ en: {} }, { cacheDynamic: true });
+    let translations = new Translations({ en: {} });
     let values: { bananas?: number; when?: string }[] = [
         { when: 'breakfast' },
         { bananas: 3 },

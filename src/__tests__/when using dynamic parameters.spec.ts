@@ -19,7 +19,7 @@ describe('when using dynamic parameters', () => {
                 breakfast: 'завтрак',
             },
         },
-        { cacheDynamic: true, lang: 'en' }
+        { lang: 'en' }
     );
 
     let values = [

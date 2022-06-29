@@ -6,7 +6,6 @@ export interface ContextParams<TData = any> {
     lang: string;
     dynamicProps?: TranslateDynamicProps;
     fallback?: string;
-    dynamicCache?: SimpleDictionaries;
     data?: TData;
 }
 
@@ -21,11 +20,6 @@ export interface Context<T = {}, TParamsData = any> {
     params: ContextParams<TParamsData>;
     result: ContextBaseResult & T;
     translate?: SimpleTranslateFunc;
-}
-
-export interface CachedResult {
-    dynamicKey: string;
-    fromCache: boolean;
 }
 
 export interface RegExpResult {
@@ -88,15 +82,6 @@ export type Plurals = { [key: string]: PluralOptions };
 export type SimpleDictionary = { [key: string]: string };
 export type SimpleDictionaries = { [lang: string]: SimpleDictionary };
 
-export type MiddlewareCreator<T = {}, TParams = {}, DT = any> = (
-    data: DT
-) => MiddlewareFunc<T, TParams>;
-
-export type MiddlewareFunc<T = {}, TProps = {}> = (
-    context: Context<T, TProps>,
-    next: () => void
-) => void;
-
 export type SimpleTranslateFunc = (
     key: string,
     dynamicProps?: TranslateDynamicProps,
@@ -104,13 +89,23 @@ export type SimpleTranslateFunc = (
     lang?: string
 ) => string;
 
+export type MiddlewareFunc<T = {}, TProps = {}> = (
+    context: Context<T, TProps>
+) => void;
+
 export interface MiddlewareStatic<T = {}, TProps = any> {
-    exec(context: Context<T, TProps>, next: () => void): void;
+    exec(context: Context<T, TProps>): void;
 }
 
-export type Middlewares = Array<
-    MiddlewareFunc<any, any> | MiddlewareStatic<any, any>
->;
+export abstract class MiddlewareCreator<T = {}, TProps = any> {
+    abstract create(): Middleware<T,TProps>;
+}
+
+export type Middleware<T, TProps> =
+    | MiddlewareFunc<T, TProps>
+    | MiddlewareStatic<T, TProps>;
+
+export type Middlewares = Array<Middleware<any, any>>;
 
 export interface Pipeline {
     run<T = {}>(params: ContextParams<T>): string;

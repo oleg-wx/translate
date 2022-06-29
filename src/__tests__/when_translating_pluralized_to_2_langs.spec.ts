@@ -2,63 +2,54 @@ import { Dictionary, Translations } from '..';
 
 describe('when translating pluralized to 2 langs', () => {
     let key = 'i-ate-${eggs}-${bananas}-dinner';
-    let translations = new Translations(
-        {
-            en: {
-                [key]: {
-                    value: 'I ate ${bananas} and ${eggs} for dinner',
-                    plural: {
-                        bananas: [
-                            ['= 1 ', 'one banana'],
-                            [`in [2,3,4]`, '$# bananas'],
-                            ['< 1', 'no bananas'],
-                            [
-                                '% 11',
-                                'many bananas that is divisible by eleven',
-                            ],
-                            ['> 10', 'too many bananas'],
-                            ['>= 5', 'many bananas'],
-                            ['_', '$# bananas'],
-                        ],
-                        eggs: [
-                            ['= 0', 'zero eggs'],
-                            ['= 1', 'one egg'],
-                            ['_', '$# eggs'],
-                        ],
-                    },
-                    description: 'translations',
+    let translations = new Translations({
+        en: {
+            [key]: {
+                value: 'I ate ${bananas} and ${eggs} for dinner',
+                plural: {
+                    bananas: [
+                        ['= 1 ', 'one banana'],
+                        [`in [2,3,4]`, '$# bananas'],
+                        ['< 1', 'no bananas'],
+                        ['% 11', 'many bananas that is divisible by eleven'],
+                        ['> 10', 'too many bananas'],
+                        ['>= 5', 'many bananas'],
+                        ['_', '$# bananas'],
+                    ],
+                    eggs: [
+                        ['= 0', 'zero eggs'],
+                        ['= 1', 'one egg'],
+                        ['_', '$# eggs'],
+                    ],
                 },
-            },
-            ru: {
-                [key]: {
-                    value: 'Я съел ${bananas} и ${eggs} на обед',
-                    plural: {
-                        bananas: [
-                            ['= 1', 'один банан'],
-                            ['< 1', 'нуль бананов'],
-                            ['in [2,3,4]', '$# банана'],
-                            [
-                                '% 11',
-                                'много бананов (делимое на 11)',
-                            ],
-                            ['> 10', 'слишком много бананов'],
-                            ['> 5', 'много бананов'],
-                            ['_', '$# бананов'],
-                        ],
-                        eggs: [
-                            ['= 0', 'нуль яиц'],
-                            ['= 1', 'одно яйцо'],
-                            ['= 2', 'два яйца'],
-                            ['in [3,4]', '$# яйца'],
-                            ['_', '$# яйц'],
-                        ],
-                    },
-                    description: 'translations',
-                },
+                description: 'translations',
             },
         },
-        { cacheDynamic: true }
-    );
+        ru: {
+            [key]: {
+                value: 'Я съел ${bananas} и ${eggs} на обед',
+                plural: {
+                    bananas: [
+                        ['= 1', 'один банан'],
+                        ['< 1', 'нуль бананов'],
+                        ['in [2,3,4]', '$# банана'],
+                        ['% 11', 'много бананов (делимое на 11)'],
+                        ['> 10', 'слишком много бананов'],
+                        ['> 5', 'много бананов'],
+                        ['_', '$# бананов'],
+                    ],
+                    eggs: [
+                        ['= 0', 'нуль яиц'],
+                        ['= 1', 'одно яйцо'],
+                        ['= 2', 'два яйца'],
+                        ['in [3,4]', '$# яйца'],
+                        ['_', '$# яйц'],
+                    ],
+                },
+                description: 'translations',
+            },
+        },
+    });
 
     let values = [
         { bananas: 0, eggs: 3 },
@@ -114,9 +105,5 @@ describe('when translating pluralized to 2 langs', () => {
             translations.lang = 'ru';
             expect(translations.translate(key, v)).toBe(expectedRu[i]);
         });
-    });
-
-    it('cached', () => {
-        expect(Object.keys(translations.dynamicCache['en']).length).toBe(6);
     });
 });

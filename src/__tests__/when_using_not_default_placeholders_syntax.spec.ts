@@ -17,7 +17,6 @@ describe('when using $-less syntax', () => {
                     3: 'three',
                 },
             },
-            { cacheDynamic: true }
         );
         translations.placeholder = 'single';
 
@@ -51,7 +50,7 @@ describe('when using $-less syntax', () => {
                     3: 'three',
                 },
             },
-            { cacheDynamic: true, placeholder: 'double' }
+            { placeholder: 'double' }
         );
 
         expect(

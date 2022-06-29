@@ -19,7 +19,6 @@ beforeEach(() => {
   };
   translations = new Translations(
     { "en-US": dictionary },
-    { cacheDynamic: false, lang: "en-US" }
   );
 });
 

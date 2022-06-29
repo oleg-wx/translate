@@ -47,7 +47,7 @@ const testPlaceholder_double = (value: string) => {
 export const PrepareRegularExpressionsMiddleware: MiddlewareFunc<
     RegExpResult,
     PlaceholderParams
-> = (context, next) => {
+> = (context) => {
     const { params, result } = context;
     if (!params.data?.placeholder || params.data?.placeholder === 'default') {
         result._testPlaceholder = testPlaceholder;
@@ -66,8 +66,6 @@ export const PrepareRegularExpressionsMiddleware: MiddlewareFunc<
         result._shouldTranslate = shouldTranslate;
     }
     result._replacePlaceholders.lastIndex = 0;
-
-    next();
 };
 
 function escapeRegExp(val: string): string {

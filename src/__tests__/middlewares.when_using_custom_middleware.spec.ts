@@ -1,10 +1,11 @@
 import { SimplePipeline } from '../core/middleware/simple-pipeline';
+import { MiddlewareStatic } from '../core/types';
 import { Translations } from '../Translations';
 
 describe('when using custom middleware', () => {
     let key = 'i-ate-${eggs}-${bananas}-dinner';
     const pipeline = new SimplePipeline();
-    pipeline.addMiddleware((context, next) => {
+    pipeline.addMiddleware((context) => {
         const { params, result } = context;
         if (result.fallingBack) {
             console.warn(`the value for ${params.key} is not translated`);
@@ -12,7 +13,6 @@ describe('when using custom middleware', () => {
         } else {
             result.value = `${result.value}: YAY!`;
         }
-        next();
     });
     let translations = new Translations(
         {
@@ -54,5 +54,47 @@ describe('when using custom middleware', () => {
                 expectedEn[i]
             );
         });
+    });
+});
+
+describe('when using custom middleware static', () => {
+    let key = 'i-ate-${eggs}-${bananas}-dinner';
+    const pipeline = new SimplePipeline();
+    const mv: MiddlewareStatic & {count:number} = {
+        count: 0,
+        exec(context) {
+            mv.count = (mv.count ?? 0) + 1;
+        },
+    };
+    pipeline.addMiddleware(mv);
+    let translations = new Translations(
+        {
+            en: {
+                [key]: {
+                    value: 'I ate ${bananas} for dinner',
+                    plural: {
+                        bananas: [
+                            ['< 1', 'no bananas'],
+                            ['= 1', 'one banana'],
+                            ['> 1', '$# bananas'],
+                        ],
+                    },
+                    description: 'translations',
+                },
+            },
+        },
+        { lang: 'en' },
+        pipeline
+    );
+    let values = [
+        { key, bananas: 1 },
+        { key, bananas: 0 },
+        { key, bananas: 3 },
+    ];
+    it(`should call static middleware`, () => {
+        values.forEach((v, i) => {
+            translations.translate(v.key, v);
+        });
+        expect(mv.count).toBe(3);
     });
 });

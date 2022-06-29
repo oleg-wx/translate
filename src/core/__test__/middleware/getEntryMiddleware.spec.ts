@@ -30,13 +30,13 @@ describe('when getting dictionary entry', () => {
     
     it('should get value', () => {
         const context: Context = createContextWithKey('my-key');
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBe('my-entry');
         expect(context.result.entry).toBe('my-entry');
     });
     it('should get value', () => {
         const context: Context = createContextWithKey('another_key');
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBe('another-entry');
         //expect(context.result.entry).toBe(context.params.dictionaries['en']['another-entry']);
     });
@@ -61,23 +61,23 @@ describe('when getting dictionary entry in the namespace', () => {
     it('should get value form namespace with string key', () => {
         const context: Context = createContextWithKey('space.my-key');
 
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBe('my-entry');
     });
     it('should get value form namespace with array key', () => {
         const context = createContextWithKey(['space', 'my-key']);
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBe('my-entry');
     });
     it('should return undefined if no translation', () => {
         const context = createContextWithKey(['no-key']);
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBeUndefined();
     });
 
     it('should return undefined with namespaces if no translation', () => {
         const context = createContextWithKey(['no', 'no-key']);
-        GetEntryMiddleware(context, () => undefined);
+        GetEntryMiddleware(context);
         expect(context.result.value).toBeUndefined();
     });
 });

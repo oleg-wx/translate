@@ -1,15 +1,10 @@
-import {
-    Middlewares,
-    Pipeline,
-} from '../types';
-import { AddDynamicToCacheMiddleware } from './add-dynamic-to-cache';
+import { Middlewares, Pipeline } from '../types';
 import { ContextInstance } from '../context-instanse';
 import { execMiddleware } from './exec-middleware';
 import { FallbackMiddleware } from './fallback-middleware';
 import { FallbackWithDifferentLanguageMiddleware } from './fallback-with-different-language-middleware';
 import { FillPlaceholdersMiddleware } from './fill-placeholders-middleware';
 import { GetEntryMiddleware } from './get-entry-middleware';
-import { GetDynamicFromCacheMiddleware } from './get-dynamic-from-cache-middleware';
 import {
     Context,
     ContextParams,
@@ -18,21 +13,10 @@ import {
 } from '../types';
 import { PrepareRegularExpressionsMiddleware } from './prepare-regular-expressions-middleware';
 
-export class SimplePipeline implements Pipeline {
-    private _middlewares: Middlewares = [];
+export abstract class SimplePipelineBase implements Pipeline {
+    protected _middlewares: Middlewares = [];
     get middlewares() {
         return this._middlewares;
-    }
-
-    constructor() {
-        this.middlewares.push(
-            PrepareRegularExpressionsMiddleware,
-            GetEntryMiddleware,
-            FallbackMiddleware,
-            GetDynamicFromCacheMiddleware,
-            FillPlaceholdersMiddleware,
-            AddDynamicToCacheMiddleware
-        );
     }
 
     run(params: ContextParams): string {
@@ -60,25 +44,28 @@ export class SimplePipeline implements Pipeline {
     }
 }
 
-export class SimpleDefaultPipeline implements Pipeline {
-    private _middlewares: Array<
-        MiddlewareFunc<any, any> | MiddlewareStatic<any, any>
-    >;
-
+export class SimplePipeline extends SimplePipelineBase {
     constructor() {
+        super();
+        this._middlewares = [
+            PrepareRegularExpressionsMiddleware,
+            GetEntryMiddleware,
+            FallbackMiddleware,
+            FillPlaceholdersMiddleware,
+        ];
+    }
+}
+
+export class SimpleDefaultPipeline extends SimplePipelineBase {
+    constructor() {
+        super();
         this._middlewares = [
             PrepareRegularExpressionsMiddleware,
             GetEntryMiddleware,
             new FallbackWithDifferentLanguageMiddleware(GetEntryMiddleware),
             FallbackMiddleware,
-            GetDynamicFromCacheMiddleware,
             FillPlaceholdersMiddleware,
-            AddDynamicToCacheMiddleware,
         ];
-    }
-
-    run(params: ContextParams): string {
-        return runPipeline(params, this, this._middlewares);
     }
 }
 
@@ -87,20 +74,12 @@ export function runPipeline(
     currentPipeline: Pipeline,
     middlewares: Middlewares
 ): string {
-    const context: Context = new ContextInstance(
-        params,
-        currentPipeline
-    );
+    const context: Context = new ContextInstance(params, currentPipeline);
 
-    let currentIndex = -1;
-    const next = () => {
-        currentIndex++;
-        const middleware = middlewares[currentIndex];
-        if (middleware) {
-            execMiddleware(middleware, context, next);
-        }
-    };
-    next();
+    for (let i = 0; i < middlewares.length; i++) {
+        const middleware = middlewares[i];
+        execMiddleware(middleware, context);
+    }
 
     return context.result.value ?? '';
 }

@@ -4,7 +4,6 @@ describe('when falling back to value or key using placeholders', () => {
         {
             en: {},
         },
-        { cacheDynamic: true }
     );
 
     let values = [

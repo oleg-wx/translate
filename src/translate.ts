@@ -15,7 +15,6 @@ import { GetEntryMiddleware } from './core/middleware/get-entry-middleware';
 export interface TranslateOptions
     extends PlaceholderParams,
         FallbackLangParams {
-    dynamicCache?: SimpleDictionaries;
 }
 
 /**
@@ -43,7 +42,6 @@ export function translate(
         dictionaries: dictionaries,
         lang,
         key: new TranslateKeyInstance(key),
-        dynamicCache: settings?.dynamicCache,
         dynamicProps,
         fallback: fallback,
         data: {
@@ -62,6 +60,6 @@ export function hasTranslation(
         params: { key: new TranslateKeyInstance(key), lang, dictionaries },
         result: {},
     };
-    GetEntryMiddleware(context, () => undefined);
+    GetEntryMiddleware(context);
     return !!context.result.value;
 }

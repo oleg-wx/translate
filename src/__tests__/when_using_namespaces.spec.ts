@@ -24,7 +24,7 @@ describe('when using namespaces', () => {
     };
     const translations = new Translations(
         { 'en-US': dictionary },
-        { cacheDynamic: false, lang: 'en-US' }
+        { lang: 'en-US' }
     );
 
     it('should use value from namespace', () => {
