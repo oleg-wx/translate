@@ -33,6 +33,10 @@ export interface FallbackLangParams {
     fallbackLang?: string;
 }
 
+export interface FallbackLangResult{
+    fallingBackLang?: string;
+}
+
 export type PlaceholderType = 'default' | 'single' | 'double';
 
 export interface PlaceholderParams {

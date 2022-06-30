@@ -4,16 +4,17 @@ import {
     FallbackLangParams,
     MiddlewareStatic,
     MiddlewareFunc,
+    FallbackLangResult,
 } from '../types';
 
 export class FallbackWithDifferentLanguageMiddleware
-    implements MiddlewareStatic<{}, FallbackLangParams>
+    implements MiddlewareStatic<FallbackLangResult, FallbackLangParams>
 {
     constructor(
         protected fallbackMiddleware: MiddlewareStatic | MiddlewareFunc
     ) {}
 
-    exec(context: Context<{}, FallbackLangParams>): void {
+    exec(context: Context<FallbackLangResult, FallbackLangParams>): void {
         if (!context.result.value && context.params.data?.fallbackLang) {
             const tempContext = {
                 ...context,
@@ -24,6 +25,10 @@ export class FallbackWithDifferentLanguageMiddleware
             };
             execMiddleware(this.fallbackMiddleware, tempContext);
             context.result.value = tempContext.result.value;
+            if(context.result.value){
+                context.result.fallingBack = true;
+                context.result.fallingBackLang = context.params.data?.fallbackLang;
+            }
         }
     }
 }

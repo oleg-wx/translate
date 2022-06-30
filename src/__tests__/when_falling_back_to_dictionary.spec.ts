@@ -42,7 +42,7 @@ describe.only('when falling back to dictionary', () => {
     beforeEach(() => {
         translations = new Translations(
             {
-                en: {
+                fb: {
                     hello_world: 'Hello World!',
                     goodbye_world: 'Goodbye World!',
                     hello_user: 'Hello $&{user?user_def}',
@@ -61,7 +61,7 @@ describe.only('when falling back to dictionary', () => {
                         },
                     },
                 },
-                ru: {
+                main: {
                     hello_world: 'Привет, мир!',
                     goodbye_user: 'Пока, $&{user?user_def}',
                     user_def: 'Пользователь',
@@ -71,7 +71,7 @@ describe.only('when falling back to dictionary', () => {
                     },
                 },
             },
-            { lang: 'ru', fallbackLang: 'en' }
+            { lang: 'main', fallbackLang: 'fb' }
         );
     });
 
