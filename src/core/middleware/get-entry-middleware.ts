@@ -31,7 +31,8 @@ export const GetEntryMiddleware: MiddlewareFunc = ({ params, result }) => {
         result.entry = value;
     } else if (typeof (value as any)?.value === 'string') {
         result.value = value?.value;
-        result.plural = value?.plural;
+        result.plurals = value?.plural;
+        result.cases = value?.cases;
         result.entry = value;
     }
 };

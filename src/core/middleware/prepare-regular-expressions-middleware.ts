@@ -4,36 +4,41 @@ import { MiddlewareFunc, PlaceholderParams, RegExpResult } from '../types';
 import { TranslateDynamicProps } from '../types';
 
 const replacePlaceholdersRx = new RegExp(
-    '(\\$?\\&?){([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}',
+    '(\\$?[\\&\\!]?){([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}',
     'g'
 );
 
 const replacePlaceholdersRx_single = new RegExp(
-    '(\\&?){([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}',
+    '([\\&\\!]?){([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}',
     'g'
 );
 
 const replacePlaceholdersRx_double = new RegExp(
-    '(\\&?){{([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}}',
+    '([\\&\\!]?){{([\\w\\d\\.\\-]+)(\\?([\\d\\w\\s,.+-=_?!@#$%^&*()]+))?\\}}',
     'g'
 );
 
-const testPlaceholderRx = /[\$\&]\{/;
-const testPlaceholderRx_single = /\&?\{/;
-const testPlaceholderRx_double = /\&?\{\{/;
+const testPlaceholderRx = /[\$\&\!]\{/;
+const testPlaceholderRx_single = /[\&\!]?\{/;
+const testPlaceholderRx_double = /[\&\!]?\{\{/;
 
 const shouldReplace = (prefix: string, placeholder: string) =>
     prefix?.includes('$');
+
 const shouldReplace_single_double = (prefix: string, placeholder: string) =>
     true;
 
 const shouldTranslate = (prefix: string, placeholder: string) =>
     prefix.includes('&');
 
+const shouldUseCases = (prefix: string, placeholder: string) =>
+    prefix.includes('!');
+
 const testPlaceholder = (value: string) => {
     testPlaceholderRx.lastIndex = 0;
     return testPlaceholderRx.test(value);
 };
+
 const testPlaceholder_single = (value: string) => {
     testPlaceholderRx_single.lastIndex = 0;
     return testPlaceholderRx_single.test(value);
@@ -53,18 +58,18 @@ export const PrepareRegularExpressionsMiddleware: MiddlewareFunc<
         result._testPlaceholder = testPlaceholder;
         result._replacePlaceholders = replacePlaceholdersRx;
         result._shouldReplace = shouldReplace;
-        result._shouldTranslate = shouldTranslate;
-    } else if (params.data?.placeholder === 'single')  {
+    } else if (params.data?.placeholder === 'single') {
         result._testPlaceholder = testPlaceholder_single;
         result._replacePlaceholders = replacePlaceholdersRx_single;
         result._shouldReplace = shouldReplace_single_double;
-        result._shouldTranslate = shouldTranslate;
-    } else if (params.data?.placeholder === 'double')  {
+    } else if (params.data?.placeholder === 'double') {
         result._testPlaceholder = testPlaceholder_single;
         result._replacePlaceholders = replacePlaceholdersRx_double;
         result._shouldReplace = shouldReplace_single_double;
-        result._shouldTranslate = shouldTranslate;
     }
+    result._shouldTranslate = shouldTranslate;
+    result._shouldUseCases = shouldUseCases;
+
     result._replacePlaceholders.lastIndex = 0;
 };
 

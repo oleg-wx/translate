@@ -1,4 +1,5 @@
 import { pluralize } from '../pluralize';
+import { handleCases } from '../handleCases';
 import { replacePlaceholders } from '../_replace-placeholders';
 import { MiddlewareFunc, RegExpResult } from '../types';
 import { TranslateDynamicProps } from '../types';
@@ -21,12 +22,14 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
     }
 
     var regexp = result._replacePlaceholders;
-    const _plurals = result.plural;
+    const _plurals = result.plurals;
+    const _cases = result.cases;
 
     const replaced: string = replacePlaceholders(
         regexp,
         value,
         _plurals,
+        _cases,
         dynamicProps,
         !!context.translate
             ? (
@@ -36,9 +39,11 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
               ) => context.translate!(key, dynamicProps, fallback)
             : undefined,
         pluralize,
+        handleCases,
         {
             shouldReplaceDynamic: result._shouldReplace,
             shouldTranslate: result._shouldTranslate,
+            shouldUseCases: result._shouldUseCases,
         }
     );
 

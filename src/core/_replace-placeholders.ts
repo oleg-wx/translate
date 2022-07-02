@@ -1,4 +1,6 @@
 import {
+    CaseOptions,
+    Cases,
     PluralOptions,
     Plurals,
     TranslateDynamicProps,
@@ -12,17 +14,23 @@ export function replacePlaceholders(
     _regexp: RegExp,
     value: string,
     plurals: Plurals | undefined,
+    cases: Cases | undefined,
     dynamicProps: TranslateDynamicProps | undefined,
     handleTranslate: SimpleTranslateFunc | undefined,
     handlePluralize:
         | ((value: string | number, plural: PluralOptions) => string)
         | undefined,
+    handleCases: ((value: any, caseOptions: CaseOptions) => string) | undefined,
     settings: {
         shouldReplaceDynamic?: (
             placeholderPrefix: string,
             placeholder: string
         ) => boolean;
         shouldTranslate?: (
+            placeholderPrefix: string,
+            placeholder: string
+        ) => boolean;
+        shouldUseCases?: (
             placeholderPrefix: string,
             placeholder: string
         ) => boolean;
@@ -40,12 +48,10 @@ export function replacePlaceholders(
             text: string
         ) => {
             var replaceValue: string | number | undefined;
+
             const shouldReplaceDynamic =
                 settings.shouldReplaceDynamic &&
                 settings.shouldReplaceDynamic(replaceAndOrTranslate, prop);
-            const shouldTranslate =
-                settings.shouldTranslate &&
-                settings.shouldTranslate(replaceAndOrTranslate, prop);
             if (shouldReplaceDynamic) {
                 if (
                     dynamicProps &&
@@ -58,6 +64,27 @@ export function replacePlaceholders(
                 }
             } else {
                 replaceValue = prop;
+            }
+
+            const shouldUseCases =
+                cases &&
+                handleCases &&
+                settings.shouldUseCases &&
+                settings.shouldUseCases(replaceAndOrTranslate, prop);
+            if (shouldUseCases) {
+                replaceValue = handleCases(replaceValue, cases[prop]);
+                // replace again
+                replaceValue = replacePlaceholders(
+                    _regexp,
+                    replaceValue,
+                    plurals,
+                    cases,
+                    dynamicProps,
+                    handleTranslate,
+                    handlePluralize,
+                    handleCases,
+                    settings
+                );
             }
 
             if (
@@ -73,13 +100,20 @@ export function replacePlaceholders(
                         _regexp,
                         replaceValue,
                         plurals,
+                        cases,
                         dynamicProps,
                         handleTranslate,
                         handlePluralize,
+                        handleCases,
                         settings
                     );
                 }
             }
+
+            const shouldTranslate =
+                settings.shouldTranslate &&
+                settings.shouldTranslate(replaceAndOrTranslate, prop);
+
             if (handleTranslate && shouldTranslate) {
                 replaceValue = handleTranslate(replaceValue as string);
             }

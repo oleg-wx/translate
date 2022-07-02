@@ -12,7 +12,8 @@ export interface ContextParams<TData = any> {
 export interface ContextBaseResult {
     entry?: DictionaryValue;
     value?: string;
-    plural?: Plurals;
+    plurals?: Plurals;
+    cases?: Cases;
     fallingBack?: boolean;
 }
 
@@ -27,6 +28,7 @@ export interface RegExpResult {
     _testPlaceholder: (val: string) => boolean;
     _shouldReplace: (prefix: string, placeholder: string) => boolean;
     _shouldTranslate: (prefix: string, placeholder: string) => boolean;
+    _shouldUseCases: (prefix: string, placeholder: string) => boolean;
 }
 
 export interface FallbackLangParams {
@@ -48,6 +50,7 @@ export type TranslateKey = string | string[];
 export interface DictionaryEntry {
     value: string;
     plural?: Plurals;
+    cases?: Cases;
     description?: string;
 }
 
@@ -73,7 +76,7 @@ export type numberOrEmpty = string; // `${`,${number}` | ''}`;
 export type numberOrEmptyX5 = string;
 // `${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
 
-export type Contains = string //`in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
+export type Contains = string; //`in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
 
 //export type Between = `between ${number},${number}`;
 
@@ -86,6 +89,14 @@ export type PluralOptions = PluralOption[];
 export type Plurals = { [key: string]: PluralOptions };
 export type SimpleDictionary = { [key: string]: string };
 export type SimpleDictionaries = { [lang: string]: SimpleDictionary };
+
+export type CaseOption = [
+    '!' | '_' | '!!',
+    string,
+    ((val: string) => boolean)?
+];
+export type CaseOptions = CaseOption[];
+export type Cases = { [key: string]: CaseOptions };
 
 export type SimpleTranslateFunc = (
     key: string,

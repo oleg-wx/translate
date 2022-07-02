@@ -7,8 +7,9 @@ Simplest translations for JS. Consider it even more as a object mapper, a Dictio
 #### (v0.20.0)
 
 -   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
--   added **remainder** (modulo) operator `%`.
--   added **ends** with operator `...`.
+-   added **remainder** (modulo) plural operator `%`.
+-   added **ends-with** plural operator `...`.
+-   added **cases** functionality _(see [Cases](#Cases))_.
 -   added double curly brackets `{{...}}` support for placeholder.
 -   deprecated `defaultLang` property over `lang` name.
 -   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
@@ -298,7 +299,6 @@ let translations = new Translations(
                         ['_', '$# eggs'],
                     ],
                 },
-                description: 'translations',
             },
         },
     },
@@ -306,6 +306,7 @@ let translations = new Translations(
         lang: 'en-US',
     }
 );
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 0,
     eggs: 1,
@@ -411,6 +412,78 @@ translations.translate('i-ate-apples-for', {
 });
 // I ate 5 (WOW!) apples for Breakfast
 ```
+
+### Cases
+
+_(v0.20.0+)_  
+**(experimental)**
+Cases are similar to _pluralization_ but bit simpler. At the moment there is only truly/falsy check.   
+Little bit different syntax like translation placeholder, instead of `&` - `!`: `$!{...}`. 
+```javascript
+let translations = new Translations(
+    {
+        'en-US': {
+            somebody_ate_bananas: {
+                value: '$&{prefix}$!{prefix}${person} ate bananas',
+                cases: {
+                    prefix: [
+                        ['!!', ' '],
+                        ['!', ''],
+                    ],
+                },
+            },
+            sir: 'Sir',
+            madam: 'Madam',
+        },
+    },
+    {
+        lang: 'en-US',
+    }
+);
+
+translations.translate('somebody_ate_bananas', {
+    prefix: 'sir', person: 'Holmes'
+});
+// Sir Holmes ate bananas
+
+translations.translate('somebody_ate_bananas', {
+    person: 'Holmes'
+});
+// Holmes ate bananas
+```
+Or use replace pattern `$#` in combination with translate `&{...}` (same as for pluralization) 
+```javascript
+let translations = new Translations(
+    {
+        'en-US': {
+            somebody_ate_bananas: {
+                value: '$!{prefix}${person} ate bananas',
+                cases: {
+                    prefix: [
+                        ['!!', '(&{$#}) '],
+                    ],
+                },
+            },
+            sir: 'Sir',
+            madam: 'Madam',
+        },
+    },
+    {
+        lang: 'en-US',
+    }
+);
+
+translations.translate('somebody_ate_bananas', {
+    prefix: 'sir', person: 'Holmes'
+});
+// (Sir) Holmes ate bananas
+
+translations.translate('somebody_ate_bananas', {
+    person: 'Holmes'
+});
+// Holmes ate bananas
+```
+As you can see this is pretty simple but may bring some value for conditional placeholders. Still figuring value of this out...
 
 ### Add terms to dictionary
 
