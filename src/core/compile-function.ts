@@ -71,6 +71,23 @@ operators.push([
     },
 ]);
 
+const _ends = [/^\.\.\.\s?[\d\.]+/g, /^\.\.\.\s?([\d\.]+)?/];
+operators.push([
+    _ends[0],
+    (operation: string) => {
+        _ends[1].lastIndex = 0;
+        const match = _ends[1].exec(operation);
+        if (match) {
+            const last = match[1];
+            return function (val: string | number) {
+                return String(val).endsWith(last);
+            };
+        } else {
+            throw new Error(`wrong ends format: "${operation}"`);
+        }
+    },
+]);
+
 const _simple = /^\s*([>!=<]{1,2})\s?(-?\d+(\.\d+)?)\s*$/;
 export function compileFunction(
     operation: SimpleCompare | Contains

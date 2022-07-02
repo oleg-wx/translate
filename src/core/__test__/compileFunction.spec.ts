@@ -211,3 +211,15 @@ it('should compile and run "% (reminder)" operator',()=>{
     expect(fn(10)).toBeFalsy();
 })
 
+it('should compile and run "ends" operator',()=>{
+    let fn = compileFunction("...2");
+    expect(fn(0.2)).toBeTruthy();
+    expect(fn(2)).toBeTruthy();
+    expect(fn(22)).toBeTruthy();
+    expect(fn(142)).toBeTruthy();
+    expect(fn(21)).toBeFalsy();
+    expect(fn(120)).toBeFalsy();
+    expect(fn(4)).toBeFalsy();
+    expect(fn(20)).toBeFalsy();
+});
+

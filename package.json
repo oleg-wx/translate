@@ -1,6 +1,6 @@
 {
   "name": "simply-translate",
-  "version": "0.20.0-beta.6",
+  "version": "0.20.0-beta.7",
   "description": "Simplest translation functionality ever",
   "main": "dist/index.js",
   "files": [
@@ -10,6 +10,7 @@
     "test": "jest",
     "clean": "rimraf dist",
     "build": "npm run clean && tsc",
+    "publish": "npm publish",
     "build:patch": "npm --no-git-tag-version version patch && npm run build",
     "publish:patch": "npm run build:patch && npm publish"
   },

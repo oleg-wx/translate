@@ -1,6 +1,7 @@
 import {
     Dictionaries,
     Dictionary,
+    DictionaryEntry,
     Pipeline,
     PlaceholderType,
     SimpleDictionaries,
@@ -11,7 +12,6 @@ import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { translate, hasTranslation } from './translate';
 
 export class Translations {
-    readonly absent: { [key: string]: string[] } = {};
     pipeline: Pipeline;
 
     placeholder?: PlaceholderType;
@@ -41,16 +41,13 @@ export class Translations {
     }
 
     constructor(
-        dictionaries?: { [lang: string]: Dictionary },
+        dictionaries?: Dictionaries,
         options?: {
             lang?: string;
             /**
              * @deprecated defaultLang will be removed. Use lang instead
              */
             defaultLang?: string;
-            /**
-             * @deprecated Fallback Lang will be removed soon as a parameter. It can be added as a middleware in pipeline before regular Fallback.
-             */
             fallbackLang?: string;
             placeholder?: PlaceholderType;
             /**
@@ -77,12 +74,12 @@ export class Translations {
     translate(
         key: TranslateKey,
         dynamicProps?: TranslateDynamicProps,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string;
     translate(
         key: TranslateKey,
         dynamicPropsOrFallback?: TranslateDynamicProps | string,
-        fallback?: string
+        fallback?: DictionaryEntry |string
     ): string {
         return this.translateTo(
             this.lang!,
@@ -98,13 +95,13 @@ export class Translations {
         lang: string,
         key: TranslateKey,
         dynamicProps: TranslateDynamicProps,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string;
     translateTo(
         lang: string,
         key: TranslateKey,
         dynamicPropsOrFallback?: TranslateDynamicProps | string,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string {
         if (!lang) {
             lang = Object.keys(this.dictionaries)[0];

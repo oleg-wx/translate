@@ -7,11 +7,13 @@ Simplest translations for JS. Consider it even more as a object mapper, a Dictio
 #### (v0.20.0)
 
 -   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
--   added remainder (modulo) operator `%`.
+-   added **remainder** (modulo) operator `%`.
+-   added **ends** with operator `...`.
 -   added double curly brackets `{{...}}` support for placeholder.
--   deprecated `fallbackLang` and `defaultLang` properties. It is recommended to use `lang` and custom middleware for `fallbackLang` if needed in future.
+-   deprecated `defaultLang` property over `lang` name.
 -   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
 -   removed **dynamic cache**.
+-   ~~deprecated `fallbackLang` property~~ `fallbackLang` remains.
 
 #### (v0.10.0)
 
@@ -96,8 +98,8 @@ translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.   
-It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to *single* (`{...}`) or *double* (`{{...}}`), however it is _not recommended_.
+In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.  
+It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to _single_ (`{...}`) or _double_ (`{{...}}`), however it is _not recommended_.
 
 ```javascript
 const dics = {
@@ -282,6 +284,7 @@ let translations = new Translations(
                 plural: {
                     bananas: [
                         ['<= 0', 'no bananas'],
+                        ['...2', 'number of bananas that ends with 2'],
                         ['= 1', 'one banana'],
                         ['in [3,4]', 'few bananas'],
                         ['% 11', 'many bananas that is divisible by eleven'],
@@ -308,37 +311,48 @@ translations.translate('i-ate-eggs-bananas-dinner', {
     eggs: 1,
 });
 // I ate no bananas and one egg for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 3,
-    eggs: 2,
+    eggs: 5,
 });
-// I ate few bananas and 2 eggs for dinner
+// I ate few bananas and 5 eggs for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 1,
     eggs: 1,
 });
 // I ate one banana and one egg for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 12,
+    bananas: 13,
     eggs: 0,
 });
 // I ate too many bananas and zero eggs for dinner
-translations.translate('i-ate-apples-for', {
-    apples: 121,
-    when: 'dinner',
+
+translations.translate('i-ate-eggs-bananas-dinner', {
+    bananas: 121,
+    eggs: 3,
 });
 // I ate many bananas that is divisible by eleven and some eggs for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 6,
     eggs: 3,
 });
 // I ate many bananas and some eggs for dinner
+
+translations.translate('i-ate-eggs-bananas-dinner', {
+    bananas: 12,
+    eggs: one,
+});
+// I ate number of bananas that ends with 2 and one eggs for dinner
 ```
 
 Pluralization are added to `plural` property of translation value as an array to keep execution order.
 The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.   
-Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.    
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
+Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.  
 Execution order is important because compare operations runs from top to bottom and when criteria is met then translation will use `value` provided for `operation`.
 
 ### Plural translations
@@ -397,6 +411,7 @@ translations.translate('i-ate-apples-for', {
 });
 // I ate 5 (WOW!) apples for Breakfast
 ```
+
 ### Add terms to dictionary
 
 To **extend** dictionary with new values use `extendDictionary` method.
@@ -417,12 +432,13 @@ translations.extendDictionary('en-US', {
 ```
 
 ### Pipeline
-_(v0.20.0+)_    
+
+_(v0.20.0+)_  
 **(experimental)**
 To manage translation flow now there is a **pipeline** functionality that runs **middlewares**.  
 Default flow is the same, but now it is possible to add custom **middlewares** to the flow or build custom one from the scratch.
 At the moment there is `SimpleDefaultPipeline` which is the old one with _fallback language_ which will be _removed_ in future. And `SimplePipeline` with access to **middlewares** collection.  
-In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.  
+In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.
 
 ```javascript
 const pipeline = new SimplePipeline();
@@ -439,4 +455,5 @@ pipeline.addMiddleware((context) => {
     });
 let translations = new Translations(..., pipeline);
 ```
-`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.  
+
+`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.

@@ -5,7 +5,7 @@ export interface ContextParams<TData = any> {
     key: TranslateKeyInstance;
     lang: string;
     dynamicProps?: TranslateDynamicProps;
-    fallback?: string;
+    fallback?: DictionaryEntry | string;
     data?: TData;
 }
 
@@ -33,7 +33,7 @@ export interface FallbackLangParams {
     fallbackLang?: string;
 }
 
-export interface FallbackLangResult{
+export interface FallbackLangResult {
     fallingBackLang?: string;
 }
 
@@ -55,7 +55,6 @@ export type DictionaryValue = string | DictionaryEntry | Dictionary;
 
 export interface Dictionary {
     [key: string]: DictionaryValue;
-    // | { [key: string]: any };
 }
 
 export interface Dictionaries {
@@ -66,13 +65,15 @@ export type TranslateDynamicProps = {
     [key: string]: string | number | undefined;
 };
 export type SimpleCompare = string;
-// | "_"
-// | `${">" | "<=" | "<" | ">=" | "="}${" " | ""}${number | ""}`;
-export type numberOrEmpty = string; //`${`,${number}` | ""}`;
+// | '_'
+// | `${'>' | '<=' | '<' | '>=' | '='}${' ' | ''}${number | ''}`
+// | `%${number | ''}${'=' | ''}${number}`;
+export type numberOrEmpty = string; // `${`,${number}` | ''}`;
 
-export type numberOrEmptyX5 = string; //`${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
+export type numberOrEmptyX5 = string;
+// `${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}${numberOrEmpty}`;
 
-export type Contains = string; // `in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
+export type Contains = string //`in [${number}${numberOrEmptyX5}${numberOrEmptyX5}]`;
 
 //export type Between = `between ${number},${number}`;
 
@@ -102,7 +103,7 @@ export interface MiddlewareStatic<T = {}, TProps = any> {
 }
 
 export abstract class MiddlewareCreator<T = {}, TProps = any> {
-    abstract create(): Middleware<T,TProps>;
+    abstract create(): Middleware<T, TProps>;
 }
 
 export type Middleware<T, TProps> =
