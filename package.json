@@ -1,6 +1,6 @@
 {
   "name": "simply-translate",
-  "version": "0.20.0-beta.8",
+  "version": "0.20.0-beta.10",
   "description": "Simplest translation functionality ever",
   "main": "dist/index.js",
   "files": [
@@ -9,9 +9,9 @@
   "scripts": {
     "test": "jest",
     "clean": "rimraf dist",
-    "build": "npm run clean && tsc",
-    "publish": "npm publish",
-    "build:patch": "npm --no-git-tag-version version patch && npm run build",
+    "build:prod": "npm run clean && tsc",
+    "publish:prod": "npm run build:prod && npm publish",
+    "build:patch": "npm --no-git-tag-version version patch && npm run build:prod",
     "publish:patch": "npm run build:patch && npm publish"
   },
   "devDependencies": {

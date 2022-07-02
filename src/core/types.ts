@@ -15,6 +15,7 @@ export interface ContextBaseResult {
     plurals?: Plurals;
     cases?: Cases;
     fallingBack?: boolean;
+    fallingBackToKey?: boolean;
 }
 
 export interface Context<T = {}, TParamsData = any> {

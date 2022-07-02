@@ -80,4 +80,37 @@ describe('when falling back to value or key using placeholders', () => {
             )
         ).toBe('i ate five bananas');
     });
+
+    it('should fail to fallback to not latin because of REGEXP', () => {
+        const res = translations.translateTo(
+            'ru-RU',
+            'hi_${user}',
+            { user: 'Олег' },
+            'Привет ${user?Пользователь}'
+        );
+        expect(res).toBe('Привет ${user?Пользователь}');
+    });
+
+    it('should not fallback to property name', () => {
+        const res = translations.translateTo(
+            'ru-RU',
+            'hi_${user}',
+            { user: undefined },
+            'Привет ${user}'
+        );
+        expect(res).toBe('Привет ');
+    });
+
+    it('should not fallback to property fallback and translate', () => {
+        translations.extendDictionary('ru-RU', {
+            user: 'Пользователь',
+        });
+        const res = translations.translateTo(
+            'ru-RU',
+            'hi_${user}',
+            { user: undefined },
+            'Привет $&{user?user}'
+        );
+        expect(res).toBe('Привет Пользователь');
+    });
 });

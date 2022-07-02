@@ -47,8 +47,8 @@ export function replacePlaceholders(
             ind: number,
             text: string
         ) => {
-            var replaceValue: string | number | undefined;
-
+            let replaceValue: string | number | undefined;
+            let replaceAgain = false;
             const shouldReplaceDynamic =
                 settings.shouldReplaceDynamic &&
                 settings.shouldReplaceDynamic(replaceAndOrTranslate, prop);
@@ -59,13 +59,12 @@ export function replacePlaceholders(
                 ) {
                     replaceValue = dynamicProps![prop];
                 }
-                if (replaceValue === undefined) {
-                    replaceValue = propFallback ?? prop;
+                if (replaceValue == null) {
+                    replaceValue = propFallback;
                 }
             } else {
                 replaceValue = prop;
             }
-
             const shouldUseCases =
                 cases &&
                 handleCases &&
@@ -74,28 +73,29 @@ export function replacePlaceholders(
             if (shouldUseCases) {
                 replaceValue = handleCases(replaceValue, cases[prop]);
                 // replace again
-                replaceValue = replacePlaceholders(
-                    _regexp,
-                    replaceValue,
-                    plurals,
-                    cases,
-                    dynamicProps,
-                    handleTranslate,
-                    handlePluralize,
-                    handleCases,
-                    settings
-                );
+                if (replaceValue?.indexOf('{') >= 0) {
+                    replaceAgain = true;
+                }
             }
 
-            if (
+            const shouldPluralize =
+                plurals &&
                 handlePluralize &&
                 shouldReplaceDynamic &&
-                plurals &&
-                !isNaN(replaceValue as number)
-            ) {
-                replaceValue = handlePluralize(replaceValue, plurals[prop]);
+                !isNaN(replaceValue as number);
+            if (shouldPluralize) {
+                replaceValue = handlePluralize(
+                    replaceValue ?? '',
+                    plurals[prop]
+                );
+                // replace again
                 if (replaceValue.indexOf('{') >= 0) {
-                    // replace again
+                    replaceAgain = true;
+                }
+            }
+
+            if (replaceAgain && typeof replaceValue === 'string') {
+                if (replaceValue?.indexOf('{') >= 0) {
                     replaceValue = replacePlaceholders(
                         _regexp,
                         replaceValue,
@@ -118,7 +118,7 @@ export function replacePlaceholders(
                 replaceValue = handleTranslate(replaceValue as string);
             }
 
-            return '' + replaceValue ?? prop;
+            return String(replaceValue ?? '');
         }
     );
     return replaced;

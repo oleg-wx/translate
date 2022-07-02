@@ -1,6 +1,7 @@
 # Simply Translate
 
-Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
+Simplest translations for JS. Even consider it more as an object mapper, a Dictionary, but not translation AI or Bot or something... :)  
+_[Typescript support]_
 
 ### **Breaking changes**
 
@@ -13,6 +14,7 @@ Simplest translations for JS. Consider it even more as a object mapper, a Dictio
 -   added double curly brackets `{{...}}` support for placeholder.
 -   deprecated `defaultLang` property over `lang` name.
 -   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
+-   not falling back to placeholder property name.
 -   removed **dynamic cache**.
 -   ~~deprecated `fallbackLang` property~~ `fallbackLang` remains.
 
@@ -34,8 +36,6 @@ npm i simply-translate
 ```javascript
 import { Translations } from 'simply-translate';
 ```
-
-_Typescript_ (4.0) supported
 
 ### Initialize
 
@@ -60,7 +60,7 @@ const dics = {
 
 ### Dictionary entry
 
-is a set of values with a unique string as a key and a string or object with value (which is requierd) and description
+is a set of values with a unique string as a key and a string or object with _value_ (which is required), _description_, and (optionally) _plural_ and _cases_ data
 
 ```javascript
 const dics = {
@@ -76,8 +76,8 @@ const dics = {
 
 ### Translate
 
-by calling `translate` or `translateTo` functions.  
-`translate` function uses `lang` property, `translateTo` awaits language parameter.
+by calling `translate` or `translateTo` methods.  
+`translate` method uses `lang` property of `Translations`, `translateTo` requires language parameter.
 
 ```javascript
 // create translations with dictionary:
@@ -86,7 +86,7 @@ const translated = translations.translate('hello_world');
 const translated = translations.translateTo('en-US', 'hello_world');
 ```
 
-To use dynamic data that can be passed to as parameters for translation add `${...}` with property name of the passed data.
+To use dynamic data add `${...}` with field name of the data object.
 
 ```javascript
 const dics = {
@@ -119,7 +119,8 @@ translations.translate("hello_user", { user: "Oleg" }, "Hello {{user}}");
 // Hello Oleg
 ```
 
-Please _note_ that using `$` prefix will replace placeholder with value from the data object, `$&` will try to translate that value, and `&` will just translate the placeholder.
+Please **note** that using `$` prefix will replace placeholder with value from the data object, `$&` will try to translate that value, and `&` will just translate the placeholder.  
+And **note**: _single_ (`{...}`) and _double_ ignores `$` as if it is there.
 
 ```javascript
 const dics = {
@@ -159,11 +160,11 @@ translations.translate('user.hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-Do **not use** namespaces separator (`.` by default) for dictionary keys.
+Do **not use** namespaces separator (`.`) for dictionary keys.
 
 ### Fallback value
 
-can be passed to `translate` function to be used instead of absent translation.
+Can be used as value if translation was not found. If value is not found and `fallback` is not provided, _key_ will be used as _value_.
 
 ```javascript
 const dics = {
@@ -172,11 +173,11 @@ const dics = {
     },
 };
 const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate('hello_${user}', { user: 'Oleg' }, 'Hello ${user}');
+translations.translate('hello_user}', { user: 'Oleg' }, 'Hello ${user}');
 // Hello Oleg!
 ```
 
-To add clarity you can use `${...}` in keys, **however** it is **not** required.
+You can use `${...}` in keys, **however** it is **not** required, but might be useful.
 
 ```javascript
 const dics = {
@@ -187,16 +188,12 @@ const dics = {
 const translations = new Translations(dics);
 translations.translateTo('en-US', 'hello_${user}', { user: 'Oleg' });
 // Hello Oleg!
+translations.translateTo('en-US', 'goodbye_${user}', { user: 'Oleg' });
+// goodbye_Oleg!
 ```
 
-It may be useful if translation and fallback values were not provided, so key will be used with dynamic value.
-
-```javascript
-translations.translateTo('es-ES', 'hello_${user}', { user: 'Oleg' });
-// hello_Oleg!
-```
-
-It is possible to use fallback values for dynamic parameters. **Note**: Due to some limitations **only Latin** characters supported for fallback.
+It is possible to use fallback values for dynamic fields. **Note**: Due to implementation limitations (and not adding external dependencies) **only Latin** characters supported for placeholders and fallback.  
+Since _ver.0.20.0_ if property is null or undefined placeholder will be empty _(not property name as it was)_.
 
 ```javascript
 const dics = {
@@ -210,17 +207,14 @@ translations.translate('hello_${user}', { user: undefined });
 // Hello User!
 translations.translate('hi_${user}', { user: undefined }, 'Hi ${user?Friend}');
 // Hi Friend!
+translations.translate('hi_${user}', { user: undefined }, 'Hi ${user}');
+// Hi !
 ```
 
 Next will fail to replace placeholder:
 
 ```javascript
-translations.translateTo(
-    'ru-RU',
-    'hi_${user}',
-    { user: 'Олег' },
-    'Привет ${user?Пользователь}'
-);
+translations.translateTo('ru-RU', 'hi_${user}', { user: 'Олег' }, 'Привет ${user?Пользователь}');
 // Привет ${user?Пользователь}
 ```
 
@@ -230,12 +224,7 @@ To solve this you may add translation term:
 translations.extendDictionary('ru-RU', {
     User: 'Пользователь',
 });
-translations.translateTo(
-    'ru-RU',
-    'hi_${user}',
-    { user: undefined },
-    'Привет $&{user?User}'
-);
+translations.translateTo('ru-RU', 'hi_${user}', { user: undefined }, 'Привет $&{user?User}');
 // Привет Пользователь
 ```
 
@@ -264,11 +253,7 @@ translations.translate('hello_${user}', { user: 'Oleg' });
 // Привет, Олег!
 translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}');
 // Goodbye Олег!
-translations.translate(
-    'nice_day_${user}',
-    { user: undefined },
-    'Have a nice day ${user?Friend}'
-);
+translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day ${user?Friend}');
 // Have a nice day Friend
 ```
 
@@ -350,9 +335,9 @@ translations.translate('i-ate-eggs-bananas-dinner', {
 // I ate number of bananas that ends with 2 and one eggs for dinner
 ```
 
-Pluralization are added to `plural` property of translation value as an array to keep execution order.
+`plural` property of translation value used for pluralization. It as an array to keep execution order.
 The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, `...`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
 Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.  
 Execution order is important because compare operations runs from top to bottom and when criteria is met then translation will use `value` provided for `operation`.
 
@@ -417,72 +402,82 @@ translations.translate('i-ate-apples-for', {
 
 _(v0.20.0+)_  
 **(experimental)**
-Cases are similar to _pluralization_ but bit simpler. At the moment there is only truly/falsy check.   
-Little bit different syntax like translation placeholder, instead of `&` - `!`: `$!{...}`. 
+Cases are similar to _pluralization_ but bit simpler. At the moment there is only truthy/falsy check.  
+Little bit different syntax like translation placeholder, instead of `&` - `!`: `$!{...}`.
+
 ```javascript
-let translations = new Translations(
-    {
-        'en-US': {
-            somebody_ate_bananas: {
-                value: '$&{prefix}$!{prefix}${person} ate bananas',
-                cases: {
-                    prefix: [
-                        ['!!', ' '],
-                        ['!', ''],
-                    ],
-                },
+let translations = new Translations({
+    'en-US': {
+        somebody_ate_bananas: {
+            value: '$&{prefix}$!{prefix}${person} ate bananas',
+            cases: {
+                prefix: [
+                    ['!!', ' '],
+                    ['!', ''],
+                ],
             },
-            sir: 'Sir',
-            madam: 'Madam',
         },
+        sir: 'Sir',
+        madam: 'Madam',
     },
-    {
-        lang: 'en-US',
-    }
-);
+});
 
 translations.translate('somebody_ate_bananas', {
-    prefix: 'sir', person: 'Holmes'
+    prefix: 'sir',
+    person: 'Holmes',
 });
 // Sir Holmes ate bananas
 
 translations.translate('somebody_ate_bananas', {
-    person: 'Holmes'
+    person: 'Holmes',
 });
 // Holmes ate bananas
 ```
-Or use replace pattern `$#` in combination with translate `&{...}` (same as for pluralization) 
+
+Use replace pattern `$#` in combination with `$` or `&` for a bit more complex scenarios (like pluralization)
+
 ```javascript
-let translations = new Translations(
-    {
-        'en-US': {
-            somebody_ate_bananas: {
-                value: '$!{prefix}${person} ate bananas',
-                cases: {
-                    prefix: [
-                        ['!!', '(&{$#}) '],
-                    ],
-                },
+let translations = new Translations({
+    'en-US': {
+        i_have_been_here_count: {
+            value: '$!{count} ${days}',
+            cases: {
+                count: [
+                    ['!!', "I've been here ${count}"],
+                    ['!', 'I have not been here'],
+                ],
             },
-            sir: 'Sir',
-            madam: 'Madam',
+            plural: {
+                count: [
+                    ['=1', 'once'],
+                    ['=2', 'twice'],
+                    ['in [3,4,5]', 'few times'],
+                    ['>10', 'many times'],
+                    ['_', '$# times'],
+                ],
+                days: [
+                    ['<2', 'today'],
+                    ['<5', 'for last few days'],
+                    ['_', 'for long time'],
+                ],
+            },
         },
     },
-    {
-        lang: 'en-US',
-    }
-);
-
-translations.translate('somebody_ate_bananas', {
-    prefix: 'sir', person: 'Holmes'
 });
-// (Sir) Holmes ate bananas
 
-translations.translate('somebody_ate_bananas', {
-    person: 'Holmes'
+translations.translate('i_have_been_here_count', {
+    count: 0,
+    days: 1,
 });
-// Holmes ate bananas
+// I have not been here today
+
+translations.translate('i_have_been_here_count', {
+    count: 2,
+    days: 3,
+});
+// I've been here twice for last few days
 ```
+
 As you can see this is pretty simple but may bring some value for conditional placeholders. Still figuring value of this out...
 
 ### Add terms to dictionary

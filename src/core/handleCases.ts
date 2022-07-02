@@ -15,7 +15,7 @@ export function handleCases(value: any, options: CaseOptions) {
             } else {
                 let operatorFunction_ = _value_tmp_[2];
                 if (!operatorFunction_) {
-                    operatorFunction_ = compileFunction(key_);
+                    operatorFunction_ = compileCasesFunction(key_);
                     _value_tmp_[2] = operatorFunction_;
                 }
                 if (operatorFunction_(value)) {
@@ -33,7 +33,7 @@ export function handleCases(value: any, options: CaseOptions) {
     return replacedValue;
 }
 
-function compileFunction(caseKey: CaseOption[0]) {
+export function compileCasesFunction(caseKey: CaseOption[0]) {
     if (caseKey === '!') {
         return (val: any) => !val;
     }

@@ -73,6 +73,15 @@ describe('when translating pluralized to 2 langs', () => {
         'I ate too many bananas and one egg for dinner',
     ];
 
+    let expectedNo = [
+        'i-ate-3-0-dinner',
+        'i-ate-2-1-dinner',
+        'i-ate-4-3-dinner',
+        'i-ate-0-10-dinner',
+        'i-ate-1-121-dinner',
+        'i-ate-1-12-dinner',
+    ];
+
     values.forEach((v, i) => {
         it(`should translate plural to EN: ${expectedEn[i]}`, () => {
             expect(translations.translateTo('en', key, v)).toBe(expectedEn[i]);
@@ -80,9 +89,19 @@ describe('when translating pluralized to 2 langs', () => {
     });
 
     values.forEach((v, i) => {
-        translations.lang = 'en';
-        it(`should translate plural to EN default lang: ${expectedEn[i]}`, () => {
-            expect(translations.translate(key, v)).toBe(expectedEn[i]);
+        it(`should translate to set EN lang: ${expectedEn[i]}`, () => {
+            translations.lang = 'en';
+            expect(translations.lang).toBe('en');
+            const val = translations.translate(key, v);
+            expect(val).toBe(expectedEn[i]);
+        });
+    });
+
+    values.forEach((v, i) => {
+        it(`should NOT translate if NO default lang: ${expectedNo[i]}`, () => {
+            expect(translations.lang).toBeUndefined();
+            const val = translations.translate(key, v);
+            expect(val).toBe(expectedNo[i]);
         });
     });
 
@@ -100,9 +119,11 @@ describe('when translating pluralized to 2 langs', () => {
             expect(translations.translateTo('ru', key, v)).toBe(expectedRu[i]);
         });
     });
+
     values.forEach((v, i) => {
         it(`should translate plural to RU default lang: ${expectedRu[i]}`, () => {
             translations.lang = 'ru';
+            expect(translations.lang).toBe('ru');
             expect(translations.translate(key, v)).toBe(expectedRu[i]);
         });
     });
