@@ -10,8 +10,8 @@ describe('when translating plural placeholders', () => {
                         apples: [
                             ['=0', ''],
                             ['= 1', 'One apple'],
-                            ['= 4', '$&{my-$#-only} apple'],
-                            ['in [2,3]', '$&{$#} apples'],
+                            ['= 4', '&{my-$#-only} apple'],
+                            ['in [2,3]', '&{$#} apples'],
                             ['= 42', '$&{answer} apples'],
                             ['= 100', '${o$#} apples'],
                             ['= 101', 'hundred and &{1} apple'],

@@ -1,17 +1,22 @@
 # Simply Translate
 
-Simplest translations for JS. Consider it even more as a object mapper, a Dictionary, not translation AI or Bot or something... :)
+Simplest translations for JS. Even consider it more as an object mapper, a Dictionary, but not translation AI or Bot or something... :)  
+_[Typescript support]_
 
 ### **Breaking changes**
 
 #### (v0.20.0)
 
 -   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
--   added remainder (modulo) operator `%`.
+-   added **remainder** (modulo) plural operator `%`.
+-   added **ends-with** plural operator `...`.
+-   added **cases** functionality _(see [Cases](#Cases))_.
 -   added double curly brackets `{{...}}` support for placeholder.
--   deprecated `fallbackLang` and `defaultLang` properties. It is recommended to use `lang` and custom middleware for `fallbackLang` if needed in future.
+-   deprecated `defaultLang` property over `lang` name.
 -   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
+-   not falling back to placeholder property name.
 -   removed **dynamic cache**.
+-   ~~deprecated `fallbackLang` property~~ `fallbackLang` remains.
 
 #### (v0.10.0)
 
@@ -31,8 +36,6 @@ npm i simply-translate
 ```javascript
 import { Translations } from 'simply-translate';
 ```
-
-_Typescript_ (4.0) supported
 
 ### Initialize
 
@@ -57,7 +60,7 @@ const dics = {
 
 ### Dictionary entry
 
-is a set of values with a unique string as a key and a string or object with value (which is requierd) and description
+is a set of values with a unique string as a key and a string or object with _value_ (which is required), _description_, and (optionally) _plural_ and _cases_ data
 
 ```javascript
 const dics = {
@@ -73,8 +76,8 @@ const dics = {
 
 ### Translate
 
-by calling `translate` or `translateTo` functions.  
-`translate` function uses `lang` property, `translateTo` awaits language parameter.
+by calling `translate` or `translateTo` methods.  
+`translate` method uses `lang` property of `Translations`, `translateTo` requires language parameter.
 
 ```javascript
 // create translations with dictionary:
@@ -83,7 +86,7 @@ const translated = translations.translate('hello_world');
 const translated = translations.translateTo('en-US', 'hello_world');
 ```
 
-To use dynamic data that can be passed to as parameters for translation add `${...}` with property name of the passed data.
+To use dynamic data add `${...}` with field name of the data object.
 
 ```javascript
 const dics = {
@@ -96,8 +99,8 @@ translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.   
-It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to *single* (`{...}`) or *double* (`{{...}}`), however it is _not recommended_.
+In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.  
+It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to _single_ (`{...}`) or _double_ (`{{...}}`), however it is _not recommended_.
 
 ```javascript
 const dics = {
@@ -116,7 +119,8 @@ translations.translate("hello_user", { user: "Oleg" }, "Hello {{user}}");
 // Hello Oleg
 ```
 
-Please _note_ that using `$` prefix will replace placeholder with value from the data object, `$&` will try to translate that value, and `&` will just translate the placeholder.
+Please **note** that using `$` prefix will replace placeholder with value from the data object, `$&` will try to translate that value, and `&` will just translate the placeholder.  
+And **note**: _single_ (`{...}`) and _double_ ignores `$` as if it is there.
 
 ```javascript
 const dics = {
@@ -156,11 +160,11 @@ translations.translate('user.hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-Do **not use** namespaces separator (`.` by default) for dictionary keys.
+Do **not use** namespaces separator (`.`) for dictionary keys.
 
 ### Fallback value
 
-can be passed to `translate` function to be used instead of absent translation.
+Can be used as value if translation was not found. If value is not found and `fallback` is not provided, _key_ will be used as _value_.
 
 ```javascript
 const dics = {
@@ -169,11 +173,11 @@ const dics = {
     },
 };
 const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate('hello_${user}', { user: 'Oleg' }, 'Hello ${user}');
+translations.translate('hello_user}', { user: 'Oleg' }, 'Hello ${user}');
 // Hello Oleg!
 ```
 
-To add clarity you can use `${...}` in keys, **however** it is **not** required.
+You can use `${...}` in keys, **however** it is **not** required, but might be useful.
 
 ```javascript
 const dics = {
@@ -184,16 +188,12 @@ const dics = {
 const translations = new Translations(dics);
 translations.translateTo('en-US', 'hello_${user}', { user: 'Oleg' });
 // Hello Oleg!
+translations.translateTo('en-US', 'goodbye_${user}', { user: 'Oleg' });
+// goodbye_Oleg!
 ```
 
-It may be useful if translation and fallback values were not provided, so key will be used with dynamic value.
-
-```javascript
-translations.translateTo('es-ES', 'hello_${user}', { user: 'Oleg' });
-// hello_Oleg!
-```
-
-It is possible to use fallback values for dynamic parameters. **Note**: Due to some limitations **only Latin** characters supported for fallback.
+It is possible to use fallback values for dynamic fields. **Note**: Due to implementation limitations (and not adding external dependencies) **only Latin** characters supported for placeholders and fallback.  
+Since _ver.0.20.0_ if property is null or undefined placeholder will be empty _(not property name as it was)_.
 
 ```javascript
 const dics = {
@@ -207,17 +207,14 @@ translations.translate('hello_${user}', { user: undefined });
 // Hello User!
 translations.translate('hi_${user}', { user: undefined }, 'Hi ${user?Friend}');
 // Hi Friend!
+translations.translate('hi_${user}', { user: undefined }, 'Hi ${user}');
+// Hi !
 ```
 
 Next will fail to replace placeholder:
 
 ```javascript
-translations.translateTo(
-    'ru-RU',
-    'hi_${user}',
-    { user: 'Олег' },
-    'Привет ${user?Пользователь}'
-);
+translations.translateTo('ru-RU', 'hi_${user}', { user: 'Олег' }, 'Привет ${user?Пользователь}');
 // Привет ${user?Пользователь}
 ```
 
@@ -227,12 +224,7 @@ To solve this you may add translation term:
 translations.extendDictionary('ru-RU', {
     User: 'Пользователь',
 });
-translations.translateTo(
-    'ru-RU',
-    'hi_${user}',
-    { user: undefined },
-    'Привет $&{user?User}'
-);
+translations.translateTo('ru-RU', 'hi_${user}', { user: undefined }, 'Привет $&{user?User}');
 // Привет Пользователь
 ```
 
@@ -261,11 +253,7 @@ translations.translate('hello_${user}', { user: 'Oleg' });
 // Привет, Олег!
 translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}');
 // Goodbye Олег!
-translations.translate(
-    'nice_day_${user}',
-    { user: undefined },
-    'Have a nice day ${user?Friend}'
-);
+translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day ${user?Friend}');
 // Have a nice day Friend
 ```
 
@@ -282,6 +270,7 @@ let translations = new Translations(
                 plural: {
                     bananas: [
                         ['<= 0', 'no bananas'],
+                        ['...2', 'number of bananas that ends with 2'],
                         ['= 1', 'one banana'],
                         ['in [3,4]', 'few bananas'],
                         ['% 11', 'many bananas that is divisible by eleven'],
@@ -295,7 +284,6 @@ let translations = new Translations(
                         ['_', '$# eggs'],
                     ],
                 },
-                description: 'translations',
             },
         },
     },
@@ -303,42 +291,54 @@ let translations = new Translations(
         lang: 'en-US',
     }
 );
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 0,
     eggs: 1,
 });
 // I ate no bananas and one egg for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 3,
-    eggs: 2,
+    eggs: 5,
 });
-// I ate few bananas and 2 eggs for dinner
+// I ate few bananas and 5 eggs for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 1,
     eggs: 1,
 });
 // I ate one banana and one egg for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 12,
+    bananas: 13,
     eggs: 0,
 });
 // I ate too many bananas and zero eggs for dinner
-translations.translate('i-ate-apples-for', {
-    apples: 121,
-    when: 'dinner',
+
+translations.translate('i-ate-eggs-bananas-dinner', {
+    bananas: 121,
+    eggs: 3,
 });
 // I ate many bananas that is divisible by eleven and some eggs for dinner
+
 translations.translate('i-ate-eggs-bananas-dinner', {
     bananas: 6,
     eggs: 3,
 });
 // I ate many bananas and some eggs for dinner
+
+translations.translate('i-ate-eggs-bananas-dinner', {
+    bananas: 12,
+    eggs: one,
+});
+// I ate number of bananas that ends with 2 and one eggs for dinner
 ```
 
-Pluralization are added to `plural` property of translation value as an array to keep execution order.
+`plural` property of translation value used for pluralization. It as an array to keep execution order.
 The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.   
-Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.    
+Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, `...`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
+Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.  
 Execution order is important because compare operations runs from top to bottom and when criteria is met then translation will use `value` provided for `operation`.
 
 ### Plural translations
@@ -397,6 +397,89 @@ translations.translate('i-ate-apples-for', {
 });
 // I ate 5 (WOW!) apples for Breakfast
 ```
+
+### Cases
+
+_(v0.20.0+)_  
+**(experimental)**
+Cases are similar to _pluralization_ but bit simpler. At the moment there is only truthy/falsy check.  
+Little bit different syntax like translation placeholder, instead of `&` - `!`: `$!{...}`.
+
+```javascript
+let translations = new Translations({
+    'en-US': {
+        somebody_ate_bananas: {
+            value: '$&{prefix}$!{prefix}${person} ate bananas',
+            cases: {
+                prefix: [
+                    ['!!', ' '],
+                    ['!', ''],
+                ],
+            },
+        },
+        sir: 'Sir',
+        madam: 'Madam',
+    },
+});
+
+translations.translate('somebody_ate_bananas', {
+    prefix: 'sir',
+    person: 'Holmes',
+});
+// Sir Holmes ate bananas
+
+translations.translate('somebody_ate_bananas', {
+    person: 'Holmes',
+});
+// Holmes ate bananas
+```
+
+Use replace pattern `$#` in combination with `$` or `&` for a bit more complex scenarios (like pluralization)
+
+```javascript
+let translations = new Translations({
+    'en-US': {
+        i_have_been_here_count: {
+            value: '$!{count} ${days}',
+            cases: {
+                count: [
+                    ['!!', "I've been here ${count}"],
+                    ['!', 'I have not been here'],
+                ],
+            },
+            plural: {
+                count: [
+                    ['=1', 'once'],
+                    ['=2', 'twice'],
+                    ['in [3,4,5]', 'few times'],
+                    ['>10', 'many times'],
+                    ['_', '$# times'],
+                ],
+                days: [
+                    ['<2', 'today'],
+                    ['<5', 'for last few days'],
+                    ['_', 'for long time'],
+                ],
+            },
+        },
+    },
+});
+
+translations.translate('i_have_been_here_count', {
+    count: 0,
+    days: 1,
+});
+// I have not been here today
+
+translations.translate('i_have_been_here_count', {
+    count: 2,
+    days: 3,
+});
+// I've been here twice for last few days
+```
+
+As you can see this is pretty simple but may bring some value for conditional placeholders. Still figuring value of this out...
+
 ### Add terms to dictionary
 
 To **extend** dictionary with new values use `extendDictionary` method.
@@ -417,12 +500,13 @@ translations.extendDictionary('en-US', {
 ```
 
 ### Pipeline
-_(v0.20.0+)_    
+
+_(v0.20.0+)_  
 **(experimental)**
 To manage translation flow now there is a **pipeline** functionality that runs **middlewares**.  
 Default flow is the same, but now it is possible to add custom **middlewares** to the flow or build custom one from the scratch.
 At the moment there is `SimpleDefaultPipeline` which is the old one with _fallback language_ which will be _removed_ in future. And `SimplePipeline` with access to **middlewares** collection.  
-In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.  
+In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.
 
 ```javascript
 const pipeline = new SimplePipeline();
@@ -439,4 +523,5 @@ pipeline.addMiddleware((context) => {
     });
 let translations = new Translations(..., pipeline);
 ```
-`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.  
+
+`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.

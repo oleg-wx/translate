@@ -24,14 +24,14 @@ export abstract class SimplePipelineBase implements Pipeline {
     }
 
     /** adds middleware in the end of pipeline queue */
-    addMiddleware(middleware: MiddlewareStatic | MiddlewareFunc) {
+    addMiddleware<T={},TParams={}>(middleware: MiddlewareStatic<T,TParams> | MiddlewareFunc<T,TParams>) {
         this.middlewares.push(middleware);
     }
 
     /** adds middleware at the specific index */
-    addMiddlewareAt(
+    addMiddlewareAt<T={},TParams={}>(
         index: number,
-        middleware: MiddlewareStatic | MiddlewareFunc
+        middleware: MiddlewareStatic<T,TParams> | MiddlewareFunc<T,TParams>
     ) {
         if (index < 0 || index >= this._middlewares.length) return;
         this.middlewares.splice(index, 0, middleware);

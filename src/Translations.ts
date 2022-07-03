@@ -1,6 +1,7 @@
 import {
     Dictionaries,
     Dictionary,
+    DictionaryEntry,
     Pipeline,
     PlaceholderType,
     SimpleDictionaries,
@@ -9,9 +10,9 @@ import {
 } from './core/types';
 import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { translate, hasTranslation } from './translate';
+import { deepAssign } from './core/deepAssign';
 
 export class Translations {
-    readonly absent: { [key: string]: string[] } = {};
     pipeline: Pipeline;
 
     placeholder?: PlaceholderType;
@@ -41,16 +42,13 @@ export class Translations {
     }
 
     constructor(
-        dictionaries?: { [lang: string]: Dictionary },
+        dictionaries?: Dictionaries,
         options?: {
             lang?: string;
             /**
              * @deprecated defaultLang will be removed. Use lang instead
              */
             defaultLang?: string;
-            /**
-             * @deprecated Fallback Lang will be removed soon as a parameter. It can be added as a middleware in pipeline before regular Fallback.
-             */
             fallbackLang?: string;
             placeholder?: PlaceholderType;
             /**
@@ -77,12 +75,12 @@ export class Translations {
     translate(
         key: TranslateKey,
         dynamicProps?: TranslateDynamicProps,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string;
     translate(
         key: TranslateKey,
         dynamicPropsOrFallback?: TranslateDynamicProps | string,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string {
         return this.translateTo(
             this.lang!,
@@ -98,16 +96,16 @@ export class Translations {
         lang: string,
         key: TranslateKey,
         dynamicProps: TranslateDynamicProps,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string;
     translateTo(
         lang: string,
         key: TranslateKey,
         dynamicPropsOrFallback?: TranslateDynamicProps | string,
-        fallback?: string
+        fallback?: DictionaryEntry | string
     ): string {
         if (!lang) {
-            lang = Object.keys(this.dictionaries)[0];
+            lang = '';
         }
 
         let dynamicProps = dynamicPropsOrFallback as
@@ -139,19 +137,35 @@ export class Translations {
     }
 
     hasTranslationTo(lang: string, key: TranslateKey): boolean {
-        return hasTranslation(lang as string, this.dictionaries, key);
+        return hasTranslation(lang, this.dictionaries, key);
     }
 
     hasTranslation(key: TranslateKey): boolean {
         return hasTranslation(this.lang as string, this.dictionaries, key);
     }
 
-    extendDictionary(lang: string, dictionary: Dictionary) {
+    extendDictionary(lang: string, dictionary: Dictionary): void;
+    extendDictionary(dictionary: Dictionary): void;
+    extendDictionary(
+        langOrDictionary: string | Dictionary,
+        dictionary?: Dictionary
+    ): void {
+        let lang: string | undefined;
+        if (typeof langOrDictionary === 'string') {
+            lang = langOrDictionary;
+        } else {
+            lang = this.lang;
+            dictionary = langOrDictionary;
+        }
+        if (!lang || !dictionary) {
+            return;
+        }
+
         this.dictionaries = this.dictionaries ?? {};
         let existingDictionary = this.dictionaries[lang];
 
         if (existingDictionary) {
-            Object.assign(existingDictionary, dictionary);
+            deepAssign(existingDictionary, dictionary);
         } else {
             this.dictionaries[lang] = dictionary;
         }

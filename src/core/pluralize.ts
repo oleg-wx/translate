@@ -8,8 +8,8 @@ export function pluralize(
     value: string | number,
     pluralOptions: PluralOptions,
 ) {
-    var pluralValues = pluralOptions;
-    var pluralValue = numProps;
+    let pluralValues = pluralOptions;
+    let pluralValue = numProps;
     if (pluralValues) {
         let num = +value as number;
         for (let i = 0; i < pluralValues.length; i++) {
@@ -31,7 +31,7 @@ export function pluralize(
         }
     }
     regexNumProps.lastIndex = 0;
-    var replacedValue = pluralValue.replace(
+    const replacedValue = pluralValue.replace(
         regexNumProps,
         (pattern: string, val: string, text: string) => value as string
     );

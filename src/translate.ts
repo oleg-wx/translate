@@ -7,6 +7,7 @@ import {
     Pipeline,
     FallbackLangParams,
     PlaceholderParams,
+    DictionaryEntry,
 } from './core/types';
 import { TranslateKeyInstance } from './core/translation-key';
 import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
@@ -31,7 +32,7 @@ export function translate(
     dictionaries: Dictionaries,
     key: TranslateKey,
     dynamicProps?: TranslateDynamicProps,
-    fallback?: string,
+    fallback?: DictionaryEntry | string,
     settings?: TranslateOptions
 ): string {
     if (key == null || key == '' || key.length === 0) {

@@ -60,7 +60,7 @@ describe('when using custom middleware', () => {
 describe('when using custom middleware static', () => {
     let key = 'i-ate-${eggs}-${bananas}-dinner';
     const pipeline = new SimplePipeline();
-    const mv: MiddlewareStatic & {count:number} = {
+    const mv: MiddlewareStatic & { count: number } = {
         count: 0,
         exec(context) {
             mv.count = (mv.count ?? 0) + 1;
@@ -96,5 +96,43 @@ describe('when using custom middleware static', () => {
             translations.translate(v.key, v);
         });
         expect(mv.count).toBe(3);
+    });
+});
+
+describe('should detect fallbacks to key or value', () => {
+    const pipeline = new SimplePipeline();
+    const mv: MiddlewareStatic & { keyFallbacks: number; fallbacks: number } = {
+        keyFallbacks: 0,
+        fallbacks: 0,
+        exec(context) {
+            if (context.result.fallingBack) {
+                mv.fallbacks++;
+                if (context.result.fallingBackToKey) {
+                    mv.keyFallbacks++;
+                }
+            }
+        },
+    };
+    pipeline.addMiddleware(mv);
+    let translations = new Translations(
+        {
+            en: { yes: 'Yes' },
+        },
+        { lang: 'en' },
+        pipeline
+    );
+    let values = [
+        { key: 'no', fallback: 'fallback' },
+        { key: 'no', fallback: undefined },
+        { key: 'yes', fallback: 'fallback' },
+        { key: 'yes', fallback: undefined },
+    ];
+
+    it(`should detect key fallbacks`, () => {
+        values.forEach((v) => {
+            translations.translate(v.key, v.fallback!);
+        });
+        expect(mv.fallbacks).toBe(2);
+        expect(mv.keyFallbacks).toBe(1);
     });
 });

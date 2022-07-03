@@ -10,8 +10,8 @@ describe('when using namespaces', () => {
                     num: [
                         ['= 0', 'none'],
                         ['= 1', 'one test'],
-                        ['= 100', '$&{onehundred} tests'],
-                        ['= 200', '$&{item.twohundred} tests'],
+                        ['= 100', '&{onehundred} tests'],
+                        ['= 200', '&{item.twohundred} tests'],
                         ['_', '$# tests'],
                     ],
                 },

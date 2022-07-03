@@ -8,9 +8,9 @@ describe('when falling back to property', () => {
         { bananas: 3, when: undefined },
     ];
     let expectedDef = [
-        'I ate bananas banana(s) for breakfast',
-        'I ate 3 banana(s) for when',
-        'I ate 3 banana(s) for when',
+        'I ate  banana(s) for breakfast',
+        'I ate 3 banana(s) for supper',
+        'I ate 3 banana(s) for supper',
     ];
     let expectedFallback = [
         'I ate some amount of banana(s) for breakfast',
@@ -23,7 +23,7 @@ describe('when falling back to property', () => {
                 'en',
                 'i-ate-bananas-when-fallback',
                 v,
-                'I ate ${bananas} banana(s) for $&{when}'
+                'I ate ${bananas} banana(s) for $&{when?supper}'
             );
             expect(t).toBe(expectedDef[i]);
         });
