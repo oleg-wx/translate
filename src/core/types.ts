@@ -127,3 +127,8 @@ export type Middlewares = Array<Middleware<any, any>>;
 export interface Pipeline {
     run<T = {}>(params: ContextParams<T>): string;
 }
+
+export interface TranslateOptions
+    extends PlaceholderParams,
+        FallbackLangParams {
+}
