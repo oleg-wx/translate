@@ -1,21 +1,26 @@
 {
   "name": "simply-translate",
-  "version": "0.20.0-beta.10",
+  "version": "0.20.0-beta.13",
   "description": "Simplest translation functionality ever",
-  "main": "dist/index.js",
+  "main": "es/index.js",
   "files": [
-    "dist/*"
+    "/*"
   ],
   "scripts": {
     "test": "jest",
     "clean": "rimraf dist",
-    "build:prod": "npm run clean && tsc",
-    "publish:prod": "npm run build:prod && npm publish",
+    "copy:readme": "copyfiles ./README.md dist/",
+    "copy:package": "copyfiles ./package.json dist/",
+    "build:es": "tsc -p tsconfig.es.json",
+    "build:common": "tsc -p tsconfig.cjs.json",
+    "build:prod": "npm run clean && npm run copy:readme && npm run copy:package && npm run build:es && npm run build:common",
+    "publish:prod": "npm run build:prod && cd ./dist && npm publish && cd ..",
     "build:patch": "npm --no-git-tag-version version patch && npm run build:prod",
-    "publish:patch": "npm run build:patch && npm publish"
+    "publish:patch": "npm run build:patch && cd ./dist && npm publish && cd .."
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
+    "copyfiles": "^2.4.1",
     "jest": "^27.4.1",
     "rimraf": "^3.0.2",
     "ts-jest": "^27.1.3",

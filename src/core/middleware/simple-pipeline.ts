@@ -62,7 +62,7 @@ export class SimpleDefaultPipeline extends SimplePipelineBase {
         this._middlewares = [
             PrepareRegularExpressionsMiddleware,
             GetEntryMiddleware,
-            new FallbackWithDifferentLanguageMiddleware(GetEntryMiddleware),
+            FallbackWithDifferentLanguageMiddleware,
             FallbackMiddleware,
             FillPlaceholdersMiddleware,
         ];

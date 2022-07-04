@@ -17,6 +17,7 @@ _[Typescript support]_
 -   not falling back to placeholder property name.
 -   removed **dynamic cache**.
 -   ~~deprecated `fallbackLang` property~~ `fallbackLang` remains.
+-   added _commonjs_ version (`simply-translate/commonjs`)
 
 #### (v0.10.0)
 

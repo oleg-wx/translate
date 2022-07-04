@@ -1,4 +1,5 @@
-import { SimplePipeline } from './core/middleware/simple-pipeline';
+
+import { FallbackMiddleware, FallbackWithDifferentLanguageMiddleware, GetEntryMiddleware, SimpleDefaultPipeline, SimplePipeline } from './core/middleware';
 import {
     Dictionaries,
     Dictionary,
@@ -9,8 +10,8 @@ import {
     MiddlewareFunc,
     MiddlewareStatic,
     PlaceholderType,
+    TranslateOptions,
 } from './core/types';
-import { TranslateOptions } from './translate';
 import { Translations } from './Translations';
 
 export {
@@ -23,7 +24,11 @@ export {
     TranslateKey,
     Pipeline,
     SimplePipeline,
+    SimpleDefaultPipeline,
     MiddlewareFunc,
     MiddlewareStatic,
     PlaceholderType,
+    FallbackWithDifferentLanguageMiddleware,
+    FallbackMiddleware,
+    GetEntryMiddleware
 };

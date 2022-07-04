@@ -8,15 +8,11 @@ import {
     FallbackLangParams,
     PlaceholderParams,
     DictionaryEntry,
+    TranslateOptions,
 } from './core/types';
 import { TranslateKeyInstance } from './core/translation-key';
 import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { GetEntryMiddleware } from './core/middleware/get-entry-middleware';
-
-export interface TranslateOptions
-    extends PlaceholderParams,
-        FallbackLangParams {
-}
 
 /**
  *
