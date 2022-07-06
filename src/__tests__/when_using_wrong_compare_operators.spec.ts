@@ -9,7 +9,6 @@ describe('when using wrong conpare operators', () => {
         '==',
         '[1,2,3]',
         '+',
-        '> a',
         'doit()',
     ]
     operations.forEach((v, i) => {

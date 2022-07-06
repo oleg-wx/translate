@@ -1,4 +1,4 @@
-import { pluralize } from '../pluralize';
+import { handlePluralize } from '../handlePluralize';
 import { handleCases } from '../handleCases';
 import { replacePlaceholders } from '../_replace-placeholders';
 import { MiddlewareFunc, RegExpResult } from '../types';
@@ -38,7 +38,7 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
                   fallback?: string
               ) => context.translate!(key, dynamicProps, fallback)
             : undefined,
-        pluralize,
+        handlePluralize,
         handleCases,
         {
             shouldReplaceDynamic: result._shouldReplace,
