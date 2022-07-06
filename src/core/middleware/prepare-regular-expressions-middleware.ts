@@ -1,4 +1,4 @@
-import { pluralize } from '../pluralize';
+import { handlePluralize } from '../handlePluralize';
 import { replacePlaceholders } from '../_replace-placeholders';
 import { MiddlewareFunc, PlaceholderParams, RegExpResult } from '../types';
 import { TranslateDynamicProps } from '../types';
@@ -72,7 +72,3 @@ export const PrepareRegularExpressionsMiddleware: MiddlewareFunc<
 
     result._replacePlaceholders.lastIndex = 0;
 };
-
-function escapeRegExp(val: string): string {
-    return val.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-}

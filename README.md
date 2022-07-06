@@ -8,8 +8,9 @@ _[Typescript support]_
 #### (v0.20.0)
 
 -   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
--   added **remainder** (modulo) plural operator `%`.
--   added **ends-with** plural operator `...`.
+-   added **remainder** (modulo) operator `%`.
+-   added **ends-with** and **starts-with** operators `...`.
+-   added **truthy/falsy** operators `!`/`!!`.
 -   added **cases** functionality _(see [Cases](#Cases))_.
 -   added double curly brackets `{{...}}` support for placeholder.
 -   deprecated `defaultLang` property over `lang` name.
@@ -34,16 +35,21 @@ npm i simply-translate
 
 ### Import
 
+#### ES6 modules
+
 ```javascript
 import { Translations } from 'simply-translate';
 ```
 
-### Initialize
-
-translations with dictionaries
+#### CommonJS modules
 
 ```javascript
-// create translations with dictionary and storing dynamically translated values:
+import { Translations } from 'simply-translate/commonjs';
+```
+
+### Initialize
+
+```javascript
 const dics = {...};
 const translations = new Translations(dics, {lang:'en-US'});
 ```
@@ -61,7 +67,7 @@ const dics = {
 
 ### Dictionary entry
 
-is a set of values with a unique string as a key and a string or object with _value_ (which is required), _description_, and (optionally) _plural_ and _cases_ data
+is a set of values with a unique string as a key and a string or object with _value_ (which is required), _description_, and (optionally) _plural_ and _cases_ data.
 
 ```javascript
 const dics = {
@@ -77,7 +83,7 @@ const dics = {
 
 ### Translate
 
-by calling `translate` or `translateTo` methods.  
+`translate` or `translateTo` methods.  
 `translate` method uses `lang` property of `Translations`, `translateTo` requires language parameter.
 
 ```javascript
@@ -87,7 +93,7 @@ const translated = translations.translate('hello_world');
 const translated = translations.translateTo('en-US', 'hello_world');
 ```
 
-To use dynamic data add `${...}` with field name of the data object.
+For Dynamic data use `${...}` with field name of the data object.
 
 ```javascript
 const dics = {
@@ -100,8 +106,8 @@ translations.translate('hello_user', { user: 'Oleg' });
 // Hello Oleg!
 ```
 
-In version _v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.  
-It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `$placeholder` property of `Translations` to _single_ (`{...}`) or _double_ (`{{...}}`), however it is _not recommended_.
+_v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.  
+It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `placeholder` property of `Translations` to _single_ (`{...}`) or _double_ (`{{...}}`) curly-braces, however it is _not recommended_.
 
 ```javascript
 const dics = {
@@ -110,7 +116,6 @@ const dics = {
   },
 };
 const translations = new Translations(dics, { lang: "en-US", placeholder = 'single' });
-
 translations.translate("hello_user", { user: "Oleg" }, "Hello {user}");
 // Hello Oleg
 
@@ -120,52 +125,55 @@ translations.translate("hello_user", { user: "Oleg" }, "Hello {{user}}");
 // Hello Oleg
 ```
 
-Please **note** that using `$` prefix will replace placeholder with value from the data object, `$&` will try to translate that value, and `&` will just translate the placeholder.  
-And **note**: _single_ (`{...}`) and _double_ ignores `$` as if it is there.
+Please **note** `$` prefix will replace placeholder with property value from the data object, `$&` translate value from data object, and `&` will just translate the placeholder text.  
+And **note**: _single_ or _double_ placeholder ignores `$` as if it is there so using _just translate_ `&` function is _not available_.
 
 ```javascript
 const dics = {
     'en-US': {
-        hello_user: 'Hello $&{user}!',
-        hello_user_t: 'Hello &{user}!',
-        hello_user_r: 'Hello ${user}!',
-        oleg: 'Oleg',
-        user: 'User',
+        hello_user: 'Hello ${user}!',
+        hello_user_r: 'Hello $&{usr}!',
+        hello_user_t: 'Hello &{usr}!',
+        usr: 'User',
+        oleg: 'Олег',
     },
 };
 const translations = new Translations(dics, { lang: 'en-US' });
 translations.translate('hello_user', { user: 'oleg' });
-// Hello Oleg!
+// Hello oleg!
 translations.translate('hello_user_t', { user: 'oleg' });
 // Hello User!
 translations.translate('hello_user_r', { user: 'oleg' });
-// Hello oleg!
+// Hello Олег!
 ```
 
 ### Namespaces
 
-You can group items in dictionary by a _namespace_, which is basically just an object.
+Group items in dictionary.
 
 ```javascript
 const dics = {
     'en-US': {
         user: {
             hello_user: 'Hello ${user}!',
+            goodbye_user: { value: 'Goodbye ${user}!' },
         },
     },
 };
 const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate(['user', 'hello_user'], { user: 'Oleg' });
-// Hello Oleg!
 translations.translate('user.hello_user', { user: 'Oleg' });
 // Hello Oleg!
+translations.translate(['user', 'goodbye_user'], { user: 'Oleg' });
+// Goodbye Oleg!
 ```
 
-Do **not use** namespaces separator (`.`) for dictionary keys.
+You don't need to directly point to `value`, it is done by default.
+
+Do **not use** namespaces separator (`.`) for dictionary **keys**.
 
 ### Fallback value
 
-Can be used as value if translation was not found. If value is not found and `fallback` is not provided, _key_ will be used as _value_.
+If value is not found and `fallback` is not provided, _key_ will be used as _value_.
 
 ```javascript
 const dics = {
@@ -178,7 +186,7 @@ translations.translate('hello_user}', { user: 'Oleg' }, 'Hello ${user}');
 // Hello Oleg!
 ```
 
-You can use `${...}` in keys, **however** it is **not** required, but might be useful.
+You may use `${...}` in keys, **however** it is **not** required, but might be useful.
 
 ```javascript
 const dics = {
@@ -193,7 +201,7 @@ translations.translateTo('en-US', 'goodbye_${user}', { user: 'Oleg' });
 // goodbye_Oleg!
 ```
 
-It is possible to use fallback values for dynamic fields. **Note**: Due to implementation limitations (and not adding external dependencies) **only Latin** characters supported for placeholders and fallback.  
+It is possible to use fallback values for dynamic fields. **Note**: Due to implementation limitations (and keep library clean of dependencies) **only Latin** characters supported for placeholders and fallback.  
 Since _ver.0.20.0_ if property is null or undefined placeholder will be empty _(not property name as it was)_.
 
 ```javascript
@@ -204,11 +212,11 @@ const dics = {
 };
 const translations = new Translations(dics, { lang: 'en-US' });
 
-translations.translate('hello_${user}', { user: undefined });
+translations.translate('hello_user', { user: undefined });
 // Hello User!
-translations.translate('hi_${user}', { user: undefined }, 'Hi ${user?Friend}');
+translations.translate('hi_user', { user: undefined }, 'Hi ${user?Friend}');
 // Hi Friend!
-translations.translate('hi_${user}', { user: undefined }, 'Hi ${user}');
+translations.translate('hi_user', { user: undefined }, 'Hi ${user}');
 // Hi !
 ```
 
@@ -219,7 +227,7 @@ translations.translateTo('ru-RU', 'hi_${user}', { user: 'Олег' }, 'Прив�
 // Привет ${user?Пользователь}
 ```
 
-To solve this you may add translation term:
+To solve this add translation term:
 
 ```javascript
 translations.extendDictionary('ru-RU', {
@@ -231,7 +239,7 @@ translations.translateTo('ru-RU', 'hi_${user}', { user: undefined }, 'Приве
 
 ### Fallback language
 
-You can use fallback if dictionary for passed or selected language does not contain translation. Fallback dictionary will be used before fallback value.
+Fallback language will use dictionary if selected language does not contain translation. Fallback dictionary will be used before fallback value.
 
 ```javascript
 const dics = {
@@ -260,7 +268,11 @@ translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day
 
 ### Pluralization
 
-Use `$#` in plural options to insert number.
+Use `$#` in plural options to insert number.  
+`plural` property of translation value used for pluralization. Execution order is sequential.  
+The structure of pluralization entry is a tuple: `[operation, value]`.  
+Supported [operators](#Operators): _truthy/falsy_ `!!`/`!`, _compare_: `>`,`<`,`=`,`<=`,`>=`; and _few more_: `in []` `between`, `%`, `...`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
+Please **note**: remainder operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.
 
 ```javascript
 let translations = new Translations(
@@ -336,12 +348,6 @@ translations.translate('i-ate-eggs-bananas-dinner', {
 // I ate number of bananas that ends with 2 and one eggs for dinner
 ```
 
-`plural` property of translation value used for pluralization. It as an array to keep execution order.
-The structure of pluralization entry is a tuple: `[operation, value]`.
-Translator supports few operators: `>`,`<`,`=`,`<=`,`>=`, `in []`, `between`, `%`, `...`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
-Please note that divisibility operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.  
-Execution order is important because compare operations runs from top to bottom and when criteria is met then translation will use `value` provided for `operation`.
-
 ### Plural translations
 
 In case if dynamic parameters have to be translated you can use `$&{$#}` syntax.  
@@ -403,17 +409,18 @@ translations.translate('i-ate-apples-for', {
 
 _(v0.20.0+)_  
 **(experimental)**
-Cases are similar to _pluralization_ but bit simpler. At the moment there is only truthy/falsy check.  
-Little bit different syntax like translation placeholder, instead of `&` - `!`: `$!{...}`.
+Similar to _pluralization_ and executes **before pluralization**. Supports a bit less [operators](#Operators): _truthy/falsy_, _compare_ and _end/startsWith_ `...` operators.  
+Little bit different syntax placeholder, similar to translations but instead of `&` use `!`: `$!{...}`.  
+Use replace pattern `$#` in combination with `$` or `&` and pluralization.
 
 ```javascript
 let translations = new Translations({
     'en-US': {
         somebody_ate_bananas: {
-            value: '$&{prefix}$!{prefix}${person} ate bananas',
+            value: '$!{prefix}${person} ate bananas',
             cases: {
                 prefix: [
-                    ['!!', ' '],
+                    ['!!', '&{$#} '],
                     ['!', ''],
                 ],
             },
@@ -435,8 +442,6 @@ translations.translate('somebody_ate_bananas', {
 // Holmes ate bananas
 ```
 
-Use replace pattern `$#` in combination with `$` or `&` for a bit more complex scenarios (like pluralization)
-
 ```javascript
 let translations = new Translations({
     'en-US': {
@@ -444,8 +449,8 @@ let translations = new Translations({
             value: '$!{count} ${days}',
             cases: {
                 count: [
-                    ['!!', "I've been here ${count}"],
-                    ['!', 'I have not been here'],
+                    ['== 0', 'I have not been here'],
+                    ['_', "I've been here ${count}"],
                 ],
             },
             plural: {
@@ -481,21 +486,39 @@ translations.translate('i_have_been_here_count', {
 
 As you can see this is pretty simple but may bring some value for conditional placeholders. Still figuring value of this out...
 
+### Operators
+
+-   Truthy/Falsy `!!`/`!`: `['!!','appear if value is truthy']` / `['!','appear if value is falsy']`
+-   Compare `>`,`<`,`=`,`<=`,`>=`. Just regular compare operators: `['<2','appear if value is less then 2']`
+-   In `in []`: `['in [2,4,8]', 'only for 2, 4, and 8']`. Works only for pluralization and with digits.
+-   Between `between`: `['between 2 and 5', 'for 2, 3, 4, and 8']`. Works only for pluralization and with digits.
+-   Remainder `%`: `['%2', 'remainder that equals to 0 left over when divided by 2']`, `['%3=5', 'remainder that equals to 5 when divided by 3']`
+-   Ends/Starts with `...` operators: `['...2', 'ends with 2']`, `['2...', 'starts with 2']`
+-   and `_` for _default_.
+    Operators uses static values provided in `operation`.  
+    Operators in `plural` or `cases` executes in the order in which it is listed, so it is important to next rule is not prevented by current, especially default `_`.
+
 ### Add terms to dictionary
 
 To **extend** dictionary with new values use `extendDictionary` method.
 
 ```javascript
 translations.extendDictionary('en-US', {
-    'i-ate-mango': {
-        value: 'I ate ${mango}',
-        plural: {
-            apples: [
-                ['< 1', 'no mangos'],
-                ['= 1', 'one mango'],
-                ['_', '$# mangos'],
-            ],
+    fruits: {
+        'i-ate-mango': {
+            value: 'I ate ${mango}',
+            plural: {
+                apples: [
+                    ['< 1', 'no mangos'],
+                    ['= 1', 'one mango'],
+                    ['_', '$# mangos'],
+                ],
+            },
         },
+        mango: 'mango',
+    },
+    tools: {
+        fork: 'fork',
     },
 });
 ```

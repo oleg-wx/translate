@@ -10,7 +10,7 @@ import {
 } from './core/types';
 import { SimpleDefaultPipeline } from './core/middleware/simple-pipeline';
 import { translate, hasTranslation } from './translate';
-import { deepAssign } from './core/deepAssign';
+import { deepAssign } from './core/deep-assign';
 
 export class Translations {
     pipeline: Pipeline;

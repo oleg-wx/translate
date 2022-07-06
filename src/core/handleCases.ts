@@ -1,7 +1,12 @@
-import { CaseOption, CaseOptions } from './types';
+import { getOperatorFn } from './operators/get-operator';
+import { endsWithOperator, startsWithOperator } from './operators/operators';
+import { truthyFalsyOperator, compareOperator } from './operators/simple-operators';
+import { CaseOptions, Operator } from './types';
 
 const valProps = '$#';
 const regexValProps = /\$\#/g;
+
+const operators: Operator[] = [truthyFalsyOperator, compareOperator, startsWithOperator, endsWithOperator];
 
 export function handleCases(value: any, options: CaseOptions) {
     let _values = options;
@@ -15,7 +20,11 @@ export function handleCases(value: any, options: CaseOptions) {
             } else {
                 let operatorFunction_ = _value_tmp_[2];
                 if (!operatorFunction_) {
-                    operatorFunction_ = compileCasesFunction(key_);
+                    operatorFunction_ = getOperatorFn(
+                        key_,
+                        operators,
+                        (key) => new Error(`case operator "${key}" not supported`)
+                    ).exec(key_);
                     _value_tmp_[2] = operatorFunction_;
                 }
                 if (operatorFunction_(value)) {
@@ -26,18 +35,6 @@ export function handleCases(value: any, options: CaseOptions) {
         }
     }
     regexValProps.lastIndex = 0;
-    var replacedValue = _value.replace(
-        regexValProps,
-        (pattern: string, val: string, text: string) => value as string
-    );
+    var replacedValue = _value.replace(regexValProps, (pattern: string, val: string, text: string) => value as string);
     return replacedValue;
-}
-
-export function compileCasesFunction(caseKey: CaseOption[0]) {
-    if (caseKey === '!') {
-        return (val: any) => !val;
-    }
-    else{
-        return (val: any) => !!val;
-    }
 }

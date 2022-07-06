@@ -1,10 +1,4 @@
-import {
-    CaseOptions,
-    Cases,
-    PluralOptions,
-    Plurals,
-    TranslateDynamicProps,
-} from './types';
+import { CaseOptions, Cases, PluralOptions, Plurals, TranslateDynamicProps } from './types';
 import { SimpleTranslateFunc } from './types';
 
 //import { translate } from "./translate";
@@ -17,23 +11,12 @@ export function replacePlaceholders(
     cases: Cases | undefined,
     dynamicProps: TranslateDynamicProps | undefined,
     handleTranslate: SimpleTranslateFunc | undefined,
-    handlePluralize:
-        | ((value: string | number, plural: PluralOptions) => string)
-        | undefined,
+    handlePluralize: ((value: string | number | boolean, plural: PluralOptions) => string) | undefined,
     handleCases: ((value: any, caseOptions: CaseOptions) => string) | undefined,
     settings: {
-        shouldReplaceDynamic?: (
-            placeholderPrefix: string,
-            placeholder: string
-        ) => boolean;
-        shouldTranslate?: (
-            placeholderPrefix: string,
-            placeholder: string
-        ) => boolean;
-        shouldUseCases?: (
-            placeholderPrefix: string,
-            placeholder: string
-        ) => boolean;
+        shouldReplaceDynamic?: (placeholderPrefix: string, placeholder: string) => boolean;
+        shouldTranslate?: (placeholderPrefix: string, placeholder: string) => boolean;
+        shouldUseCases?: (placeholderPrefix: string, placeholder: string) => boolean;
     }
 ) {
     var replaced: string = value.replace(
@@ -47,16 +30,12 @@ export function replacePlaceholders(
             ind: number,
             text: string
         ) => {
-            let replaceValue: string | number | undefined;
+            let replaceValue: string | number | boolean | undefined;
             let replaceAgain = false;
             const shouldReplaceDynamic =
-                settings.shouldReplaceDynamic &&
-                settings.shouldReplaceDynamic(replaceAndOrTranslate, prop);
+                settings.shouldReplaceDynamic && settings.shouldReplaceDynamic(replaceAndOrTranslate, prop);
             if (shouldReplaceDynamic) {
-                if (
-                    dynamicProps &&
-                    Object.prototype.hasOwnProperty.call(dynamicProps, prop)
-                ) {
+                if (dynamicProps && Object.prototype.hasOwnProperty.call(dynamicProps, prop)) {
                     replaceValue = dynamicProps![prop];
                 }
                 if (replaceValue == null) {
@@ -66,10 +45,7 @@ export function replacePlaceholders(
                 replaceValue = prop;
             }
             const shouldUseCases =
-                cases &&
-                handleCases &&
-                settings.shouldUseCases &&
-                settings.shouldUseCases(replaceAndOrTranslate, prop);
+                cases && handleCases && settings.shouldUseCases && settings.shouldUseCases(replaceAndOrTranslate, prop);
             if (shouldUseCases) {
                 replaceValue = handleCases(replaceValue, cases[prop]);
                 // replace again
@@ -79,15 +55,9 @@ export function replacePlaceholders(
             }
 
             const shouldPluralize =
-                plurals &&
-                handlePluralize &&
-                shouldReplaceDynamic &&
-                !isNaN(replaceValue as number);
+                plurals && handlePluralize && shouldReplaceDynamic && !isNaN(replaceValue as number);
             if (shouldPluralize) {
-                replaceValue = handlePluralize(
-                    replaceValue ?? '',
-                    plurals[prop]
-                );
+                replaceValue = handlePluralize(replaceValue ?? '', plurals[prop]);
                 // replace again
                 if (replaceValue.indexOf('{') >= 0) {
                     replaceAgain = true;
@@ -110,12 +80,10 @@ export function replacePlaceholders(
                 }
             }
 
-            const shouldTranslate =
-                settings.shouldTranslate &&
-                settings.shouldTranslate(replaceAndOrTranslate, prop);
+            const shouldTranslate = settings.shouldTranslate && settings.shouldTranslate(replaceAndOrTranslate, prop);
 
             if (handleTranslate && shouldTranslate) {
-                replaceValue = handleTranslate(replaceValue as string);
+                replaceValue = handleTranslate(replaceValue as string, dynamicProps);
             }
 
             return String(replaceValue ?? '');
