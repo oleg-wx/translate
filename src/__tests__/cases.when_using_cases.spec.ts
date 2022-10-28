@@ -128,10 +128,7 @@ describe('when using more complex cases', () => {
         { count: 2, days: 3 },
     ];
 
-    let expectedEn = [
-        'I have not been here today',
-        "I've been here twice for last few days",
-    ];
+    let expectedEn = ['I have not been here today', "I've been here twice for last few days"];
 
     values.forEach((v, i) => {
         it(`should replace ${v.count} for ${v.days} => ${expectedEn[i]}`, () => {
@@ -259,6 +256,41 @@ describe('when using cases with translation and pluralization references', () =>
     values.forEach((v, i) => {
         it(`should replace and translate ${v.type} => ${expectedEn[i]}`, () => {
             expect(translations.translateTo('en', key, v)).toBe(expectedEn[i]);
+        });
+    });
+});
+
+describe('when using falsy, truthy undefined and null values for cases', () => {
+    let key = 'test_it';
+    let translations = new Translations({
+        en: {
+            [key]: {
+                value: '$!{prefix}${prefix} test',
+                cases: {
+                    prefix: [
+                        ['!!', '&{$#} '],
+                        ['!', ''],
+                    ],
+                },
+            },
+        },
+    });
+
+    let values = [
+        { prefix: '' },
+        { prefix: null },
+        { prefix: undefined },
+        { prefix: true },
+        { prefix: false },
+        { prefix: 1 },
+        { prefix: 0 },
+    ];
+
+    let expectedEn = [' test', ' test', ' test', 'true true test', 'false test', '1 1 test', '0 test'];
+
+    values.forEach((v, i) => {
+        it(`should build ${v.prefix} => ${expectedEn[i]}`, () => {
+            expect(translations.translateTo('en', key, v as any)).toBe(expectedEn[i]);
         });
     });
 });
