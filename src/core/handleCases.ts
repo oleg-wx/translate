@@ -8,14 +8,14 @@ const regexValProps = /\$\#/g;
 
 const operators: Operator[] = [truthyFalsyOperator, compareOperator, startsWithOperator, endsWithOperator];
 
-export function handleCases(value: any, options: CaseOptions) {
+export function handleCases(locale: string, value: any, options: CaseOptions) {
     let _values = options;
     let _value = valProps;
     if (_values) {
         for (let i = 0; i < _values.length; i++) {
             let _value_tmp_ = _values[i];
             let key_ = _value_tmp_[0];
-            if (key_ === '_') {
+            if (key_ === '_' || key_ === 'other') {
                 _value = _value_tmp_[1];
             } else {
                 let operatorFunction_ = _value_tmp_[2];
@@ -27,7 +27,7 @@ export function handleCases(value: any, options: CaseOptions) {
                     ).exec(key_);
                     _value_tmp_[2] = operatorFunction_;
                 }
-                if (operatorFunction_(value)) {
+                if (operatorFunction_(value, locale)) {
                     _value = _value_tmp_[1];
                     break;
                 }

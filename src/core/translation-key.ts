@@ -1,33 +1,44 @@
 import { DictionaryEntry } from './types';
 
+const namespaceSeparator = '.';
+
 export class TranslateKeyInstance {
-    readonly asString: string;
-    readonly asArray: string[];
+    private _value: string | string[];
+    private _asString?: string;
+    private _asArray?: string[];
+
+    get asString(): string {
+        if (this._asString) {
+            return this._asString;
+        }
+
+        if (typeof this._value === 'string') {
+            this._asString = this._value.trim();
+        } else if (Array.isArray(this._value)) {
+            this._asString = this._value.join(namespaceSeparator);
+        } else if (this._value != null) {
+            this._asString = String(this._value).trim();
+        }
+
+        return this._asString ?? '';
+    }
+
+    get asArray(): string[] {
+        if (this._asArray) {
+            return this._asArray;
+        }
+
+        if (typeof this._value === 'string') {
+            this._asArray = this._value.split(namespaceSeparator).map(s => s.trim());
+        } else if (Array.isArray(this._value)) {
+            this._asArray = this._value;
+        }
+
+        return this._asArray ?? [];
+    }
 
     constructor(key: string | string[]) {
-        if (key != null && !Array.isArray(key) && typeof key !== 'string') {
-            if ((key as any).toString) {
-                key = (key as any).toString();
-            } else {
-                key = '' + key;
-            }
-        }
-        var namespaceSeparator = '.';
-        // separate key by namespace namespace
-        if (typeof key === 'string' && key.indexOf(namespaceSeparator) >= 0) {
-            this.asString = key;
-
-            this.asArray = key.split(namespaceSeparator).reduce((res, val) => {
-                val && res.push(val.trim());
-                return res;
-            }, [] as string[]);
-        } else if (Array.isArray(key)) {
-            this.asString = key.join(namespaceSeparator);
-            this.asArray = key;
-        } else {
-            this.asString = key;
-            this.asArray = [key];
-        }
+        this._value = key;
     }
 
     toString() {

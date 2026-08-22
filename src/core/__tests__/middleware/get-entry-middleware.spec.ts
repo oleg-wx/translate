@@ -47,4 +47,17 @@ describe('GetEntryMiddleware', () => {
     ])('leaves the value unset for $shape', ({ key }) => {
         expect(resolve(key).value).toBeUndefined();
     });
+
+    // Keys can come from anywhere, so the walk must never step outside the dictionary's own keys.
+    it.each([
+        { key: 'constructor', shape: 'a prototype property' },
+        { key: 'constructor.name', shape: 'a string reachable on Object.prototype' },
+        { key: '__proto__.constructor.name', shape: 'the same, reached through __proto__' },
+        { key: 'toString', shape: 'an inherited method' },
+        { key: 'my-key.0', shape: 'an index into an already resolved entry' },
+        { key: 'my-key.length', shape: "a resolved entry's length" },
+        { key: 'another_key.value.0', shape: "an index into an entry's value" },
+    ])('does not resolve $shape ("$key")', ({ key }) => {
+        expect(resolve(key).value).toBeUndefined();
+    });
 });

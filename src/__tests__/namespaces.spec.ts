@@ -42,4 +42,14 @@ describe('when using namespaces', () => {
         expect(translated).not.toBe('nope');
         expect(translated).toBe('will.not.work');
     });
+
+    // Resolution must stay inside the dictionary rather than walking the prototype chain
+    // or indexing into an entry that has already resolved to a string.
+    it.each(['constructor.name', '__proto__.constructor.name', 'item.twohundred.0'])(
+        'falls back to the key instead of resolving "%s"',
+        (key) => {
+            expect(translations.hasTranslation(key)).toBe(false);
+            expect(translations.translate(key)).toBe(key);
+        }
+    );
 });

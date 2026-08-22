@@ -3,28 +3,28 @@ import { Translations } from '..';
 const LANG = 'en';
 const KEY = 'i-ate-${eggs}-${bananas}-dinner';
 
-const translations = new Translations({
-    [LANG]: {
-        [KEY]: {
-            value: 'I ate ${bananas} for dinner',
-            plural: {
-                bananas: [
-                    ['= 1', 'one banana'],
-                    ['in [2,3]', '$# bananas'],
-                    ['between 4 and 6', '4-6 bananas'],
-                    ['< 1', 'no bananas'],
-                    ['<= 8', 'few bananas'],
-                    ['> 12', 'too many bananas'],
-                    ['>= 10', 'several bananas'],
-                    ['_', 'about $# bananas'],
-                ],
-            },
-            description: 'translations',
-        },
-    },
-});
-
 describe('when inserting numbers conditionally with plural options', () => {
+    const translations = new Translations({
+        [LANG]: {
+            [KEY]: {
+                value: 'I ate ${bananas} for dinner',
+                plural: {
+                    bananas: [
+                        ['= 1', 'one banana'],
+                        ['in [2,3]', '$# bananas'],
+                        ['between 4 and 6', '4-6 bananas'],
+                        ['< 1', 'no bananas'],
+                        ['<= 8', 'few bananas'],
+                        ['> 12', 'too many bananas'],
+                        ['>= 10', 'several bananas'],
+                        ['_', 'about $# bananas'],
+                    ],
+                },
+                description: 'translations',
+            },
+        },
+    });
+
     // The first rule that matches wins, so these expectations also document the rule order above:
     // `<= 8` never sees 1..6 and `>= 10` never sees anything above 12.
     it.each([

@@ -71,7 +71,7 @@ export type TranslateDynamicProps = {
 
 export interface Operator {
     test(value: string): boolean;
-    exec(operation: string): (value: string | number | boolean | Date) => boolean;
+    exec(operation: string): (value: string | number | boolean | Date, locale?: string) => boolean;
 }
 
 export type SimpleCompare = string;
@@ -93,7 +93,7 @@ export type Plurals = { [key: string]: PluralOptions };
 export type SimpleDictionary = { [key: string]: string };
 export type SimpleDictionaries = { [lang: string]: SimpleDictionary };
 
-export type CaseOption = [string, string, ((val: string) => boolean)?];
+export type CaseOption = [string, string, ((val: string, locale: string) => boolean)?];
 export type CaseOptions = CaseOption[];
 export type Cases = { [key: string]: CaseOptions };
 

@@ -1,3 +1,4 @@
+import { cldrOperator } from './operators/cldr.operators';
 import { getOperatorFn } from './operators/get-operator';
 import {
     betweenOperator,
@@ -10,6 +11,7 @@ import { compareOperator, truthyFalsyOperator} from './operators/simple-operator
 import { Operator, PluralOptions } from './types';
 
 const operators: Operator[] = [
+    cldrOperator,
     truthyFalsyOperator,
     compareOperator,
     inOperator,
@@ -22,7 +24,7 @@ const operators: Operator[] = [
 const numProps = '$#';
 const regexNumProps = /\$\#/g;
 
-export function handlePluralize(value: string | number | boolean, pluralOptions: PluralOptions) {
+export function handlePluralize(locale: string, value: string | number | boolean, pluralOptions: PluralOptions) {
     var pluralValues = pluralOptions;
     var pluralValue = numProps;
     if (pluralValues) {
@@ -30,7 +32,7 @@ export function handlePluralize(value: string | number | boolean, pluralOptions:
         for (let i = 0; i < pluralValues.length; i++) {
             let pluralValue_tmp_ = pluralValues[i];
             let key_ = pluralValue_tmp_[0];
-            if (key_ === '_') {
+            if (key_ === '_' || key_ === 'other') {
                 pluralValue = pluralValue_tmp_[1];
             } else {
                 let operatorFn_ = pluralValue_tmp_[2];
@@ -38,7 +40,7 @@ export function handlePluralize(value: string | number | boolean, pluralOptions:
                     operatorFn_ = getOperatorFn(key_, operators).exec(key_);
                     pluralValue_tmp_[2] = operatorFn_;
                 }
-                if (operatorFn_(num)) {
+                if (operatorFn_(num, locale)) {
                     pluralValue = pluralValue_tmp_[1];
                     break;
                 }
