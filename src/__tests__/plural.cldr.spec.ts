@@ -4,8 +4,8 @@ import { PluralOptions } from '../core/types';
 const KEY = 'i-ate-${bananas}';
 
 /**
- * A rule per CLDR category. `other` is not listed because the library already spells the
- * catch-all as `_`, so anything with no category lands on the last rule.
+ * A rule per CLDR category. `other` is the catch-all — `handlePluralize` treats it exactly like
+ * `_` — so any number with no category in the target language lands there.
  */
 const categoryRules = (): PluralOptions => [
     ['zero', 'no bananas'],

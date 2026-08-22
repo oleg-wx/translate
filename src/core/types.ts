@@ -74,6 +74,12 @@ export interface Operator {
     exec(operation: string): (value: string | number | boolean | Date, locale?: string) => boolean;
 }
 
+/**
+ * A compiled operator. It is deliberately locale-agnostic — the locale arrives at match time —
+ * so one compiled matcher can be reused for every language.
+ */
+export type OperatorMatcher = ReturnType<Operator['exec']>;
+
 export type SimpleCompare = string;
 // | '_'
 // | `${'>' | '<=' | '<' | '>=' | '='}${' ' | ''}${number | ''}`
@@ -87,13 +93,13 @@ export type Contains = string; //`in [${number}${numberOrEmptyX5}${numberOrEmpty
 
 //export type Between = `between ${number},${number}`;
 
-export type PluralOption = [SimpleCompare | Contains, string, ReturnType<Operator['exec']>?];
+export type PluralOption = [SimpleCompare | Contains, string];
 export type PluralOptions = PluralOption[];
 export type Plurals = { [key: string]: PluralOptions };
 export type SimpleDictionary = { [key: string]: string };
 export type SimpleDictionaries = { [lang: string]: SimpleDictionary };
 
-export type CaseOption = [string, string, ((val: string, locale: string) => boolean)?];
+export type CaseOption = [string, string];
 export type CaseOptions = CaseOption[];
 export type Cases = { [key: string]: CaseOptions };
 

@@ -5,8 +5,8 @@ const intlMap = new Map<string, Intl.PluralRules>();
 /**
  * `Intl.PluralRules` negotiates the locale on construction, which is far too expensive to redo
  * for every placeholder, so instances are memoised per locale. They cannot simply be closed over
- * by the matcher: the matcher is cached on the rule itself (`PluralOption[2]`) and therefore has
- * to stay locale-agnostic, taking the locale at match time.
+ * by the matcher: matchers are memoised per expression and shared across every language, so they
+ * have to stay locale-agnostic and take the locale at match time.
  */
 function getPluralRules(locale: string): Intl.PluralRules {
     let intl = intlMap.get(locale);

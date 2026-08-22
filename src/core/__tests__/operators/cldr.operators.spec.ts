@@ -1,8 +1,8 @@
 import { cldrOperator } from '../../operators/cldr.operators';
 
 /**
- * The categories the operator claims. CLDR also defines `other`, but the library already spells
- * that as `_`, so it is deliberately not an operator — see the note in cldr.operators.ts.
+ * The categories the operator claims. CLDR's sixth category, `other`, is deliberately not one of
+ * them: `handlePluralize` accepts it as a synonym for `_` and never asks an operator about it.
  */
 const CATEGORIES = ['zero', 'one', 'two', 'few', 'many'];
 
@@ -18,7 +18,7 @@ describe('CldrOperator.test', () => {
     it.each([
         { operation: '', why: 'empty' },
         { operation: '_', why: 'the default rule' },
-        { operation: 'other', why: 'spelled as `_` instead' },
+        { operation: 'other', why: 'handled as the default rule, not an operator' },
         { operation: 'ones', why: 'not a category' },
         { operation: 'onetwo', why: 'two categories run together' },
         { operation: 'one two', why: 'two categories' },
