@@ -5,6 +5,9 @@ _[Typescript support]_
 
 ### **Breaking changes**
 
+#### (v0.21.0)
+- added **CLRDR** pluralization support
+
 #### (v0.20.0)
 
 -   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
