@@ -7,6 +7,7 @@ _[Typescript support]_
 
 #### (v0.21.0)
 - added **CLRDR** pluralization support
+- package now declares `exports`: `simply-translate` resolves to the ES build for bundlers and to the CommonJS build in Node (both `require` and `import`). Deep imports of internal files (e.g. `simply-translate/es/...`) are no longer allowed.
 
 #### (v0.20.0)
 
