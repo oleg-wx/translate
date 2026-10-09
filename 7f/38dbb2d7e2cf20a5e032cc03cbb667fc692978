@@ -1,0 +1,27 @@
+tsconfig.json
+  s_c06ea43ffe4e3a::t_2a0ebd84a1f21b 51
+  s_c06ea43ffe4e3a::t_5ac55962deb42b 5
+  s_c06ea43ffe4e3a::t_e1d98e79475d91 46
+tsconfig.cjs.json
+  s_c06ea43ffe4e3a::t_5ac55962deb42b 6
+package-lock.json
+  s_c06ea43ffe4e3a::t_0080c83a615580 17,3812-3814,3816,3822,6696-6698
+package.json
+  s_c06ea43ffe4e3a::t_9641ab743e4b32 27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "7f38dbb2d7e2cf20a5e032cc03cbb667fc692978",
+  "prompts": {},
+  "sessions": {
+    "s_c06ea43ffe4e3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92ec817f-bd62-4e01-9dd7-309b1c77a36b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Oleg <oleg.wx@gmail.com>"
+    }
+  }
+}
