@@ -1,0 +1,21 @@
+README.md
+  s_c06ea43ffe4e3a::t_5a72e5359e258d 10
+package.json
+  s_c06ea43ffe4e3a::t_d1b99ac495e596 5-19
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ec655015a516e35af3fc9d60352b17f71b41280a",
+  "prompts": {},
+  "sessions": {
+    "s_c06ea43ffe4e3a": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "92ec817f-bd62-4e01-9dd7-309b1c77a36b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Oleg <oleg.wx@gmail.com>"
+    }
+  }
+}
