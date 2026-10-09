@@ -5,14 +5,15 @@ import { SimpleTranslateFunc } from './types';
 //import { tryToPluralizeAndReplace } from "./tryToPluralizeAndReplace";
 
 export function replacePlaceholders(
+    locale:string,
     _regexp: RegExp,
     value: string,
     plurals: Plurals | undefined,
     cases: Cases | undefined,
     dynamicProps: TranslateDynamicProps | undefined,
     handleTranslate: SimpleTranslateFunc | undefined,
-    handlePluralize: ((value: string | number | boolean, plural: PluralOptions) => string) | undefined,
-    handleCases: ((value: any, caseOptions: CaseOptions) => string) | undefined,
+    handlePluralize: ((locale:string, value: string | number | boolean, plural: PluralOptions) => string) | undefined,
+    handleCases: ((locale:string, value: any, caseOptions: CaseOptions) => string) | undefined,
     settings: {
         shouldReplaceDynamic?: (placeholderPrefix: string, placeholder: string) => boolean;
         shouldTranslate?: (placeholderPrefix: string, placeholder: string) => boolean;
@@ -47,7 +48,7 @@ export function replacePlaceholders(
             const shouldUseCases =
                 cases && handleCases && settings.shouldUseCases && settings.shouldUseCases(replaceAndOrTranslate, prop);
             if (shouldUseCases) {
-                replaceValue = handleCases(replaceValue, cases[prop]);
+                replaceValue = handleCases(locale, replaceValue, cases[prop]);
                 // replace again
                 if (replaceValue?.indexOf('{') >= 0) {
                     replaceAgain = true;
@@ -57,7 +58,7 @@ export function replacePlaceholders(
             const shouldPluralize =
                 plurals && handlePluralize && shouldReplaceDynamic && !isNaN(replaceValue as number);
             if (shouldPluralize) {
-                replaceValue = handlePluralize(replaceValue ?? '', plurals[prop]);
+                replaceValue = handlePluralize(locale, replaceValue ?? '', plurals[prop]);
                 // replace again
                 if (replaceValue.indexOf('{') >= 0) {
                     replaceAgain = true;
@@ -67,6 +68,7 @@ export function replacePlaceholders(
             if (replaceAgain && typeof replaceValue === 'string') {
                 if (replaceValue?.indexOf('{') >= 0) {
                     replaceValue = replacePlaceholders(
+                        locale,
                         _regexp,
                         replaceValue,
                         plurals,

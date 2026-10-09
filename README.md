@@ -1,76 +1,70 @@
 # Simply Translate
 
-Simplest translations for JS. Even consider it more as an object mapper, a Dictionary, but not translation AI or Bot or something... :)  
-_[Typescript support]_
+Simple, dependency-free translations for JavaScript and TypeScript. Think of it as a dictionary lookup with placeholders, pluralization and fallbacks, not machine translation.
 
-### **Breaking changes**
+-   Nested dictionaries with namespaces
+-   Placeholders for dynamic values, with defaults
+-   Pluralization with custom rules or [CLDR](https://cldr.unicode.org/index/cldr-spec/plural-rules) categories (`one`, `few`, `many`, …)
+-   Fallback language and fallback values
+-   Extensible translation pipeline (middleware)
+-   TypeScript types included; ES module and CommonJS builds
 
-#### (v0.20.0)
+## Contents
 
--   added **middleware pipeline** _(see [Pipeline](#Pipeline))_.
--   added **remainder** (modulo) operator `%`.
--   added **ends-with** and **starts-with** operators `...`.
--   added **truthy/falsy** operators `!`/`!!`.
--   added **cases** functionality _(see [Cases](#Cases))_.
--   added double curly brackets `{{...}}` support for placeholder.
--   deprecated `defaultLang` property over `lang` name.
--   deprecated `$less` property. Instead of `$less` use `placeholder = 'single'`.
--   not falling back to placeholder property name.
--   removed **dynamic cache**.
--   ~~deprecated `fallbackLang` property~~ `fallbackLang` remains.
--   added _commonjs_ version (`simply-translate/commonjs`)
+-   [Install](#install)
+-   [Quick start](#quick-start)
+-   [Dictionaries](#dictionaries)
+-   [Translating](#translating)
+-   [Placeholders](#placeholders)
+-   [Missing translations](#missing-translations)
+-   [Pluralization](#pluralization)
+-   [Cases](#cases)
+-   [Operators](#operators)
+-   [Extending dictionaries](#extending-dictionaries)
+-   [Pipeline and middleware](#pipeline-and-middleware)
+-   [Changelog](#changelog)
 
-#### (v0.10.0)
+## Install
 
--   `$T{...}` replaced with `$&{...}`.
--   `{$}` and `$T{$}` removed from **pluralization**, use `$#` instead _(see [Plural translations](#Plural-translations))_.
-
----
-
-### Install
-
-```javascript
+```bash
 npm i simply-translate
 ```
 
-### Import
+```javascript
+// ES modules
+import { Translations } from 'simply-translate';
 
-#### ES6 modules
+// CommonJS
+const { Translations } = require('simply-translate');
+```
+
+Bundlers get the ES module build and Node gets the CommonJS build automatically. `simply-translate/commonjs` still works for existing code.
+
+## Quick start
 
 ```javascript
 import { Translations } from 'simply-translate';
+
+const translations = new Translations(
+    {
+        'en-US': { hello_user: 'Hello ${user}!' },
+        'ru-RU': { hello_user: 'Привет, ${user}!' },
+    },
+    { lang: 'en-US' }
+);
+
+translations.translate('hello_user', { user: 'Oleg' });
+// Hello Oleg!
+translations.translateTo('ru-RU', 'hello_user', { user: 'Oleg' });
+// Привет, Oleg!
 ```
 
-#### CommonJS modules
+## Dictionaries
+
+Dictionaries are plain objects keyed by language. Each entry is either a string or an object with a required `value` and optional `description`, `plural` and `cases`.
 
 ```javascript
-import { Translations } from 'simply-translate/commonjs';
-```
-
-### Initialize
-
-```javascript
-const dics = {...};
-const translations = new Translations(dics, {lang:'en-US'});
-```
-
-### Dictionaries
-
-JSON with languge identifier in the root
-
-```javascript
-const dics = {
-  "en-US": ...,
-  "ru-RU": ...
-};
-```
-
-### Dictionary entry
-
-is a set of values with a unique string as a key and a string or object with _value_ (which is required), _description_, and (optionally) _plural_ and _cases_ data.
-
-```javascript
-const dics = {
+const dictionaries = {
     'en-US': {
         hello_world: 'Hello World',
         goodbye_world: {
@@ -78,293 +72,273 @@ const dics = {
             description: 'When you want to say goodbye to the world',
         },
     },
-};
-```
-
-### Translate
-
-`translate` or `translateTo` methods.  
-`translate` method uses `lang` property of `Translations`, `translateTo` requires language parameter.
-
-```javascript
-// create translations with dictionary:
-const translations = new Translations({...}, {lang:'en-US'});
-const translated = translations.translate('hello_world');
-const translated = translations.translateTo('en-US', 'hello_world');
-```
-
-For Dynamic data use `${...}` with field name of the data object.
-
-```javascript
-const dics = {
-    'en-US': {
-        hello_user: 'Hello ${user}!',
+    'ru-RU': {
+        hello_world: 'Привет, мир',
     },
 };
-const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate('hello_user', { user: 'Oleg' });
-// Hello Oleg!
 ```
 
-_v0.0.20_ `$less` is deprecated. Instead of `$less` use `placeholder = 'single'`.  
-It is required to add \$ before placeholders. However it is possible to use _$-less_ placeholders by setting `placeholder` property of `Translations` to _single_ (`{...}`) or _double_ (`{{...}}`) curly-braces, however it is _not recommended_.
-
-```javascript
-const dics = {
-  "en-US": {
-    hello_user: "Hello {user}!",
-  },
-};
-const translations = new Translations(dics, { lang: "en-US", placeholder = 'single' });
-translations.translate("hello_user", { user: "Oleg" }, "Hello {user}");
-// Hello Oleg
-
-// or
-translations.placeholder = 'double';
-translations.translate("hello_user", { user: "Oleg" }, "Hello {{user}}");
-// Hello Oleg
-```
-
-Please **note** `$` prefix will replace placeholder with property value from the data object, `$&` translate value from data object, and `&` will just translate the placeholder text.  
-And **note**: _single_ or _double_ placeholder ignores `$` as if it is there so using _just translate_ `&` function is _not available_.
-
-```javascript
-const dics = {
-    'en-US': {
-        hello_user: 'Hello ${user}!',
-        hello_user_r: 'Hello $&{usr}!',
-        hello_user_t: 'Hello &{usr}!',
-        usr: 'User',
-        oleg: 'Олег',
-    },
-};
-const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate('hello_user', { user: 'oleg' });
-// Hello oleg!
-translations.translate('hello_user_t', { user: 'oleg' });
-// Hello User!
-translations.translate('hello_user_r', { user: 'oleg' });
-// Hello Олег!
-```
+Use real locale tags such as `en-US` or `ru` as language keys if you use [CLDR plural categories](#cldr-plural-categories).
 
 ### Namespaces
 
-Group items in dictionary.
+Nest objects to group entries, then address them with a dot-separated key or an array of key parts. Don't use `.` inside your own keys.
 
 ```javascript
-const dics = {
-    'en-US': {
-        user: {
-            hello_user: 'Hello ${user}!',
-            goodbye_user: { value: 'Goodbye ${user}!' },
+const translations = new Translations(
+    {
+        'en-US': {
+            user: {
+                hello_user: 'Hello ${user}!',
+                goodbye_user: { value: 'Goodbye ${user}!' },
+            },
         },
     },
-};
-const translations = new Translations(dics, { lang: 'en-US' });
+    { lang: 'en-US' }
+);
+
 translations.translate('user.hello_user', { user: 'Oleg' });
 // Hello Oleg!
 translations.translate(['user', 'goodbye_user'], { user: 'Oleg' });
 // Goodbye Oleg!
 ```
 
-You don't need to directly point to `value`, it is done by default.
-
-Do **not use** namespaces separator (`.`) for dictionary **keys**.
-
-### Fallback value
-
-If value is not found and `fallback` is not provided, _key_ will be used as _value_.
+## Translating
 
 ```javascript
-const dics = {
-    'en-US': {
-        hello_world: 'Hello World',
-    },
-};
-const translations = new Translations(dics, { lang: 'en-US' });
-translations.translate('hello_user}', { user: 'Oleg' }, 'Hello ${user}');
-// Hello Oleg!
+const translations = new Translations(dictionaries, {
+    lang: 'en-US', // language used by translate()
+    fallbackLang: 'en-US', // optional, see Missing translations
+    placeholder: 'default', // optional, see Single and double braces
+});
+
+translations.translate('hello_world'); // uses translations.lang
+translations.translateTo('ru-RU', 'hello_world'); // explicit language
+
+translations.lang = 'ru-RU'; // switch the current language
+
+translations.hasTranslation('hello_world'); // true
+translations.hasTranslationTo('en-US', 'missing_key'); // false
 ```
 
-You may use `${...}` in keys, **however** it is **not** required, but might be useful.
+Both `translate` and `translateTo` accept optional dynamic values and a fallback:
 
 ```javascript
-const dics = {
-    'en-US': {
-        'hello_${user}': 'Hello ${user}!',
-    },
-};
-const translations = new Translations(dics);
-translations.translateTo('en-US', 'hello_${user}', { user: 'Oleg' });
-// Hello Oleg!
-translations.translateTo('en-US', 'goodbye_${user}', { user: 'Oleg' });
-// goodbye_Oleg!
+translations.translate(key);
+translations.translate(key, fallback);
+translations.translate(key, dynamicProps, fallback);
+translations.translateTo(lang, key, dynamicProps, fallback);
 ```
 
-It is possible to use fallback values for dynamic fields. **Note**: Due to implementation limitations (and keep library clean of dependencies) **only Latin** characters supported for placeholders and fallback.  
-Since _ver.0.20.0_ if property is null or undefined placeholder will be empty _(not property name as it was)_.
+## Placeholders
+
+| Syntax      | Inserts                                                         |
+| ----------- | --------------------------------------------------------------- |
+| `${name}`   | the value of `name`                                             |
+| `$&{name}`  | the translation of the value of `name` (used as a key)          |
+| `&{text}`   | the translation of the literal key `text`                       |
+| `$!{name}`  | the matching [case](#cases) for `name`                          |
+| `$#`        | the number, inside [plural](#pluralization) and case options    |
 
 ```javascript
-const dics = {
-    'en-US': {
-        'hello_${user}': 'Hello ${user?User}!',
+const translations = new Translations(
+    {
+        'en-US': {
+            hello_user: 'Hello ${user}!',
+            hello_user_translated: 'Hello $&{user}!',
+            hello_guest: 'Hello &{guest}!',
+            guest: 'Guest',
+            oleg: 'Олег',
+        },
     },
-};
-const translations = new Translations(dics, { lang: 'en-US' });
+    { lang: 'en-US' }
+);
 
-translations.translate('hello_user', { user: undefined });
-// Hello User!
-translations.translate('hi_user', { user: undefined }, 'Hi ${user?Friend}');
-// Hi Friend!
-translations.translate('hi_user', { user: undefined }, 'Hi ${user}');
+translations.translate('hello_user', { user: 'oleg' });
+// Hello oleg!
+translations.translate('hello_user_translated', { user: 'oleg' });
+// Hello Олег!
+translations.translate('hello_guest');
+// Hello Guest!
+```
+
+### Default values
+
+Add `?default` to use a default when the value is `null` or `undefined`. Without a default, the placeholder becomes an empty string.
+
+```javascript
+const translations = new Translations(
+    {
+        'en-US': {
+            hello_user: 'Hello ${user?Friend}!',
+            hi_user: 'Hi ${user}!',
+        },
+    },
+    { lang: 'en-US' }
+);
+
+translations.translate('hello_user', { user: 'Oleg' });
+// Hello Oleg!
+translations.translate('hello_user', {});
+// Hello Friend!
+translations.translate('hi_user', {});
 // Hi !
 ```
 
-Next will fail to replace placeholder:
+Defaults may contain only Latin letters, digits, spaces and `_`. For other languages, translate the default instead: `$&{user?User}` looks up the key `User`.
 
 ```javascript
-translations.translateTo('ru-RU', 'hi_${user}', { user: 'Олег' }, 'Привет ${user?Пользователь}');
-// Привет ${user?Пользователь}
-```
-
-To solve this add translation term:
-
-```javascript
-translations.extendDictionary('ru-RU', {
-    User: 'Пользователь',
-});
-translations.translateTo('ru-RU', 'hi_${user}', { user: undefined }, 'Привет $&{user?User}');
-// Привет Пользователь
-```
-
-### Fallback language
-
-Fallback language will use dictionary if selected language does not contain translation. Fallback dictionary will be used before fallback value.
-
-```javascript
-const dics = {
-    'en-US': {
-        'hello_${user}': 'Hello ${user?User}!',
-        'goodbye_${user}': 'Goodbye ${user?User}!',
+const translations = new Translations(
+    {
+        'ru-RU': {
+            hello_user: 'Привет, $&{user?User}!',
+            User: 'Пользователь',
+        },
     },
-    'ru-RU': {
-        'hello_${user}': 'Привет, $&{user}!',
-        user: 'Пользовтель',
-        Oleg: 'Олег',
-    },
-};
-const translations = new Translations(dics, {
-    lang: 'ru-RU',
-    fallbackLang: 'en-US',
-});
+    { lang: 'ru-RU' }
+);
 
-translations.translate('hello_${user}', { user: 'Oleg' });
-// Привет, Олег!
-translations.translate('goodbye_${user}', { user: 'Oleg' }, 'Bye ${user?User}');
-// Goodbye Олег!
-translations.translate('nice_day_${user}', { user: undefined }, 'Have a nice day ${user?Friend}');
-// Have a nice day Friend
+translations.translate('hello_user', {});
+// Привет, Пользователь!
 ```
 
-### Pluralization
+### Single and double braces
 
-Use `$#` in plural options to insert number.  
-`plural` property of translation value used for pluralization. Execution order is sequential.  
-The structure of pluralization entry is a tuple: `[operation, value]`.  
-Supported [operators](#Operators): _truthy/falsy_ `!!`/`!`, _compare_: `>`,`<`,`=`,`<=`,`>=`; and _few more_: `in []` `between`, `%`, `...`, and `_` for _default_. Operations can only be done with static numbers provided in `operation`.  
-Please **note**: remainder operator `%` compares remainder (or modulo) operation result with 0. It is possible to use `%` with specific remainder: `%2=0`.
+If your strings already use `{name}` or `{{name}}`, set `placeholder` to `'single'` or `'double'`. The `$` prefix is then implied: `{name}` works like `${name}` and `&{name}` like `$&{name}`, so there is no way to translate literal text. Prefer the default `$` syntax where you can.
 
 ```javascript
-let translations = new Translations(
+const translations = new Translations(
+    { 'en-US': { hello_user: 'Hello {user}!' } },
+    { lang: 'en-US', placeholder: 'single' }
+);
+
+translations.translate('hello_user', { user: 'Oleg' });
+// Hello Oleg!
+```
+
+## Missing translations
+
+When a key isn't found, the library tries, in order:
+
+1. the dictionary for the current language,
+2. the dictionary for `fallbackLang`,
+3. the `fallback` argument,
+4. the key itself.
+
+Placeholders are filled at every step.
+
+```javascript
+const translations = new Translations(
+    {
+        'en-US': { goodbye_user: 'Goodbye ${user}!' },
+        'ru-RU': { hello_user: 'Привет, ${user}!' },
+    },
+    { lang: 'ru-RU', fallbackLang: 'en-US' }
+);
+
+translations.translate('hello_user', { user: 'Oleg' });
+// Привет, Oleg!            (ru-RU)
+translations.translate('goodbye_user', { user: 'Oleg' }, 'Bye ${user}!');
+// Goodbye Oleg!            (en-US wins over the fallback argument)
+translations.translate('nice_day', { user: 'Oleg' }, 'Have a nice day, ${user}!');
+// Have a nice day, Oleg!   (fallback argument)
+translations.translate('nice_day_${user}', { user: 'Oleg' });
+// nice_day_Oleg            (the key)
+```
+
+## Pluralization
+
+Add a `plural` object to an entry. Each placeholder gets a list of `[operation, text]` rules. Rules are checked top to bottom and the first match wins, so put the catch-all `_` (or `other`) last. Use `$#` to insert the number. If no rule matches, the raw value is inserted.
+
+```javascript
+const translations = new Translations(
     {
         'en-US': {
-            'i-ate-eggs-bananas-dinner': {
-                value: 'I ate ${bananas} and ${eggs} for dinner',
+            ate_bananas: {
+                value: 'I ate ${bananas}',
                 plural: {
                     bananas: [
-                        ['<= 0', 'no bananas'],
-                        ['...2', 'number of bananas that ends with 2'],
+                        ['= 0', 'no bananas'],
                         ['= 1', 'one banana'],
-                        ['in [3,4]', 'few bananas'],
-                        ['% 11', 'many bananas that is divisible by eleven'],
-                        ['> 10', 'too many bananas'],
-                        ['>= 5', 'many bananas'],
-                    ],
-                    eggs: [
-                        ['= 0', 'zero eggs'],
-                        ['= 1', 'one egg'],
-                        ['between 2 and 4', 'some eggs'],
-                        ['_', '$# eggs'],
+                        ['in [2,3]', 'a couple of bananas'],
+                        ['% 11', '$# bananas, divisible by eleven'],
+                        ['_', '$# bananas'],
                     ],
                 },
             },
         },
     },
-    {
-        lang: 'en-US',
-    }
+    { lang: 'en-US' }
 );
 
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 0,
-    eggs: 1,
-});
-// I ate no bananas and one egg for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 3,
-    eggs: 5,
-});
-// I ate few bananas and 5 eggs for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 1,
-    eggs: 1,
-});
-// I ate one banana and one egg for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 13,
-    eggs: 0,
-});
-// I ate too many bananas and zero eggs for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 121,
-    eggs: 3,
-});
-// I ate many bananas that is divisible by eleven and some eggs for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 6,
-    eggs: 3,
-});
-// I ate many bananas and some eggs for dinner
-
-translations.translate('i-ate-eggs-bananas-dinner', {
-    bananas: 12,
-    eggs: one,
-});
-// I ate number of bananas that ends with 2 and one eggs for dinner
+translations.translate('ate_bananas', { bananas: 0 });
+// I ate no bananas
+translations.translate('ate_bananas', { bananas: 3 });
+// I ate a couple of bananas
+translations.translate('ate_bananas', { bananas: 22 });
+// I ate 22 bananas, divisible by eleven
+translations.translate('ate_bananas', { bananas: 7 });
+// I ate 7 bananas
 ```
 
-### Plural translations
+See [Operators](#operators) for every supported operation.
 
-In case if dynamic parameters have to be translated you can use `$&{$#}` syntax.  
-It is possible to modify plural translations a little bit like so: `$&{my-$#-value}`.  
-In rare cases you are able to use dynamic replacement `${...}` placeholders as well.
+### CLDR plural categories
+
+_(v1.0.0+)_ Languages split numbers into plural forms differently. Rules named after [CLDR categories](https://cldr.unicode.org/index/cldr-spec/plural-rules) (`zero`, `one`, `two`, `few`, `many`, `other`) use the built-in `Intl.PluralRules` for the dictionary's language, so you don't have to work the rules out yourself.
 
 ```javascript
-let translations = new Translations(
+const translations = new Translations(
     {
         'en-US': {
-            'i-ate-apples-for': {
-                value: 'I ate ${apples} for $&{when}',
+            apples: {
+                value: '${count}',
+                plural: { count: [['one', '$# apple'], ['other', '$# apples']] },
+            },
+        },
+        'ru-RU': {
+            apples: {
+                value: '${count}',
+                plural: {
+                    count: [
+                        ['one', '$# яблоко'],
+                        ['few', '$# яблока'],
+                        ['many', '$# яблок'],
+                        ['other', '$# яблока'],
+                    ],
+                },
+            },
+        },
+    },
+    { lang: 'ru-RU' }
+);
+
+translations.translate('apples', { count: 1 }); // 1 яблоко
+translations.translate('apples', { count: 2 }); // 2 яблока
+translations.translate('apples', { count: 5 }); // 5 яблок
+translations.translate('apples', { count: 21 }); // 21 яблоко
+translations.translateTo('en-US', 'apples', { count: 5 }); // 5 apples
+```
+
+-   The language key is passed to `Intl.PluralRules` as the locale, so it must be a valid locale tag. An invalid one, such as `english`, throws when the rule runs.
+-   Categories a language doesn't use never match. English, for example, only has `one` and `other`.
+-   CLDR rules can be mixed with other operators, for example `['= 0', 'no apples']` before `['one', …]`.
+
+### Translating inside plural rules
+
+Plural texts support the same placeholders as values. `&{$#}` translates the number itself, and you can build keys around it, such as `&{$#-only}`.
+
+```javascript
+const translations = new Translations(
+    {
+        'en-US': {
+            ate_apples_for: {
+                value: 'I ate ${apples} for $&{meal}',
                 plural: {
                     apples: [
                         ['= 1', '&{$#-only} apple'],
                         ['in [2,3]', '&{$#} apples'],
-                        ['= 5', '$# ($&{yay}) apples'],
+                        ['= 5', '$# ($&{reaction}) apples'],
                         ['_', '$# apple(s)'],
                     ],
                 },
@@ -372,180 +346,167 @@ let translations = new Translations(
             dinner: 'Dinner',
             breakfast: 'Breakfast',
             '1-only': 'Only One',
-            1: 'One',
             2: 'Two',
             3: 'Three',
             wow: 'WOW!',
         },
     },
-    {
-        lang: 'en-US',
-    }
+    { lang: 'en-US' }
 );
-translations.translate('i-ate-apples-for', {
-    apples: 1,
-    when: 'dinner',
-});
+
+translations.translate('ate_apples_for', { apples: 1, meal: 'dinner' });
 // I ate Only One apple for Dinner
-translations.translate('i-ate-apples-for', {
-    apples: 2,
-    when: 'breakfast',
-});
+translations.translate('ate_apples_for', { apples: 2, meal: 'breakfast' });
 // I ate Two apples for Breakfast
-translations.translate('i-ate-apples-for', {
-    apples: 4,
-    when: 'breakfast',
-});
-// I ate Two apples for Breakfast
-translations.translate('i-ate-apples-for', {
-    apples: 5,
-    when: 'breakfast',
-    yay: 'wow',
-});
+translations.translate('ate_apples_for', { apples: 5, meal: 'breakfast', reaction: 'wow' });
 // I ate 5 (WOW!) apples for Breakfast
+translations.translate('ate_apples_for', { apples: 7, meal: 'breakfast' });
+// I ate 7 apple(s) for Breakfast
 ```
 
-### Cases
+## Cases
 
-_(v0.20.0+)_  
-**(experimental)**
-Similar to _pluralization_ and executes **before pluralization**. Supports a bit less [operators](#Operators): _truthy/falsy_, _compare_ and _end/startsWith_ `...` operators.  
-Little bit different syntax placeholder, similar to translations but instead of `&` use `!`: `$!{...}`.  
-Use replace pattern `$#` in combination with `$` or `&` and pluralization.
+_(v0.20.0+, experimental)_ Cases pick a text based on a value, like pluralization, but for any condition. Reference them with `$!{name}` and define rules under `cases`. Cases run **before** pluralization, so the text a case produces can contain plural placeholders. Cases support fewer [operators](#operators) than plurals.
 
 ```javascript
-let translations = new Translations({
-    'en-US': {
-        somebody_ate_bananas: {
-            value: '$!{prefix}${person} ate bananas',
-            cases: {
-                prefix: [
-                    ['!!', '&{$#} '],
-                    ['!', ''],
-                ],
+const translations = new Translations(
+    {
+        'en-US': {
+            somebody_ate_bananas: {
+                value: '$!{title}${person} ate bananas',
+                cases: {
+                    title: [
+                        ['!!', '&{$#} '],
+                        ['!', ''],
+                    ],
+                },
             },
+            sir: 'Sir',
+            madam: 'Madam',
         },
-        sir: 'Sir',
-        madam: 'Madam',
     },
-});
+    { lang: 'en-US' }
+);
 
-translations.translate('somebody_ate_bananas', {
-    prefix: 'sir',
-    person: 'Holmes',
-});
+translations.translate('somebody_ate_bananas', { title: 'sir', person: 'Holmes' });
 // Sir Holmes ate bananas
-
-translations.translate('somebody_ate_bananas', {
-    person: 'Holmes',
-});
+translations.translate('somebody_ate_bananas', { person: 'Holmes' });
 // Holmes ate bananas
 ```
 
+Combined with pluralization:
+
 ```javascript
-let translations = new Translations({
-    'en-US': {
-        i_have_been_here_count: {
-            value: '$!{count} ${days}',
-            cases: {
-                count: [
-                    ['== 0', 'I have not been here'],
-                    ['_', "I've been here ${count}"],
-                ],
-            },
-            plural: {
-                count: [
-                    ['=1', 'once'],
-                    ['=2', 'twice'],
-                    ['in [3,4,5]', 'few times'],
-                    ['>10', 'many times'],
-                    ['_', '$# times'],
-                ],
-                days: [
-                    ['<2', 'today'],
-                    ['<5', 'for last few days'],
-                    ['_', 'for long time'],
-                ],
+const translations = new Translations(
+    {
+        'en-US': {
+            visits: {
+                value: '$!{count} ${days}',
+                cases: {
+                    count: [
+                        ['= 0', 'I have not been here'],
+                        ['_', "I've been here ${count}"],
+                    ],
+                },
+                plural: {
+                    count: [
+                        ['= 1', 'once'],
+                        ['= 2', 'twice'],
+                        ['_', '$# times'],
+                    ],
+                    days: [
+                        ['< 2', 'today'],
+                        ['< 5', 'in the last few days'],
+                        ['_', 'in a long time'],
+                    ],
+                },
             },
         },
     },
-});
+    { lang: 'en-US' }
+);
 
-translations.translate('i_have_been_here_count', {
-    count: 0,
-    days: 1,
-});
+translations.translate('visits', { count: 0, days: 1 });
 // I have not been here today
-
-translations.translate('i_have_been_here_count', {
-    count: 2,
-    days: 3,
-});
-// I've been here twice for last few days
+translations.translate('visits', { count: 2, days: 3 });
+// I've been here twice in the last few days
 ```
 
-As you can see this is pretty simple but may bring some value for conditional placeholders. Still figuring value of this out...
+## Operators
 
-### Operators
+Operations compare against the static values written in the rule.
 
--   Truthy/Falsy `!!`/`!`: `['!!','appear if value is truthy']` / `['!','appear if value is falsy']`
--   Compare `>`,`<`,`=`,`<=`,`>=`. Just regular compare operators: `['<2','appear if value is less then 2']`
--   In `in []`: `['in [2,4,8]', 'only for 2, 4, and 8']`. Works only for pluralization and with digits.
--   Between `between`: `['between 2 and 5', 'for 2, 3, 4, and 8']`. Works only for pluralization and with digits.
--   Remainder `%`: `['%2', 'remainder that equals to 0 left over when divided by 2']`, `['%3=5', 'remainder that equals to 5 when divided by 3']`
--   Ends/Starts with `...` operators: `['...2', 'ends with 2']`, `['2...', 'starts with 2']`
--   and `_` for _default_.
-    Operators uses static values provided in `operation`.  
-    Operators in `plural` or `cases` executes in the order in which it is listed, so it is important to next rule is not prevented by current, especially default `_`.
+| Operator                | Example                      | Matches when the value…                | `plural` | `cases` |
+| ----------------------- | ---------------------------- | -------------------------------------- | :------: | :-----: |
+| Truthy / falsy          | `!!` / `!`                   | is truthy / falsy                      |    ✓     |    ✓    |
+| Compare                 | `= 1`, `!= 1`, `< 2`, `>= 5` | compares as written (`==` also works)  |    ✓     |    ✓    |
+| Ends with / starts with | `...2` / `2...`              | ends / starts with `2`                 |    ✓     |    ✓    |
+| In                      | `in [2,4,8]`                 | is one of the listed numbers           |    ✓     |         |
+| Between                 | `between 2 and 5`            | is from 2 to 5, inclusive              |    ✓     |         |
+| Remainder               | `% 3`, `% 3 = 2`             | divided by 3 leaves 0 / leaves 2       |    ✓     |         |
+| CLDR category           | `zero` `one` `two` `few` `many` | is in that category for the language |    ✓     |         |
+| Default                 | `_` or `other`               | always                                 |    ✓     |    ✓    |
 
-### Add terms to dictionary
+Using an operator that a section doesn't support throws an error.
 
-To **extend** dictionary with new values use `extendDictionary` method.
+## Extending dictionaries
+
+`extendDictionary` deep-merges new entries into a language. Without a language argument it extends the current `lang`.
 
 ```javascript
 translations.extendDictionary('en-US', {
     fruits: {
-        'i-ate-mango': {
-            value: 'I ate ${mango}',
+        ate_mangos: {
+            value: 'I ate ${mangos}',
             plural: {
-                apples: [
+                mangos: [
                     ['< 1', 'no mangos'],
                     ['= 1', 'one mango'],
                     ['_', '$# mangos'],
                 ],
             },
         },
-        mango: 'mango',
     },
     tools: {
         fork: 'fork',
     },
 });
+
+translations.translate('fruits.ate_mangos', { mangos: 2 });
+// I ate 2 mangos
+
+translations.extendDictionary({ spoon: 'spoon' }); // current language
 ```
 
-### Pipeline
+## Pipeline and middleware
 
-_(v0.20.0+)_  
-**(experimental)**
-To manage translation flow now there is a **pipeline** functionality that runs **middlewares**.  
-Default flow is the same, but now it is possible to add custom **middlewares** to the flow or build custom one from the scratch.
-At the moment there is `SimpleDefaultPipeline` which is the old one with _fallback language_ which will be _removed_ in future. And `SimplePipeline` with access to **middlewares** collection.  
-In the `Middleware` you have access to execution `Context`. `result` property contains `value` that is going to be finial result of the entire flow. And `params` is the accepted data to be used in the flow. It is intended to be **readonly**.
+_(v0.20.0+, experimental)_ Each translation runs through a pipeline of middleware. You can add your own steps, for example to log missing translations, or build a pipeline from scratch.
+
+-   `SimpleDefaultPipeline` is used by default and includes the fallback-language step.
+-   `SimplePipeline` is the same without the fallback-language step, so `fallbackLang` has no effect with it.
+
+A middleware receives the execution context. `context.params` holds the input (`key`, `lang`, `dynamicProps`, `fallback`, …) and should be treated as read-only. `context.result.value` is the final text. `context.result.fallingBack` is `true` when the current language has no entry for the key, and `context.result.fallingBackLang` names the fallback language if it supplied the text.
 
 ```javascript
-const pipeline = new SimplePipeline();
+import { Translations, SimpleDefaultPipeline } from 'simply-translate';
+
+const pipeline = new SimpleDefaultPipeline();
 pipeline.addMiddleware((context) => {
-        const { params, result } = context;
-        if (result.fallingBack) {
-            // do some logic here for NOT translated values
-            console.warn(`the value for ${params.key} is not translated`);
-            result.value = `!WARNING: ${result.value} [${params.key}]`;
-        } else {
-            // do some logic here for translated values
-            result.value = `${result.value}: YAY!`;
-        }
-    });
-let translations = new Translations(..., pipeline);
+    const { params, result } = context;
+    if (result.fallingBack) {
+        console.warn(`missing ${params.lang} translation: ${params.key}`);
+        result.value = `!${result.value}`;
+    }
+});
+
+const translations = new Translations(dictionaries, { lang: 'en-US' }, pipeline);
 ```
 
-`addMiddleware` adds middleware to the end of the pipeline queue. `addMiddlewareAt` and `removeMiddlewareAt` adds middleware at the index.
+-   `addMiddleware(middleware)` appends to the end of the pipeline.
+-   `addMiddlewareAt(index, middleware)` inserts at a position.
+-   `removeMiddlewareAt(index)` removes the middleware at a position.
+-   `middlewares` lists the current steps.
+
+## Changelog
+
+See [CHANGELOG.md](https://github.com/oleg-wx/translate/blob/master/CHANGELOG.md) for release notes and steps for upgrading from 0.x.

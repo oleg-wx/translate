@@ -26,6 +26,7 @@ export const FillPlaceholdersMiddleware: MiddlewareFunc<RegExpResult, {}> = (
     const _cases = result.cases;
 
     const replaced: string = replacePlaceholders(
+        context.params.lang,
         regexp,
         value,
         _plurals,

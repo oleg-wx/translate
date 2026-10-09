@@ -20,49 +20,19 @@ export class Translations {
     lang: string | undefined;
     fallbackLang: string | undefined;
 
-    /**
-     * @deprecated defaultLang will be removed. Use lang instead.
-     */
-    get defaultLang() {
-        return this.lang;
-    }
-    set defaultLang(val: string | undefined) {
-        this.lang = val;
-    }
-
-    /**
-     * @deprecated $less will be removed. Use placeholder='singe' instead.
-     */
-    get $less() {
-        return this.placeholder ? this.placeholder === 'single' : undefined;
-    }
-    set $less(val: boolean | undefined) {
-        this.placeholder =
-            val === undefined ? undefined : val ? 'single' : 'default';
-    }
-
     constructor(
         dictionaries?: Dictionaries,
         options?: {
             lang?: string;
-            /**
-             * @deprecated defaultLang will be removed. Use lang instead
-             */
-            defaultLang?: string;
             fallbackLang?: string;
             placeholder?: PlaceholderType;
-            /**
-             * @deprecated $less will be removed. Use placeholder='singe' instead.
-             */
-            $less?: boolean;
         },
         pipeline?: Pipeline
     ) {
         this.dictionaries = dictionaries ?? {};
-        this.lang = options?.lang ?? options?.defaultLang;
+        this.lang = options?.lang;
         this.fallbackLang = options?.fallbackLang;
-        this.placeholder =
-            options?.placeholder ?? (options?.$less ? 'single' : undefined);
+        this.placeholder = options?.placeholder;
         if (pipeline) {
             this.pipeline = pipeline;
         } else {

@@ -1,4 +1,5 @@
-import { getOperatorFn } from './operators/get-operator';
+import { cldrOperator } from './operators/cldr.operators';
+import { compileOperator } from './operators/get-operator';
 import {
     betweenOperator,
     endsWithOperator,
@@ -6,10 +7,11 @@ import {
     remainderOperator,
     startsWithOperator,
 } from './operators/operators';
-import { compareOperator, truthyFalsyOperator} from './operators/simple-operators';
-import { Operator, PluralOptions } from './types';
+import { compareOperator, truthyFalsyOperator } from './operators/simple-operators';
+import { Operator, OperatorMatcher, PluralOptions } from './types';
 
 const operators: Operator[] = [
+    cldrOperator,
     truthyFalsyOperator,
     compareOperator,
     inOperator,
@@ -19,29 +21,26 @@ const operators: Operator[] = [
     startsWithOperator,
 ];
 
+/** Matchers compiled from the operator list above, and only from it. */
+const matchers = new Map<string, OperatorMatcher>();
+
 const numProps = '$#';
 const regexNumProps = /\$\#/g;
 
-export function handlePluralize(value: string | number | boolean, pluralOptions: PluralOptions) {
+export function handlePluralize(locale: string, value: string | number | boolean, pluralOptions: PluralOptions) {
     var pluralValues = pluralOptions;
     var pluralValue = numProps;
     if (pluralValues) {
         let num = +value;
         for (let i = 0; i < pluralValues.length; i++) {
-            let pluralValue_tmp_ = pluralValues[i];
-            let key_ = pluralValue_tmp_[0];
-            if (key_ === '_') {
-                pluralValue = pluralValue_tmp_[1];
-            } else {
-                let operatorFn_ = pluralValue_tmp_[2];
-                if (!operatorFn_) {
-                    operatorFn_ = getOperatorFn(key_, operators).exec(key_);
-                    pluralValue_tmp_[2] = operatorFn_;
-                }
-                if (operatorFn_(num)) {
-                    pluralValue = pluralValue_tmp_[1];
-                    break;
-                }
+            const [expression, template] = pluralValues[i];
+            // `other` is CLDR's catch-all and means the same as `_`: remember it, but keep
+            // looking, so a more specific rule declared later still wins.
+            if (expression === '_' || expression === 'other') {
+                pluralValue = template;
+            } else if (compileOperator(expression, operators, matchers)(num, locale)) {
+                pluralValue = template;
+                break;
             }
         }
     }
